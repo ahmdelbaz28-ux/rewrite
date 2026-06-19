@@ -1,0 +1,25 @@
+{
+  "name": "@smartlangguard/mcp-server",
+  "version": "0.1.0",
+  "description": "SmartLangGuard MCP Server - Integration with Claude, Cursor, Cline, and other AI tools",
+  "main": "src/mcp-server.js",
+  "scripts": {
+    "start": "node src/mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "cursor",
+    "arabic",
+    "keyboard"
+  ],
+  "author": "SmartLangGuard",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@smartlangguard/core": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

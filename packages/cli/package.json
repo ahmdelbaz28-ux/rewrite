@@ -1,0 +1,49 @@
+{
+  "name": "@smartlangguard/cli",
+  "version": "0.1.0",
+  "description": "SmartLangGuard CLI - Fix keyboard layout mistakes from terminal",
+  "bin": {
+    "smartlangguard": "bin/smartlangguard.js",
+    "slg": "bin/smartlangguard.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node bin/smartlangguard.js",
+    "build": "pkg . --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --out-path dist/",
+    "build:windows": "pkg . --targets node18-win-x64 --out-path dist/",
+    "build:macos": "pkg . --targets node18-macos-x64 --out-path dist/",
+    "build:linux": "pkg . --targets node18-linux-x64 --out-path dist/"
+  },
+  "pkg": {
+    "scripts": [
+      "bin/**/*.js",
+      "src/**/*.js"
+    ],
+    "assets": [
+      "node_modules/@smartlangguard/core/src/**/*.js"
+    ],
+    "targets": [
+      "node18-win-x64",
+      "node18-macos-x64",
+      "node18-linux-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [
+    "cli",
+    "arabic",
+    "keyboard",
+    "fix",
+    "terminal"
+  ],
+  "author": "SmartLangGuard",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@smartlangguard/core": "^0.1.0",
+    "@smartlangguard/mcp-server": "^0.1.0",
+    "commander": "^11.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@smartlangguard/daemon",
+  "version": "0.1.0",
+  "description": "SmartLangGuard Daemon - Background clipboard monitor + global hotkey",
+  "main": "src/daemon.js",
+  "scripts": {
+    "start": "node src/daemon.js"
+  },
+  "keywords": [
+    "daemon",
+    "clipboard",
+    "hotkey",
+    "background"
+  ],
+  "author": "SmartLangGuard",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@smartlangguard/core": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

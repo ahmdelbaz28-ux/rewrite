@@ -1,0 +1,26 @@
+{
+  "name": "@smartlangguard/core",
+  "version": "0.1.0",
+  "description": "SmartLangGuard Core - Translation engine, license layer, telemetry, and updater",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "test": "jest --testPathPattern=tests/",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/"
+  },
+  "keywords": [
+    "arabic",
+    "keyboard",
+    "layout",
+    "auto-correct",
+    "translation",
+    "smartlangguard"
+  ],
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}

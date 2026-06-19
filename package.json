@@ -1,0 +1,42 @@
+{
+  "name": "smartlangguard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SmartLangGuard - Cross-platform keyboard layout mistake fixer (CLI, MCP, Daemon, VS Code, SaaS)",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "npm install",
+    "build": "node scripts/build-all.js",
+    "build:cli": "npm run build --workspace @smartlangguard/cli",
+    "build:windows": "npm run build:windows --workspace @smartlangguard/cli",
+    "build:macos": "npm run build:macos --workspace @smartlangguard/cli",
+    "build:linux": "npm run build:linux --workspace @smartlangguard/cli",
+    "build:vscode": "npm run compile --workspace smartlangguard",
+    "start:backend": "npm start --workspace @smartlangguard/backend",
+    "start:daemon": "npm start --workspace @smartlangguard/daemon",
+    "start:mcp": "node packages/mcp-server/src/mcp-server.js",
+    "test": "npm test --workspaces --if-present",
+    "test:core": "npm test --workspace @smartlangguard/core",
+    "release": "node scripts/release.js",
+    "clean": "rm -rf packages/*/node_modules packages/*/dist packages/*/out"
+  },
+  "keywords": [
+    "arabic",
+    "keyboard",
+    "layout",
+    "auto-correct",
+    "mcp",
+    "cli",
+    "saas"
+  ],
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

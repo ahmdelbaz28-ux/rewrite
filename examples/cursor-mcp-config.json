@@ -1,0 +1,9 @@
+{
+  "_comment": "Cursor MCP configuration. Place at: ~/.cursor/mcp.json",
+  "mcpServers": {
+    "smartlangguard": {
+      "command": "smartlangguard",
+      "args": ["mcp"]
+    }
+  }
+}

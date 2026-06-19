@@ -1,0 +1,132 @@
+/**
+ * AI routes: scoring endpoint for ambiguous layout-mistake cases.
+ * Proxies to OpenAI/Anthropic based on configuration.
+ * 
+ * Free tier: returns 402 (payment required)
+ * Pro+ tier: uses configured LLM provider
+ */
+
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+
+const { asyncHandler } = require('../middleware');
+const { scoreWithContext } = require('../../../core/src/ai-scoring');
+const { verifyLicenseToken } = require('../../../core/src/license');
+const db = require('../db').getDb;
+
+async function callLLM(original, candidates) {
+  const provider = process.env.AI_PROVIDER || 'openai';
+  const apiKey = process.env.AI_API_KEY;
+  
+  if (!apiKey) {
+    // Fallback to local scoring if no API key
+    return null;
+  }
+
+  const prompt = `You are a keyboard layout mistake corrector. The user typed: "${original}"
+Possible corrections: ${JSON.stringify(candidates)}
+
+Pick the most likely correct one based on Arabic language patterns. 
+Return JSON: {"best": "...", "confidence": 0-100}`;
+
+  try {
+    if (provider === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: process.env.AI_MODEL || 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0,
+          max_tokens: 100
+        })
+      });
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      const match = content.match(/\{[^}]+\}/);
+      if (match) {
+        return JSON.parse(match[0]);
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── POST /v1/ai/score ────────────────────────────────────────────────────────
+
+router.post('/score', asyncHandler(async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authorization required' });
+  }
+  
+  const token = authHeader.slice(7);
+  
+  // Verify license
+  const license = db().prepare(
+    'SELECT * FROM licenses WHERE token = ? AND revoked = 0'
+  ).get(token);
+  
+  if (!license) {
+    return res.status(401).json({ error: 'Invalid license' });
+  }
+  
+  if (license.tier === 'free') {
+    return res.status(402).json({ 
+      error: 'AI scoring requires Pro tier',
+      upgrade_url: 'https://smartlangguard.com/pricing'
+    });
+  }
+  
+  // Check expiry
+  if (license.expires_at && Date.now() > license.expires_at) {
+    return res.status(401).json({ error: 'License expired' });
+  }
+
+  const { original, candidates } = req.body;
+  if (!original || !Array.isArray(candidates)) {
+    return res.status(400).json({ error: 'original and candidates[] required' });
+  }
+
+  // 1. Local scoring first (fast)
+  const localScores = candidates.map(c => ({
+    candidate: c,
+    score: scoreWithContext(c)
+  }));
+  
+  // If best local score is high enough, return immediately
+  const bestLocal = localScores.sort((a, b) => b.score - a.score)[0];
+  if (bestLocal.score >= 80) {
+    return res.json({
+      best_candidate: bestLocal.candidate,
+      confidence: bestLocal.score,
+      source: 'local'
+    });
+  }
+
+  // 2. Remote LLM call for ambiguous cases
+  const llmResult = await callLLM(original, candidates);
+  if (llmResult) {
+    return res.json({
+      best_candidate: llmResult.best,
+      confidence: llmResult.confidence,
+      source: 'llm'
+    });
+  }
+
+  // 3. Fallback to best local
+  return res.json({
+    best_candidate: bestLocal.candidate,
+    confidence: bestLocal.score,
+    source: 'local-fallback'
+  });
+}));
+
+module.exports = router;

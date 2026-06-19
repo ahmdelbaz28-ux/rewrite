@@ -1,0 +1,61 @@
+# SmartLangGuard .gitignore
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+out/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# OS
+Thumbs.db
+.DS_Store
+
+# SmartLangGuard runtime
+.smartlangguard/
+~/.smartlangguard/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# pkg output
+packages/cli/dist/
+
+# VS Code extension build
+packages/vscode-extension/out/
+packages/vscode-extension/*.vsix
+
+# Sensitive
+.env.production
+secrets/
+*.pem
+*.key

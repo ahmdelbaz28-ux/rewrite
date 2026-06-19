@@ -1,0 +1,73 @@
+#!/usr/bin/env node
+/**
+ * Release script: tags the current version, creates a GitHub release,
+ * and uploads the built binaries.
+ * 
+ * Usage: node scripts/release.js [patch|minor|major]
+ */
+
+'use strict';
+
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+const ROOT = path.resolve(__dirname, '..');
+const bumpType = process.argv[2] || 'patch';
+
+// 1. Bump version
+console.log(`📌 Bumping ${bumpType} version...`);
+execSync(`npm version ${bumpType} --no-git-tag-version`, { cwd: ROOT, stdio: 'inherit' });
+const version = require(path.join(ROOT, 'package.json')).version;
+console.log(`✓ Version: ${version}\n`);
+
+// 2. Update all package versions
+console.log('📦 Updating package versions...');
+const packagesDir = path.join(ROOT, 'packages');
+for (const pkg of fs.readdirSync(packagesDir)) {
+  const pkgJsonPath = path.join(packagesDir, pkg, 'package.json');
+  if (fs.existsSync(pkgJsonPath)) {
+    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+    pkgJson.version = version;
+    fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+    console.log(`  ✓ ${pkgJson.name}`);
+  }
+}
+
+// 3. Build
+console.log('\n🔨 Building...');
+execSync('node scripts/build-all.js', { cwd: ROOT, stdio: 'inherit' });
+
+// 4. Commit and tag
+console.log('\n📝 Committing release...');
+execSync('git add -A', { cwd: ROOT, stdio: 'inherit' });
+execSync(`git commit -m "release: v${version}"`, { cwd: ROOT, stdio: 'inherit' });
+execSync(`git tag v${version}`, { cwd: ROOT, stdio: 'inherit' });
+
+// 5. Push
+console.log('\n🚀 Pushing...');
+execSync('git push origin main', { cwd: ROOT, stdio: 'inherit' });
+execSync(`git push origin v${version}`, { cwd: ROOT, stdio: 'inherit' });
+
+// 6. Create GitHub release (requires gh CLI)
+console.log('\n📦 Creating GitHub release...');
+try {
+  const distDir = path.join(ROOT, 'packages', 'cli', 'dist');
+  const files = fs.readdirSync(distDir)
+    .filter(f => !f.endsWith('.json') && !f.endsWith('.sha256'))
+    .map(f => path.join(distDir, f))
+    .join(' ');
+  
+  execSync(
+    `gh release create v${version} ${files} ` +
+    `--title "v${version}" ` +
+    `--notes "See CHANGELOG.md for details."`,
+    { cwd: ROOT, stdio: 'inherit' }
+  );
+  console.log('✓ Release created');
+} catch (err) {
+  console.error('⚠ Failed to create GitHub release. Install gh CLI and authenticate.');
+  console.error('  Then run: gh release create v' + version);
+}
+
+console.log(`\n✅ Release v${version} complete!`);

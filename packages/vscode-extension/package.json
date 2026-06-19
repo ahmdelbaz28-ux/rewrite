@@ -1,0 +1,119 @@
+{
+  "name": "smartlangguard",
+  "displayName": "SmartLangGuard",
+  "description": "Fix Arabic/English keyboard layout mistakes instantly. Works with any text editor.",
+  "version": "0.1.0",
+  "publisher": "smartlangguard",
+  "license": "PROPRIETARY",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Productivity",
+    "Language Packs"
+  ],
+  "keywords": [
+    "arabic",
+    "keyboard",
+    "layout",
+    "fix",
+    "auto-correct"
+  ],
+  "icon": "assets/icon.png",
+  "activationEvents": [
+    "onCommand:smartlangguard.fixSelection",
+    "onCommand:smartlangguard.fixClipboard"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "smartlangguard.fixSelection",
+        "title": "SmartLangGuard: Fix Selection"
+      },
+      {
+        "command": "smartlangguard.fixClipboard",
+        "title": "SmartLangGuard: Fix Clipboard"
+      },
+      {
+        "command": "smartlangguard.activateLicense",
+        "title": "SmartLangGuard: Activate License"
+      },
+      {
+        "command": "smartlangguard.showStatus",
+        "title": "SmartLangGuard: Show Status"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "smartlangguard.fixSelection",
+          "when": "editorHasSelection",
+          "group": "smartlangguard@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "smartlangguard.fixSelection",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "smartlangguard.fixSelection",
+        "key": "ctrl+shift+f1",
+        "mac": "cmd+shift+f1",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "smartlangguard.fixClipboard",
+        "key": "ctrl+shift+f2",
+        "mac": "cmd+shift+f2"
+      }
+    ],
+    "configuration": {
+      "title": "SmartLangGuard",
+      "properties": {
+        "smartlangguard.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to SmartLangGuard CLI binary. Leave empty to auto-detect."
+        },
+        "smartlangguard.direction": {
+          "type": "string",
+          "enum": ["auto", "en-to-ar", "ar-to-en"],
+          "default": "auto",
+          "description": "Default conversion direction"
+        },
+        "smartlangguard.useAI": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI scoring for ambiguous cases (requires Pro license)"
+        },
+        "smartlangguard.telemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Send anonymous usage telemetry"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

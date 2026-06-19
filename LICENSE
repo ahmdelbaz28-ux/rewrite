@@ -1,0 +1,98 @@
+SMARTLANGGUARD PROPRIETARY LICENSE
+
+Copyright (c) 2026 SmartLangGuard. All rights reserved.
+
+---
+
+1. DEFINITIONS
+
+   "Software" means SmartLangGuard including the Core engine, CLI, MCP server,
+   daemon, VS Code extension, and SaaS backend, together with all accompanying
+   documentation.
+
+   "Licensor" means SmartLangGuard.
+
+   "Licensee" means any individual or entity that downloads, installs, or uses
+   the Software.
+
+   "Pro Features" means AI scoring, multi-device sync, cloud features, and any
+   other functionality gated behind a paid subscription tier.
+
+2. GRANT OF LICENSE
+
+   2.1 Free Tier. Licensor grants Licensee a non-exclusive, non-transferable,
+   royalty-free license to install and use the Software on personal devices
+   for any purpose, subject to the limitations in this Agreement.
+
+   2.2 Pro/Team/Enterprise Tiers. Licensees with an active paid subscription
+   may access Pro Features as described at https://smartlangguard.com/pricing.
+
+3. RESTRICTIONS
+
+   Licensee shall NOT:
+   
+   3.1 Reverse engineer, decompile, disassemble, or otherwise attempt to
+       derive the source code of the binary-compiled Software, except to the
+       extent applicable law prohibits this restriction.
+   
+   3.2 Modify, adapt, translate, or create derivative works of the Software.
+   
+   3.3 Redistribute, sublicense, lease, rent, or lend the Software without
+       prior written consent from Licensor.
+   
+   3.4 Remove, alter, or obscure any copyright, trademark, or other
+       proprietary notices on or in the Software.
+   
+   3.5 Use the Software to provide a competing service or product.
+   
+   3.6 Bypass or attempt to bypass license validation, device limits, or
+       other usage controls.
+   
+   3.7 Use the Software in violation of any applicable law or regulation.
+
+4. INTELLECTUAL PROPERTY
+
+   The Software is licensed, not sold. Licensor retains all right, title, and
+   interest in and to the Software, including all intellectual property rights.
+   This License does not grant Licensee any rights to use Licensor's trademarks
+   or trade names.
+
+5. TELEMETRY
+
+   The Software collects anonymized usage telemetry to improve product quality.
+   Licensee may opt out at any time via the configuration settings.
+   See https://smartlangguard.com/privacy for details.
+
+6. DISCLAIMER OF WARRANTIES
+
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+   FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY
+
+   IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+   CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR DATA,
+   ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+8. TERMINATION
+
+   This License is effective until terminated. Licensor may terminate this
+   License immediately if Licensee breaches any term. Upon termination,
+   Licensee must cease all use of the Software and destroy all copies.
+
+9. GOVERNING LAW
+
+   This License shall be governed by the laws of Egypt, without regard to
+   conflict of law principles.
+
+10. ENTIRE AGREEMENT
+
+    This License constitutes the entire agreement between Licensor and
+    Licensee regarding the Software.
+
+---
+
+For inquiries: legal@smartlangguard.com
+Website: https://smartlangguard.com
