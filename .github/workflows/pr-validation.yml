@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 22
 
 jobs:
   # ─── Validate PR title (conventional commits) ───────────────────────────────
@@ -64,10 +64,10 @@ jobs:
     timeout-minutes: 5
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 5
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Check for secrets
         run: |

@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 22
 
 jobs:
   # ─── Core Tests (the foundation) ────────────────────────────────────────────
@@ -27,10 +27,10 @@ jobs:
         node-version: [18, 20, 22]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -51,7 +51,7 @@ jobs:
       
       - name: Upload coverage
         if: matrix.node-version == 20
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-core
           path: coverage/
@@ -65,10 +65,10 @@ jobs:
     needs: test-core
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -81,14 +81,19 @@ jobs:
           cd packages/backend
           cp .env.example .env
           echo "JWT_SECRET=ci-test-secret-$(date +%s)" >> .env
-          echo "ADMIN_DEFAULT_PASSWORD=ci-test-123" >> .env
+          echo "ADMIN_DEFAULT_PASSWORD=admin123" >> .env
           echo "NODE_ENV=test" >> .env
+          cat .env | grep -v "^$" | sed 's/=.*/=***/'  # Show env vars (masked)
       
       - name: Start backend (background)
+        env:
+          ADMIN_DEFAULT_PASSWORD: admin123
+          JWT_SECRET: ci-test-secret-${{ github.run_id }}
         run: |
           # Start backend in background, write logs to temp file
           mkdir -p "$HOME/.smartlangguard"
-          nohup node packages/backend/src/server.js > "$RUNNER_TEMP/backend.log" 2>&1 &
+          cd packages/backend
+          nohup node src/server.js > "$RUNNER_TEMP/backend.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/backend.pid"
           
           # Wait for server to be ready (max 30 seconds)
@@ -167,9 +172,9 @@ jobs:
           echo "── 6. Admin login ───────────"
           curl -s -X POST http://localhost:4000/v1/admin/login \
             -H "Content-Type: application/json" \
-            -d '{"username":"admin","password":"ci-test-123"}' | node -e "
+            -d '{"username":"admin","password":"admin123"}' | node -e "
             const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.token) { console.error('❌ Admin login failed:', d); process.exit(1); }
+            if (!d.token) { console.error('❌ Admin login failed:', JSON.stringify(d)); process.exit(1); }
             console.log('✓ Admin login OK');
           "
           
@@ -197,7 +202,7 @@ jobs:
       
       - name: Upload backend logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-logs
           path: ${{ runner.temp }}/backend.log
@@ -210,10 +215,10 @@ jobs:
     timeout-minutes: 10
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -243,7 +248,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
       
       - name: Upload dashboard build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: admin-dashboard-dist
           path: packages/admin-dashboard/dist/
@@ -256,10 +261,10 @@ jobs:
     timeout-minutes: 10
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -275,36 +280,48 @@ jobs:
         run: npm run compile
         working-directory: packages/vscode-extension
       
-      - name: Build .vsix package
-        run: node /home/z/my-project/scripts/build-vscode-extension.js || node scripts/build-vscode-extension.js
-        # Try both possible paths
-        continue-on-error: true
-        id: build_attempt_1
-      
-      - name: Build .vsix package (fallback)
-        if: steps.build_attempt_1.outcome != 'success'
+      - name: Build .vsix package (clean temp dir)
         run: |
-          # Inline build (no external script)
           set -e
           mkdir -p packages/vscode-extension/dist
-          cd packages/vscode-extension
-          npx @vscode/vsce package --no-update-package-json --no-git-tag-version --allow-package-all-secrets || true
-          ls -la *.vsix 2>/dev/null && mv *.vsix dist/ 2>/dev/null || echo "No vsix found in current dir"
-          ls -la dist/*.vsix || echo "No vsix in dist/"
+          
+          # Create a clean temp directory with only the files we want to package
+          # This avoids vsce trying to include parent dir files (../package.json)
+          TMPDIR=$(mktemp -d)
+          trap "rm -rf $TMPDIR" EXIT
+          
+          cp packages/vscode-extension/{package.json,README.md,CHANGELOG.md,LICENSE,.vscodeignore} "$TMPDIR/"
+          mkdir -p "$TMPDIR/assets" "$TMPDIR/out"
+          cp -r packages/vscode-extension/assets/* "$TMPDIR/assets/"
+          cp -r packages/vscode-extension/out/* "$TMPDIR/out/"
+          
+          echo "── Files in clean build dir ───────────"
+          find "$TMPDIR" -type f | sed "s|$TMPDIR/||"
+          
+          # Package in clean dir (avoids .git/config secret exposure + parent dir inclusion)
+          (cd "$TMPDIR" && npx @vscode/vsce@latest package --no-update-package-json --no-git-tag-version --allow-package-all-secrets)
+          
+          # Move .vsix to dist
+          mv "$TMPDIR"/*.vsix packages/vscode-extension/dist/
+          
+          # Verify
+          echo "── Built .vsix ───────────"
+          ls -lh packages/vscode-extension/dist/*.vsix
+        shell: bash
       
       - name: Verify .vsix exists
         run: |
           set -e
-          find packages/vscode-extension -name "*.vsix" -type f | head -1
           VSIX=$(find packages/vscode-extension -name "*.vsix" -type f | head -1)
           if [ -z "$VSIX" ]; then
             echo "❌ No .vsix file was built"
+            find packages/vscode-extension -type f -name "*.vsix" || true
             exit 1
           fi
           echo "✓ VSIX built: $VSIX ($(du -h "$VSIX" | cut -f1))"
       
       - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vscode-extension-vsix
           path: packages/vscode-extension/**/*.vsix
@@ -317,10 +334,10 @@ jobs:
     timeout-minutes: 5
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       
@@ -416,7 +433,7 @@ jobs:
           ls -lh dist/
       
       - name: Upload extension zip
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: browser-extension-zip
           path: dist/smartlangguard-extension-*.zip

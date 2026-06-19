@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 22
   CLI_VERSION: '0.1.0'
 
 jobs:
@@ -38,10 +38,10 @@ jobs:
           - { name: 'linux-arm64', os: ubuntu-latest,   cmd: 'bash scripts/build-linux-arm64.sh', artifact: 'smartlangguard-linux-arm64' }
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -156,7 +156,7 @@ jobs:
         shell: bash
       
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binary-${{ matrix.target.name }}
           path: |
@@ -172,10 +172,10 @@ jobs:
     timeout-minutes: 10
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -195,7 +195,7 @@ jobs:
           ls -lh dashboard.zip
       
       - name: Upload dashboard artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: admin-dashboard
           path: |
@@ -210,10 +210,10 @@ jobs:
     timeout-minutes: 10
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -254,7 +254,7 @@ jobs:
         shell: bash
       
       - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vscode-extension
           path: packages/vscode-extension/dist/*.vsix
@@ -268,7 +268,7 @@ jobs:
     timeout-minutes: 5
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Create extension zip
         run: |
@@ -294,7 +294,7 @@ jobs:
           unzip -l dist/smartlangguard-extension-v${VERSION}.zip | head -20
       
       - name: Upload extension artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: browser-extension
           path: dist/smartlangguard-extension-*.zip
