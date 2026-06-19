@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SmartLangGuard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 380px;
+      padding: 16px;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .title { font-size: 16px; font-weight: 600; }
+    .subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+    
+    .section { margin-bottom: 14px; }
+    .label { font-size: 11px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      direction: auto;
+    }
+    textarea:focus { outline: none; border-color: #2563eb; }
+    
+    .result {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      border-radius: 6px;
+      font-size: 14px;
+      direction: auto;
+      min-height: 0;
+      display: none;
+    }
+    .result.visible { display: block; }
+    .result-meta { font-size: 10px; color: #64748b; margin-top: 6px; }
+    
+    .btn-row { display: flex; gap: 6px; margin-top: 10px; }
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1e40af; }
+    .btn-secondary { background: #e2e8f0; color: #475569; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-ghost { background: transparent; color: #64748b; font-size: 11px; padding: 4px; }
+    .btn-ghost:hover { color: #1e40af; }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+    .status-dot.online { background: #10b981; }
+    .status-dot.offline { background: #ef4444; }
+    .status-text { flex: 1; }
+    .status-tier { font-weight: 600; color: #2563eb; }
+    
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: white;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: #cbd5e1;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle.on { background: #2563eb; }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle.on::after { transform: translateX(16px); }
+    
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #64748b;
+    }
+    
+    .kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 10px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">SLG</div>
+    <div>
+      <div class="title">SmartLangGuard</div>
+      <div class="subtitle" id="version">v0.1.0</div>
+    </div>
+  </div>
+  
+  <div class="status" id="status">
+    <div class="status-dot" id="status-dot"></div>
+    <div class="status-text" id="status-text">Checking daemon...</div>
+    <div class="status-tier" id="status-tier"></div>
+  </div>
+  
+  <div class="section">
+    <div class="label">Fix text</div>
+    <textarea id="input" placeholder="Paste or type mistyped text here..." autofocus></textarea>
+    <div class="result" id="result">
+      <div id="result-text"></div>
+      <div class="result-meta" id="result-meta"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="fix-btn">Fix</button>
+      <button class="btn-secondary" id="copy-btn">Copy Result</button>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="toggle-row">
+      <span>Auto-fix on paste</span>
+      <div class="toggle" id="autofix-toggle"></div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <span>
+      <span class="kbd">Ctrl+Shift+L</span> Fix selection
+    </span>
+    <button class="btn-ghost" id="options-btn">Settings →</button>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

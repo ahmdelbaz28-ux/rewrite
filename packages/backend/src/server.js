@@ -69,6 +69,11 @@ app.get('/health', (req, res) => {
 
 app.use('/v1', routes);
 
+// ─── Stripe Webhook (raw body, registered before json middleware) ─────────────
+
+const stripeRoutes = require('./routes/stripe');
+app.post('/v1/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes.handleWebhook);
+
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
 app.use((req, res) => {

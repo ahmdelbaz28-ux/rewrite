@@ -12,12 +12,14 @@ const telemetryRoutes = require('./telemetry');
 const aiRoutes = require('./ai');
 const adminRoutes = require('./admin');
 const stripeRoutes = require('./stripe');
+const billingRoutes = require('./billing');
 
 router.use('/license', licenseRoutes);
 router.use('/telemetry', telemetryRoutes);
 router.use('/ai', aiRoutes);
 router.use('/admin', adminRoutes);
 router.use('/stripe', stripeRoutes);
+router.use('/billing', billingRoutes);
 
 // API root
 router.get('/', (req, res) => {

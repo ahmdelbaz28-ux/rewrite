@@ -1,0 +1,163 @@
+name: Build Binaries
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build (comma-separated: windows,macos,linux)'
+        required: false
+        default: 'windows,macos,linux'
+
+jobs:
+  build:
+    name: Build ${{ matrix.target.name }}
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { name: 'win-x64',         os: windows-latest, cmd: 'npm run build:windows' }
+          - { name: 'macos-x64',       os: macos-13,       cmd: 'npm run build:macos' }
+          - { name: 'macos-arm64',     os: macos-latest,   cmd: 'bash scripts/build-macos-arm64.sh' }
+          - { name: 'linux-x64',       os: ubuntu-latest,  cmd: 'npm run build:linux' }
+          - { name: 'linux-arm64',     os: ubuntu-latest,  cmd: 'bash scripts/build-linux-arm64.sh' }
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install pkg
+        run: npm install -g pkg@5.8.1
+      
+      - name: Build binary
+        run: ${{ matrix.target.cmd }}
+        working-directory: packages/cli
+      
+      - name: Verify binary exists
+        run: |
+          ls -lh packages/cli/dist/
+          if [ -z "$(ls packages/cli/dist/smartlangguard-* 2>/dev/null)" ]; then
+            echo "❌ No binary built"
+            exit 1
+          fi
+          echo "✅ Binary built successfully"
+        shell: bash
+      
+      - name: Smoke test binary (Unix)
+        if: matrix.target.name != 'win-x64'
+        run: |
+          chmod +x packages/cli/dist/smartlangguard-*
+          BINARY=$(ls packages/cli/dist/smartlangguard-* | head -1)
+          VERSION=$($BINARY --version)
+          if [ "$VERSION" != "0.1.0" ]; then
+            echo "❌ Version mismatch: $VERSION"
+            exit 1
+          fi
+          echo "✅ Binary --version: $VERSION"
+          
+          # Test fix command
+          RESULT=$(echo "high" | $BINARY fix --no-ai)
+          if [ "$RESULT" != "اهلا" ]; then
+            echo "❌ Fix failed: expected 'اهلا', got '$RESULT'"
+            exit 1
+          fi
+          echo "✅ Fix command works: 'high' → 'اهلا'"
+      
+      - name: Smoke test binary (Windows)
+        if: matrix.target.name == 'win-x64'
+        run: |
+          $binary = Get-ChildItem packages/cli/dist/smartlangguard-*.exe | Select-Object -First 1
+          $version = & $binary --version
+          if ($version -ne "0.1.0") {
+            Write-Error "Version mismatch: $version"
+            exit 1
+          }
+          Write-Host "✅ Binary --version: $version"
+          
+          $result = "high" | & $binary fix --no-ai
+          if ($result -ne "اهلا") {
+            Write-Error "Fix failed: expected 'اهلا', got '$result'"
+            exit 1
+          }
+          Write-Host "✅ Fix command works: 'high' → 'اهلا'"
+        shell: pwsh
+      
+      - name: Generate SHA256 checksum
+        run: |
+          cd packages/cli/dist
+          sha256sum smartlangguard-* > checksums.sha256
+          cat checksums.sha256
+        shell: bash
+      
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target.name }}
+          path: |
+            packages/cli/dist/smartlangguard-*
+            packages/cli/dist/checksums.sha256
+          retention-days: 30
+
+  package-dashboard:
+    name: Build Admin Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build dashboard
+        run: npm run build
+        working-directory: packages/admin-dashboard
+      
+      - name: Upload dashboard artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-dashboard
+          path: packages/admin-dashboard/dist/
+          retention-days: 30
+
+  package-extension:
+    name: Package Browser Extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Create extension zip
+        run: |
+          mkdir -p dist
+          cd packages/browser-extension
+          zip -r ../../dist/smartlangguard-extension-v${{ github.ref_name }}.zip . \
+            -x "node_modules/*" -x "tests/*" -x ".git/*"
+          cd ../..
+          ls -lh dist/
+      
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-extension
+          path: dist/smartlangguard-extension-*.zip
+          retention-days: 30

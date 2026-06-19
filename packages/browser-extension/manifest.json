@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "SmartLangGuard",
+  "version": "0.1.0",
+  "description": "Fix Arabic/English keyboard layout mistakes instantly in any web page.",
+  "default_locale": "en",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage",
+    "contextMenus",
+    "scripting",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://localhost:41783/*",
+    "http://localhost:4000/*"
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "default_title": "SmartLangGuard (Ctrl+Shift+L)"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "fix-selection": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Fix selected text (keyboard layout mistake)"
+    },
+    "fix-clipboard": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Fix clipboard contents"
+    }
+  },
+  "options_page": "src/options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
