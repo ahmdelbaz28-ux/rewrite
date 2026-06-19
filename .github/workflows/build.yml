@@ -233,6 +233,14 @@ jobs:
         run: npm run build
         working-directory: packages/admin-dashboard
       
+      - name: Remove sourcemaps from production build
+        run: |
+          # Sourcemaps expose original source code and aren't needed in production
+          rm -f packages/admin-dashboard/dist/assets/*.js.map
+          rm -f packages/admin-dashboard/dist/assets/*.css.map
+          echo "✓ Removed sourcemaps"
+          ls -lh packages/admin-dashboard/dist/assets/
+      
       - name: Create dashboard zip
         run: |
           # Create dashboard.zip at repo root
@@ -247,10 +255,10 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: admin-dashboard
-          path: |
-            packages/admin-dashboard/dist/
-            dashboard.zip
+          # Only upload the zip (not the raw dist folder)
+          path: dashboard.zip
           retention-days: 30
+          if-no-files-found: error
 
   # ─── Build VS Code Extension ───────────────────────────────────────────────
   build-vscode-extension:
@@ -284,22 +292,40 @@ jobs:
           mkdir -p packages/vscode-extension/dist
           
           # Create a temp directory with only the files we want to package
+          # This avoids vsce trying to include parent dir files (../package.json)
           TMPDIR=$(mktemp -d)
           trap "rm -rf $TMPDIR" EXIT
           
-          cp -r packages/vscode-extension/{package.json,README.md,CHANGELOG.md,LICENSE,.vscodeignore} "$TMPDIR/"
+          # Copy only required files (no sourcemaps, no .d.ts, no icon-512)
+          cp packages/vscode-extension/{package.json,README.md,CHANGELOG.md,LICENSE,.vscodeignore} "$TMPDIR/"
           mkdir -p "$TMPDIR/assets" "$TMPDIR/out"
-          cp -r packages/vscode-extension/assets/* "$TMPDIR/assets/"
-          cp -r packages/vscode-extension/out/* "$TMPDIR/out/"
           
-          # Package in clean dir (avoids .git/config secret exposure)
-          (cd "$TMPDIR" && npx @vscode/vsce@latest package --no-update-package-json --no-git-tag-version --allow-package-all-secrets)
+          # Only copy production icons (128x128 and 256x256 for Marketplace)
+          cp packages/vscode-extension/assets/icon.png "$TMPDIR/assets/" 2>/dev/null || true
+          cp packages/vscode-extension/assets/icon-128.png "$TMPDIR/assets/" 2>/dev/null || true
+          # Skip icon-512.png (not needed, 57KB wasted)
+          
+          # Copy only compiled JS (no .map, no .d.ts)
+          cp packages/vscode-extension/out/extension.js "$TMPDIR/out/"
+          
+          echo "── Files in clean build dir ───────────"
+          find "$TMPDIR" -type f | sed "s|$TMPDIR/||"
+          
+          # Package in clean dir
+          (cd "$TMPDIR" && npx --yes @vscode/vsce@latest package --no-update-package-json --no-git-tag-version --allow-package-all-secrets)
           
           # Move .vsix to dist
           mv "$TMPDIR"/*.vsix packages/vscode-extension/dist/
           
           # Verify
+          echo ""
+          echo "── Built .vsix ───────────"
           ls -lh packages/vscode-extension/dist/*.vsix
+          
+          # Verify contents
+          echo ""
+          echo "── VSIX contents ───────────"
+          unzip -l packages/vscode-extension/dist/*.vsix
         shell: bash
       
       - name: Upload .vsix artifact
@@ -319,30 +345,53 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - name: Create extension zip
+      - name: Validate manifest
+        run: |
+          node -e "
+          const m = require('./packages/browser-extension/manifest.json');
+          if (m.manifest_version !== 3) throw new Error('Must be MV3');
+          console.log('✓ Manifest is valid MV3, version:', m.version);
+          "
+      
+      - name: Verify all referenced files exist
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const m = require('./packages/browser-extension/manifest.json');
+          const files = [
+            m.action?.default_popup,
+            m.background?.service_worker,
+            m.options_page,
+            ...(m.content_scripts?.flatMap(cs => cs.js) || [])
+          ].filter(Boolean);
+          for (const f of files) {
+            const p = path.join('packages/browser-extension', f);
+            if (!fs.existsSync(p)) throw new Error('Missing: ' + f);
+            console.log('✓ ' + f);
+          }
+          "
+      
+      - name: Create extension zip (for Chrome Web Store upload)
         run: |
           set -e
           mkdir -p dist
           
-          # Get version from manifest
           VERSION=$(node -p "require('./packages/browser-extension/manifest.json').version")
           echo "Extension version: $VERSION"
           
-          # Create the zip
           cd packages/browser-extension
           zip -r "../../dist/smartlangguard-extension-v${VERSION}.zip" . \
-            -x "node_modules/*" -x "tests/*" -x ".git/*" -x "*.log" -x "README.md"
+            -x "node_modules/*" -x "tests/*" -x ".git/*" -x "*.log" -x "README.md" \
+            -x "package.json" -x "package-lock.json"
           cd ../..
           
-          # Verify
           ls -lh dist/
-          
-          # Verify zip contents
           echo ""
           echo "── Zip contents ───────────"
           unzip -l dist/smartlangguard-extension-v${VERSION}.zip | head -20
       
-      - name: Upload extension artifact
+      - name: Upload extension zip artifact
         uses: actions/upload-artifact@v5
         with:
           name: browser-extension
@@ -352,7 +401,7 @@ jobs:
 
   # ─── Summary Job ────────────────────────────────────────────────────────────
   build-summary:
-    name: 📋 Build Summary
+    name: Build Summary
     runs-on: ubuntu-latest
     needs: [build-binary, build-dashboard, build-vscode-extension, build-browser-extension]
     if: always()

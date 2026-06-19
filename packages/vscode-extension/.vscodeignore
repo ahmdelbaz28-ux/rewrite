@@ -14,12 +14,23 @@ tsconfig.json
 .eslintrc.js
 .prettierrc
 .github/**
+
+# Exclude source maps (security: they expose original source code)
 **/*.map
+
+# Exclude TypeScript source files (not needed at runtime, only .js)
 **/*.ts
 
+# Exclude TypeScript declaration files (not needed at runtime)
+**/*.d.ts
+
+# Exclude large icons not used by VS Code Marketplace (max 128x128)
+assets/icon-512.png
+
 # Keep these (don't ignore):
-!assets/**
-!out/**
+!assets/icon.png
+!assets/icon-128.png
+!out/extension.js
 !README.md
 !CHANGELOG.md
 !LICENSE

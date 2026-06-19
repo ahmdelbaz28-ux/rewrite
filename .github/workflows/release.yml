@@ -83,10 +83,26 @@ jobs:
           mkdir -p release
           
           # Move CLI binaries to release/
-          find artifacts/binary-* -type f \( -name 'smartlangguard-*' -o -name 'checksums.sha256' \) -exec cp {} release/ \;
+          find artifacts/binary-* -type f -name 'smartlangguard-*' -exec cp {} release/ \;
           
-          # Merge checksums into a single file
-          find artifacts/binary-* -name 'checksums.sha256' -exec cat {} \; > release/checksums.sha256
+          # Generate a SINGLE unified checksums file (not per-binary)
+          # This file will contain checksums for ALL binaries in one place
+          cd release
+          rm -f checksums.sha256  # remove any individual ones
+          for binary in smartlangguard-*; do
+            if [ -f "$binary" ]; then
+              if command -v shasum >/dev/null 2>&1; then
+                shasum -a 256 "$binary"
+              else
+                sha256sum "$binary"
+              fi
+            fi
+          done > checksums.sha256
+          cd ..
+          
+          echo "── Unified checksums ───────────"
+          cat release/checksums.sha256
+          echo ""
           
           # Move dashboard zip
           if [ -f artifacts/admin-dashboard/dashboard.zip ]; then
@@ -99,6 +115,7 @@ jobs:
           # Move browser extension zip
           find artifacts/browser-extension -name '*.zip' -exec cp {} release/ \;
           
+          echo ""
           echo "── Final release contents ───────────"
           ls -lh release/
       
@@ -107,10 +124,13 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           REPO: ${{ github.repository }}
         run: |
-          cat > release/latest.json << 'EOF'
+          # Generate latest.json using a script that properly interpolates vars
+          RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          
+          cat > release/latest.json << EOF
           {
             "version": "${VERSION}",
-            "release_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "release_date": "${RELEASE_DATE}",
             "repository": "https://github.com/${REPO}",
             "files": [
               {
@@ -142,10 +162,9 @@ jobs:
           }
           EOF
           
-          # Replace env vars in JSON (since heredoc doesn't expand in single-quoted)
-          sed -i "s|\${VERSION}|${VERSION}|g" release/latest.json
-          sed -i "s|\${REPO}|${REPO}|g" release/latest.json
-          sed -i "s|$(date -u +%Y-%m-%dT%H:%M:%SZ)|$(date -u +%Y-%m-%dT%H:%M:%SZ)|g" release/latest.json
+          # Remove leading whitespace from heredoc (caused by YAML indentation)
+          # The heredoc lines start with 10 spaces, remove them
+          sed -i 's/^          //' release/latest.json
           
           echo "── latest.json ───────────"
           cat release/latest.json
@@ -168,7 +187,8 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           REPO: ${{ github.repository }}
         run: |
-          cat > release/release-notes.md << 'EOF'
+          # Use unquoted heredoc so $VERSION and $REPO get expanded
+          cat > release/release-notes.md << EOF
           # SmartLangGuard v${VERSION}
           
           🎉 New release of SmartLangGuard - cross-platform keyboard layout mistake fixer.
@@ -177,29 +197,29 @@ jobs:
           
           | Platform | File | Install |
           |----------|------|---------|
-          | 🪟 Windows x64 | `smartlangguard-win-x64.exe` | Add to PATH |
-          | 🍎 macOS Intel | `smartlangguard-macos-x64` | `chmod +x && sudo mv to /usr/local/bin/` |
-          | 🍎 macOS Apple Silicon | `smartlangguard-macos-arm64` | Same as above |
-          | 🐧 Linux x64 | `smartlangguard-linux-x64` | Same as above |
-          | 🐧 Linux arm64 | `smartlangguard-linux-arm64` | Same as above |
+          | 🪟 Windows x64 | \`smartlangguard-win-x64.exe\` | Add to PATH |
+          | 🍎 macOS Intel | \`smartlangguard-macos-x64\` | \`chmod +x && sudo mv to /usr/local/bin/\` |
+          | 🍎 macOS Apple Silicon | \`smartlangguard-macos-arm64\` | Same as above |
+          | 🐧 Linux x64 | \`smartlangguard-linux-x64\` | Same as above |
+          | 🐧 Linux arm64 | \`smartlangguard-linux-arm64\` | Same as above |
           
           ### VS Code Extension
           
-          Install `smartlangguard-0.1.0.vsix` via:
-          ```bash
-          code --install-extension smartlangguard-0.1.0.vsix
-          ```
+          Install \`smartlangguard-${VERSION}.vsix\` via:
+          \`\`\`bash
+          code --install-extension smartlangguard-${VERSION}.vsix
+          \`\`\`
           
           ### Browser Extension (Chrome/Edge/Brave)
           
-          1. Unzip `smartlangguard-extension-v${VERSION}.zip`
-          2. Go to `chrome://extensions/`
+          1. Unzip \`smartlangguard-extension-v${VERSION}.zip\`
+          2. Go to \`chrome://extensions/\`
           3. Enable Developer mode
           4. Click "Load unpacked" → select the folder
           
           ## 📋 Installation (CLI)
           
-          ```bash
+          \`\`\`bash
           # Verify checksum
           shasum -a 256 -c checksums.sha256
           
@@ -211,12 +231,12 @@ jobs:
           
           # Verify
           smartlangguard --version
-          # Output: $VERSION
+          # Output: ${VERSION}
           
           # Test
           echo "high" | smartlangguard fix
           # Output: اهلا
-          ```
+          \`\`\`
           
           ## 🆕 What's New
           
@@ -224,7 +244,7 @@ jobs:
           
           ## 🔐 Checksums
           
-          See `checksums.sha256` file for SHA256 checksums of all binaries.
+          See \`checksums.sha256\` file for SHA256 checksums of all binaries.
           
           ## 📖 Documentation
           
@@ -237,9 +257,8 @@ jobs:
           **Made with ❤️ for the Arabic-speaking developer community.**
           EOF
           
-          # Replace env vars
-          sed -i "s|\${VERSION}|${VERSION}|g" release/release-notes.md
-          sed -i "s|\${REPO}|${REPO}|g" release/release-notes.md
+          # Remove leading whitespace from heredoc (YAML indentation)
+          sed -i 's/^          //' release/release-notes.md
           
           echo "── Release notes preview ───────────"
           head -30 release/release-notes.md
@@ -250,6 +269,11 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: SmartLangGuard v${{ steps.version.outputs.version }}
           body_path: release/release-notes.md
+          # Upload all release artifacts:
+          # - smartlangguard-* matches: binaries, vsix, extension zip
+          # - checksums.sha256: unified checksums for all binaries
+          # - latest.json: update manifest for auto-updater
+          # - dashboard.zip: admin dashboard for self-hosting
           files: |
             release/smartlangguard-*
             release/checksums.sha256
