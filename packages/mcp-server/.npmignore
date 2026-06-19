@@ -1,0 +1,42 @@
+# Tests
+tests/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+out/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Scripts (not needed in published package)
+scripts/
+
+# Dev config
+tsconfig.json
+.eslintrc*
+.prettierrc*
+jest.config*

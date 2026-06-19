@@ -1,12 +1,12 @@
 {
   "name": "@smartlangguard/cli",
   "version": "0.1.0",
-  "description": "SmartLangGuard CLI - Fix keyboard layout mistakes from terminal",
+  "description": "SmartLangGuard CLI - Fix Arabic/English keyboard layout mistakes from terminal",
+  "main": "bin/smartlangguard.js",
   "bin": {
     "smartlangguard": "bin/smartlangguard.js",
     "slg": "bin/smartlangguard.js"
   },
-  "main": "src/index.js",
   "scripts": {
     "start": "node bin/smartlangguard.js",
     "build": "npx --yes @yao-pkg/pkg@5.16.1 . --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --out-path dist/ --output dist/smartlangguard",
@@ -33,17 +33,38 @@
     "cli",
     "arabic",
     "keyboard",
+    "layout",
     "fix",
-    "terminal"
+    "terminal",
+    "smartlangguard"
   ],
-  "author": "SmartLangGuard",
-  "license": "PROPRIETARY",
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "UNLICENSED",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
     "@smartlangguard/core": "^0.1.0",
     "@smartlangguard/mcp-server": "^0.1.0",
     "commander": "^11.1.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

@@ -1,8 +1,11 @@
 {
   "name": "@smartlangguard/mcp-server",
   "version": "0.1.0",
-  "description": "SmartLangGuard MCP Server - Integration with Claude, Cursor, Cline, and other AI tools",
+  "description": "SmartLangGuard MCP Server - Integration with Claude Desktop, Cursor, Cline, and other AI tools via Model Context Protocol",
   "main": "src/mcp-server.js",
+  "bin": {
+    "smartlangguard-mcp": "src/mcp-server.js"
+  },
   "scripts": {
     "start": "node src/mcp-server.js"
   },
@@ -11,15 +14,36 @@
     "model-context-protocol",
     "claude",
     "cursor",
+    "cline",
     "arabic",
-    "keyboard"
+    "keyboard",
+    "smartlangguard"
   ],
-  "author": "SmartLangGuard",
-  "license": "PROPRIETARY",
-  "dependencies": {
-    "@smartlangguard/core": "^0.1.0"
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "UNLICENSED",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
+  "dependencies": {
+    "@smartlangguard/core": "^0.1.0"
   }
 }

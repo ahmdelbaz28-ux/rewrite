@@ -1,22 +1,41 @@
 {
   "name": "@smartlangguard/backend",
   "version": "0.1.0",
-  "description": "SmartLangGuard SaaS Backend - License, telemetry, AI scoring, admin dashboard",
+  "description": "SmartLangGuard SaaS Backend - License validation, telemetry, AI scoring, admin dashboard, and Stripe integration",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "test": "jest --testPathPattern=tests/"
+    "dev": "node --watch src/server.js"
   },
   "keywords": [
     "saas",
     "backend",
     "license",
     "stripe",
-    "admin"
+    "admin",
+    "smartlangguard"
   ],
-  "author": "SmartLangGuard",
-  "license": "PROPRIETARY",
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/backend"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
     "@smartlangguard/core": "^0.1.0",
     "bcryptjs": "^2.4.3",
@@ -28,8 +47,5 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

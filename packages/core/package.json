@@ -1,13 +1,11 @@
 {
   "name": "@smartlangguard/core",
   "version": "0.1.0",
-  "description": "SmartLangGuard Core - Translation engine, license layer, telemetry, and updater",
+  "description": "SmartLangGuard Core - Translation engine, license layer, telemetry, and updater for fixing Arabic/English keyboard layout mistakes",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "test": "jest --testPathPattern=tests/",
-    "test:watch": "jest --watch",
-    "lint": "eslint src/"
+    "test": "jest --testPathPattern=tests/"
   },
   "keywords": [
     "arabic",
@@ -18,9 +16,27 @@
     "smartlangguard"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
-  "license": "PROPRIETARY",
+  "license": "UNLICENSED",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme"
 }

@@ -2,7 +2,9 @@
 
 > **Cross-platform keyboard layout mistake fixer** — works in any terminal, AI tool, browser, or text editor.
 
-[![License: PROPRIETARY](https://img.shields.io/badge/License-PROPRIETARY-blue.svg)](LICENSE)
+[![License: UNLICENSED](https://img.shields.io/badge/License-UNLICENSED-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg)](https://www.npmjs.com/package/@smartlangguard/cli)
+[![npm downloads](https://img.shields.io/npm/dm/@smartlangguard/cli.svg)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![Node](https://img.shields.io/badge/Node-18%2B-green.svg)](https://nodejs.org)
 [![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#installation)
 

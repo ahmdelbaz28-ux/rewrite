@@ -1,8 +1,11 @@
 {
   "name": "@smartlangguard/daemon",
   "version": "0.1.0",
-  "description": "SmartLangGuard Daemon - Background clipboard monitor + global hotkey",
+  "description": "SmartLangGuard Daemon - Background clipboard monitor + global hotkey for fixing keyboard layout mistakes",
   "main": "src/daemon.js",
+  "bin": {
+    "smartlangguard-daemon": "src/daemon.js"
+  },
   "scripts": {
     "start": "node src/daemon.js"
   },
@@ -10,14 +13,36 @@
     "daemon",
     "clipboard",
     "hotkey",
-    "background"
+    "background",
+    "arabic",
+    "keyboard",
+    "smartlangguard"
   ],
-  "author": "SmartLangGuard",
-  "license": "PROPRIETARY",
-  "dependencies": {
-    "@smartlangguard/core": "^0.1.0"
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "UNLICENSED",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/daemon"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
+  "dependencies": {
+    "@smartlangguard/core": "^0.1.0"
   }
 }
