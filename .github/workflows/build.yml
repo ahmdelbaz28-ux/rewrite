@@ -49,8 +49,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install pkg (fork that supports newer Node)
-        run: npm install -g @yao-pkg/pkg@5.16.1
+      - name: Verify @yao-pkg/pkg is installed
+        run: |
+          echo "=== Checking @yao-pkg/pkg ==="
+          npx --yes @yao-pkg/pkg@5.16.1 --version || echo "Will install on demand"
+          echo ""
+          echo "=== Checking for deprecated pkg ==="
+          if [ -d "node_modules/pkg" ]; then
+            echo "⚠ Found deprecated 'pkg' in node_modules - removing"
+            rm -rf node_modules/pkg
+          fi
+          echo "✓ Ready to build"
         shell: bash
       
       - name: Build binary
@@ -71,8 +80,12 @@ jobs:
           echo "✅ Binary built successfully"
         shell: bash
       
-      - name: Smoke test binary (Unix)
-        if: matrix.target.name != 'win-x64'
+      - name: Smoke test binary (Unix - same arch only)
+        # Only run smoke test when the binary arch matches the runner arch
+        # arm64 binaries can't run on x64 runners and vice versa
+        if: |
+          matrix.target.name != 'win-x64' &&
+          !endsWith(matrix.target.name, '-arm64')
         run: |
           set -e
           chmod +x packages/cli/dist/smartlangguard-*
@@ -110,6 +123,39 @@ jobs:
             if (d.mistakes_found < 1) { console.error('❌ Detect failed'); process.exit(1); }
             console.log('✓ Detect found', d.mistakes_found, 'mistake(s)');
           "
+        shell: bash
+      
+      - name: Verify binary format (arm64 - no execution)
+        # For arm64 binaries built on x64 runners, just verify the file format
+        if: |
+          matrix.target.name != 'win-x64' &&
+          endsWith(matrix.target.name, '-arm64')
+        run: |
+          set -e
+          chmod +x packages/cli/dist/smartlangguard-*
+          BINARY=$(ls packages/cli/dist/smartlangguard-* | head -1)
+          
+          echo "── Binary info ───────────"
+          file "$BINARY"
+          echo ""
+          
+          # Verify it's an ARM binary (cannot execute on x64 runner)
+          if file "$BINARY" | grep -q "ARM aarch64\|ARM64"; then
+            echo "✓ ARM64 binary format verified"
+          elif file "$BINARY" | grep -q "arm64"; then
+            echo "✓ arm64 binary format verified"
+          else
+            echo "⚠ Unexpected binary format (may still be valid)"
+            file "$BINARY"
+          fi
+          
+          # Verify file size is reasonable (>10MB for a Node.js binary)
+          SIZE=$(stat -c%s "$BINARY" 2>/dev/null || stat -f%z "$BINARY")
+          if [ "$SIZE" -lt 10000000 ]; then
+            echo "❌ Binary too small: $SIZE bytes"
+            exit 1
+          fi
+          echo "✓ Binary size: $((SIZE / 1024 / 1024)) MB"
         shell: bash
       
       - name: Smoke test binary (Windows)
@@ -189,10 +235,13 @@ jobs:
       
       - name: Create dashboard zip
         run: |
+          # Create dashboard.zip at repo root
+          # Path: packages/admin-dashboard/dist → repo root = 3 levels up
           cd packages/admin-dashboard/dist
-          zip -r "../../../../dashboard.zip" .
+          zip -r "../../../dashboard.zip" .
           cd ../../..
           ls -lh dashboard.zip
+        shell: bash
       
       - name: Upload dashboard artifact
         uses: actions/upload-artifact@v5

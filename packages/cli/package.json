@@ -9,10 +9,10 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node bin/smartlangguard.js",
-    "build": "pkg . --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --out-path dist/",
-    "build:windows": "pkg . --targets node18-win-x64 --out-path dist/",
-    "build:macos": "pkg . --targets node18-macos-x64 --out-path dist/",
-    "build:linux": "pkg . --targets node18-linux-x64 --out-path dist/"
+    "build": "npx --yes @yao-pkg/pkg@5.16.1 . --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --out-path dist/ --output dist/smartlangguard",
+    "build:windows": "npx --yes @yao-pkg/pkg@5.16.1 . --targets node18-win-x64 --output dist/smartlangguard-win-x64.exe",
+    "build:macos": "npx --yes @yao-pkg/pkg@5.16.1 . --targets node18-macos-x64 --output dist/smartlangguard-macos-x64",
+    "build:linux": "npx --yes @yao-pkg/pkg@5.16.1 . --targets node18-linux-x64 --output dist/smartlangguard-linux-x64"
   },
   "pkg": {
     "scripts": [
