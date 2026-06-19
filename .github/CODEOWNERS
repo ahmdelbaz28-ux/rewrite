@@ -1,0 +1,19 @@
+# Codeowners for SmartLangGuard
+# Format: <path> <owner1> <owner2>
+# These people will be automatically requested for review on PRs
+
+# Default owner for everything
+* @ahmdelbaz28-ux
+
+# Specific areas
+/packages/core/         @ahmdelbaz28-ux
+/packages/cli/          @ahmdelbaz28-ux
+/packages/mcp-server/   @ahmdelbaz28-ux
+/packages/daemon/       @ahmdelbaz28-ux
+/packages/backend/      @ahmdelbaz28-ux
+/packages/vscode-extension/ @ahmdelbaz28-ux
+/packages/browser-extension/ @ahmdelbaz28-ux
+/packages/admin-dashboard/ @ahmdelbaz28-ux
+
+/.github/workflows/     @ahmdelbaz28-ux
+/docs/                  @ahmdelbaz28-ux
