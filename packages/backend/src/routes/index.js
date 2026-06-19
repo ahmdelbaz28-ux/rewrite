@@ -7,11 +7,11 @@
 const express = require('express');
 const router = express.Router();
 
-const licenseRoutes = require('./routes/license');
-const telemetryRoutes = require('./routes/telemetry');
-const aiRoutes = require('./routes/ai');
-const adminRoutes = require('./routes/admin');
-const stripeRoutes = require('./routes/stripe');
+const licenseRoutes = require('./license');
+const telemetryRoutes = require('./telemetry');
+const aiRoutes = require('./ai');
+const adminRoutes = require('./admin');
+const stripeRoutes = require('./stripe');
 
 router.use('/license', licenseRoutes);
 router.use('/telemetry', telemetryRoutes);
@@ -23,7 +23,7 @@ router.use('/stripe', stripeRoutes);
 router.get('/', (req, res) => {
   res.json({
     name: 'SmartLangGuard SaaS API',
-    version: require('../package.json').version,
+    version: require('../../package.json').version,
     docs: '/docs',
     endpoints: {
       license: '/v1/license/validate, /v1/license/activate, /v1/license/revoke',

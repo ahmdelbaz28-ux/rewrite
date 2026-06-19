@@ -62,7 +62,7 @@ async function fetchManifest() {
 
 function getCurrentVersion() {
   try {
-    return require('../../package.json').version || '0.0.0';
+    return require('../package.json').version || '0.0.0';
   } catch {
     return '0.0.0';
   }

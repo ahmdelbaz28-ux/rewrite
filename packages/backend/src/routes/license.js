@@ -60,18 +60,48 @@ router.post('/validate', asyncHandler(async (req, res) => {
         .run(JSON.stringify(devices), license.id);
     }
 
-    // Update last_seen
-    db().prepare(
-      `INSERT INTO devices (id, license_id, fingerprint, hostname, platform, last_seen, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(license_id, fingerprint) DO UPDATE SET last_seen = ?`
-    ).run(
-      deviceId, license.id, fingerprint,
-      req.headers['x-hostname'] || 'unknown',
-      req.headers['x-platform'] || 'unknown',
-      Date.now(), Date.now(),
-      Date.now()
-    );
+    // Update last_seen (use UPSERT for idempotency)
+    // First: check if this device is already registered (with any license)
+    const existingDevice = db().prepare(
+      'SELECT id, license_id FROM devices WHERE id = ?'
+    ).get(deviceId);
+    
+    if (existingDevice) {
+      if (existingDevice.license_id === license.id) {
+        // Same device, same license → just update last_seen
+        db().prepare(
+          'UPDATE devices SET last_seen = ?, fingerprint = ? WHERE id = ?'
+        ).run(Date.now(), fingerprint, deviceId);
+      } else {
+        // Device switched to a new license → reassign
+        db().prepare(
+          'UPDATE devices SET license_id = ?, fingerprint = ?, last_seen = ? WHERE id = ?'
+        ).run(license.id, fingerprint, Date.now(), deviceId);
+      }
+    } else {
+      // New device → check if fingerprint is already registered for this license
+      const existingFp = db().prepare(
+        'SELECT id FROM devices WHERE license_id = ? AND fingerprint = ?'
+      ).get(license.id, fingerprint);
+      
+      if (existingFp) {
+        // Same fingerprint, update its device_id and last_seen
+        db().prepare(
+          'UPDATE devices SET id = ?, last_seen = ? WHERE license_id = ? AND fingerprint = ?'
+        ).run(deviceId, Date.now(), license.id, fingerprint);
+      } else {
+        // Truly new device
+        db().prepare(
+          `INSERT INTO devices (id, license_id, fingerprint, hostname, platform, last_seen, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        ).run(
+          deviceId, license.id, fingerprint,
+          req.headers['x-hostname'] || 'unknown',
+          req.headers['x-platform'] || 'unknown',
+          Date.now(), Date.now()
+        );
+      }
+    }
   }
 
   res.json({

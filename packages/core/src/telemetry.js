@@ -100,7 +100,7 @@ function track(event, properties = {}) {
     timestamp: Date.now(),
     session_id: process.pid,
     os: `${os.platform()}-${os.arch()}`,
-    app_version: require('../../package.json').version || '0.0.0'
+    app_version: require('../package.json').version || '0.0.0'
   };
 
   queue.push(entry);

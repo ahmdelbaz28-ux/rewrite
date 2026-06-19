@@ -241,3 +241,21 @@ function startLocalServer() {
 }
 
 module.exports = { startDaemon };
+
+// ─── Auto-start when run directly ─────────────────────────────────────────────
+
+if (require.main === module) {
+  // Parse simple CLI args
+  const args = process.argv.slice(2);
+  const monitorClipboard = !args.includes('--no-clipboard');
+  const enableHotkey = !args.includes('--no-hotkey');
+  
+  startDaemon({
+    monitorClipboard,
+    enableHotkey,
+    endpoint: process.env.SMARTLANGGUARD_API || 'http://localhost:4000'
+  }).catch(err => {
+    console.error('Fatal:', err.message);
+    process.exit(1);
+  });
+}

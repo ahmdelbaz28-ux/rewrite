@@ -33,8 +33,17 @@ describe('Translator', () => {
       expect(convertToArabic('')).toBe('');
     });
 
-    test('preserves non-Latin chars unchanged', () => {
-      expect(convertToArabic('hello 123')).toContain('ه');
+    test('preserves numbers as Arabic-Indic digits', () => {
+      // Numbers 0-9 are mapped to Arabic-Indic digits ٠-٩
+      const result = convertToArabic('hello 123');
+      expect(result).toContain('١');
+      expect(result).toContain('٢');
+      expect(result).toContain('٣');
+    });
+
+    test('preserves unmapped chars like @ and # unchanged', () => {
+      expect(convertToArabic('test@domain.com')).toContain('@');
+      expect(convertToArabic('tag #1')).toContain('#');
     });
 
     test('handles "لا" combination (b → لا)', () => {

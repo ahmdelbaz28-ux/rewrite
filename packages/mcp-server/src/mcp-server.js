@@ -308,3 +308,14 @@ async function startMcpServer(options = {}) {
 }
 
 module.exports = { startMcpServer, TOOLS, PROTOCOL_VERSION };
+
+// ─── Auto-start when run directly (not when imported) ─────────────────────────
+
+if (require.main === module) {
+  startMcpServer({
+    endpoint: process.env.SMARTLANGGUARD_API || 'http://localhost:4000'
+  }).catch(err => {
+    process.stderr.write(`Fatal: ${err.message}\n`);
+    process.exit(1);
+  });
+}

@@ -190,16 +190,17 @@ function scoreConversion(original, converted) {
 function translate(text, options = {}) {
   const direction = options.direction || 'auto';
   let detected = direction;
+
   if (direction === 'auto') {
     detected = detectMistakeType(text);
     if (detected === 'unknown') detected = 'en-mistake'; // default
   }
 
   let result;
-  if (detected === 'en-mistake') {
+  if (detected === 'en-mistake' || detected === 'en-to-ar') {
     result = convertToArabic(text);
     detected = 'en-to-ar';
-  } else if (detected === 'ar-mistake') {
+  } else if (detected === 'ar-mistake' || detected === 'ar-to-en') {
     result = convertToEnglish(text);
     detected = 'ar-to-en';
   } else {
