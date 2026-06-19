@@ -1,0 +1,26 @@
+# Files to exclude from the published .vsix package
+# This keeps the package small and clean
+
+.vscode/**
+.vscode-test/**
+src/**
+node_modules/**
+.git/**
+.gitignore
+.gitattributes
+.yarnrc
+webpack.config.js
+tsconfig.json
+.eslintrc.js
+.prettierrc
+.github/**
+**/*.map
+**/*.ts
+
+# Keep these (don't ignore):
+!assets/**
+!out/**
+!README.md
+!CHANGELOG.md
+!LICENSE
+!package.json

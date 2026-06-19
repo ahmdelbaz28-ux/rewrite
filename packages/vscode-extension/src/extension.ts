@@ -10,13 +10,10 @@
  */
 
 import * as vscode from 'vscode';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-
-const execFileAsync = promisify(execFile);
 
 let statusBar: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
@@ -98,14 +95,44 @@ async function runCli(args: string[], input?: string): Promise<string> {
     throw new Error('SmartLangGuard CLI not found. Install it with: npm install -g @smartlangguard/cli');
   }
 
-  const { stdout } = await execFileAsync(cliPath, args, {
-    input,
-    maxBuffer: 10 * 1024 * 1024,
-    timeout: 30000,
-    encoding: 'utf8'
-  });
+  return new Promise<string>((resolve, reject) => {
+    const child = spawn(cliPath!, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: os.homedir()
+    });
 
-  return stdout;
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (data) => { stdout += data.toString('utf8'); });
+    child.stderr.on('data', (data) => { stderr += data.toString('utf8'); });
+
+    if (input) {
+      child.stdin.write(input, 'utf8');
+      child.stdin.end();
+    } else {
+      child.stdin.end();
+    }
+
+    const timeout = setTimeout(() => {
+      child.kill('SIGTERM');
+      reject(new Error('SmartLangGuard CLI timed out (30s)'));
+    }, 30000);
+
+    child.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(new Error(`Failed to start CLI: ${err.message}`));
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timeout);
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(new Error(`CLI exited with code ${code}: ${stderr.trim()}`));
+      }
+    });
+  });
 }
 
 // ─── Commands ─────────────────────────────────────────────────────────────────

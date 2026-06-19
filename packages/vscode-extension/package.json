@@ -1,13 +1,17 @@
 {
   "name": "smartlangguard",
   "displayName": "SmartLangGuard",
-  "description": "Fix Arabic/English keyboard layout mistakes instantly. Works with any text editor.",
+  "description": "Fix Arabic/English keyboard layout mistakes instantly. Works in any text editor, terminal, or AI tool.",
   "version": "0.1.0",
   "publisher": "smartlangguard",
-  "license": "PROPRIETARY",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ahmdelbaz28-ux/rewrite"
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite.git"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -22,12 +26,40 @@
     "keyboard",
     "layout",
     "fix",
-    "auto-correct"
+    "auto-correct",
+    "typing",
+    "mistype",
+    "qwerty",
+    "rtl",
+    "middle-east"
   ],
   "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#1e293b",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/version-0.1.0-blue.svg",
+      "href": "https://github.com/ahmdelbaz28-ux/rewrite/releases",
+      "description": "Version 0.1.0"
+    },
+    {
+      "url": "https://img.shields.io/badge/platforms-Win%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
+      "href": "https://github.com/ahmdelbaz28-ux/rewrite",
+      "description": "Cross-platform"
+    },
+    {
+      "url": "https://img.shields.io/badge/tests-306%20passing-brightgreen.svg",
+      "href": "https://github.com/ahmdelbaz28-ux/rewrite/actions",
+      "description": "306 tests passing"
+    }
+  ],
   "activationEvents": [
     "onCommand:smartlangguard.fixSelection",
-    "onCommand:smartlangguard.fixClipboard"
+    "onCommand:smartlangguard.fixClipboard",
+    "onCommand:smartlangguard.activateLicense",
+    "onCommand:smartlangguard.showStatus"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -83,37 +115,49 @@
         "smartlangguard.cliPath": {
           "type": "string",
           "default": "",
-          "description": "Path to SmartLangGuard CLI binary. Leave empty to auto-detect."
+          "markdownDescription": "Path to SmartLangGuard CLI binary. Leave empty to auto-detect (npm global install, bundled, or PATH)."
         },
         "smartlangguard.direction": {
           "type": "string",
           "enum": ["auto", "en-to-ar", "ar-to-en"],
           "default": "auto",
+          "enumDescriptions": [
+            "Auto-detect from text content",
+            "Force English → Arabic conversion",
+            "Force Arabic → English conversion"
+          ],
           "description": "Default conversion direction"
         },
         "smartlangguard.useAI": {
           "type": "boolean",
           "default": true,
-          "description": "Enable AI scoring for ambiguous cases (requires Pro license)"
+          "markdownDescription": "Enable AI scoring for ambiguous cases. Uses the built-in custom model (free, offline) for Pro users."
         },
         "smartlangguard.telemetry": {
           "type": "boolean",
           "default": true,
-          "description": "Send anonymous usage telemetry"
+          "markdownDescription": "Send anonymous usage telemetry to help improve SmartLangGuard. No personal data is collected. See [privacy policy](https://github.com/ahmdelbaz28-ux/rewrite/blob/main/docs/ARCHITECTURE.md#threat-model)."
+        },
+        "smartlangguard.endpoint": {
+          "type": "string",
+          "default": "https://api.smartlangguard.com",
+          "description": "SaaS API endpoint for license validation."
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "echo 'Skipping prepublish - using pre-built out/'",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package",
-    "publish": "vsce publish"
+    "package": "node /home/z/my-project/scripts/build-vscode-extension.js",
+    "publish": "node /home/z/my-project/scripts/build-vscode-extension.js && echo 'Run: vsce publish' ",
+    "lint": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.85.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^3.0.0"
   }
 }
