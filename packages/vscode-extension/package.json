@@ -58,8 +58,13 @@
   "activationEvents": [
     "onCommand:smartlangguard.fixSelection",
     "onCommand:smartlangguard.fixClipboard",
+    "onCommand:smartlangguard.fixLastWord",
     "onCommand:smartlangguard.activateLicense",
-    "onCommand:smartlangguard.showStatus"
+    "onCommand:smartlangguard.showStatus",
+    "onCommand:smartlangguard.toggleRealTime",
+    "onCommand:smartlangguard.testSound",
+    "onCommand:smartlangguard.selectSound",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -73,12 +78,28 @@
         "title": "SmartLangGuard: Fix Clipboard"
       },
       {
+        "command": "smartlangguard.fixLastWord",
+        "title": "SmartLangGuard: Fix Last Word (Quick Fix)"
+      },
+      {
         "command": "smartlangguard.activateLicense",
         "title": "SmartLangGuard: Activate License"
       },
       {
         "command": "smartlangguard.showStatus",
         "title": "SmartLangGuard: Show Status"
+      },
+      {
+        "command": "smartlangguard.toggleRealTime",
+        "title": "SmartLangGuard: Toggle Real-Time Detection"
+      },
+      {
+        "command": "smartlangguard.testSound",
+        "title": "SmartLangGuard: Test Alert Sound"
+      },
+      {
+        "command": "smartlangguard.selectSound",
+        "title": "SmartLangGuard: Select Alert Sound"
       }
     ],
     "menus": {
@@ -87,12 +108,29 @@
           "command": "smartlangguard.fixSelection",
           "when": "editorHasSelection",
           "group": "smartlangguard@1"
+        },
+        {
+          "command": "smartlangguard.fixLastWord",
+          "when": "!editorHasSelection",
+          "group": "smartlangguard@2"
         }
       ],
       "commandPalette": [
         {
           "command": "smartlangguard.fixSelection",
           "when": "editorHasSelection"
+        },
+        {
+          "command": "smartlangguard.fixLastWord"
+        },
+        {
+          "command": "smartlangguard.toggleRealTime"
+        },
+        {
+          "command": "smartlangguard.testSound"
+        },
+        {
+          "command": "smartlangguard.selectSound"
         }
       ]
     },
@@ -107,6 +145,17 @@
         "command": "smartlangguard.fixClipboard",
         "key": "ctrl+shift+f2",
         "mac": "cmd+shift+f2"
+      },
+      {
+        "command": "smartlangguard.fixLastWord",
+        "key": "ctrl+shift+backspace",
+        "mac": "cmd+shift+backspace",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "smartlangguard.toggleRealTime",
+        "key": "ctrl+shift+alt+l",
+        "mac": "cmd+shift+alt+l"
       }
     ],
     "configuration": {
@@ -136,12 +185,54 @@
         "smartlangguard.telemetry": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Send anonymous usage telemetry to help improve SmartLangGuard. No personal data is collected. See [privacy policy](https://github.com/ahmdelbaz28-ux/rewrite/blob/main/docs/ARCHITECTURE.md#threat-model)."
+          "markdownDescription": "Send anonymous usage telemetry to help improve SmartLangGuard. No personal data is collected."
         },
         "smartlangguard.endpoint": {
           "type": "string",
           "default": "https://api.smartlangguard.com",
           "description": "SaaS API endpoint for license validation."
+        },
+        "smartlangguard.realTimeDetection": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "**Real-time typing detection.** When enabled, SmartLangGuard analyzes your typing as you type and plays a sound alert when it detects wrong keyboard layout. Use `Ctrl+Shift+Backspace` to fix the last word instantly.",
+          "scope": "window"
+        },
+        "smartlangguard.sound": {
+          "type": "string",
+          "enum": ["off", "beep", "ding", "chime", "soft-pop", "click", "double-beep"],
+          "default": "ding",
+          "enumDescriptions": [
+            "No sound (silent mode)",
+            "Short square-wave beep (~150ms) - attention-grabbing",
+            "Soft sine-wave ding (~300ms) - pleasant, recommended",
+            "Ascending 3-note chime (~500ms) - musical",
+            "Very soft damped pop (~200ms) - least intrusive",
+            "Short click (~80ms) - very subtle",
+            "Double beep (~250ms) - more urgent"
+          ],
+          "markdownDescription": "Sound to play when wrong keyboard layout is detected. Use command `SmartLangGuard: Test Alert Sound` to preview.",
+          "scope": "window"
+        },
+        "smartlangguard.soundVolume": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Volume for alert sounds (0.0 to 1.0).",
+          "scope": "window"
+        },
+        "smartlangguard.sensitivity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "enumDescriptions": [
+            "Only alert after 5+ consecutive wrong-layout characters",
+            "Alert after 3+ consecutive wrong-layout characters (default)",
+            "Alert after 2+ consecutive wrong-layout characters"
+          ],
+          "markdownDescription": "Detection sensitivity. Higher = more alerts (may false-positive).",
+          "scope": "window"
         }
       }
     }

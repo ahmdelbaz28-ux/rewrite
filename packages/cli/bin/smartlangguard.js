@@ -339,13 +339,107 @@ program
   .description('Start background daemon (clipboard monitor + hotkey)')
   .option('--no-clipboard', 'disable clipboard monitoring')
   .option('--no-hotkey', 'disable global hotkey')
+  .option('--enable-typing-monitor', 'enable system-wide typing monitor (requires permissions)')
   .action(async (opts) => {
     const { startDaemon } = require('@smartlangguard/daemon');
     await startDaemon({
       monitorClipboard: opts.clipboard,
-      enableHotkey: opts.hotkey
+      enableHotkey: opts.hotkey,
+      enableTypingMonitor: opts.enableTypingMonitor || false
     });
   });
+
+// ── sound ─────────────────────────────────────────────────────────────────────
+
+const soundCmd = program
+  .command('sound')
+  .description('Manage alert sounds');
+
+soundCmd
+  .command('play [name]')
+  .description('Play a sound (default: ding). Available: beep, ding, chime, soft-pop, click, double-beep, off')
+  .option('--volume <n>', 'volume 0.0-1.0', '0.5')
+  .action(async (name, opts) => {
+    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const player = new SoundPlayer({
+      sound: name || 'ding',
+      volume: parseFloat(opts.volume)
+    });
+    if (!name) {
+      await player.play();
+    } else if (name === 'off') {
+      console.log('Sound is off');
+    } else {
+      await player.play(name);
+    }
+    // Give the OS a moment to start playback before exit
+    setTimeout(() => process.exit(0), 300);
+  });
+
+soundCmd
+  .command('list')
+  .description('List all available sounds')
+  .action(() => {
+    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const sounds = SoundPlayer.getAvailableSounds();
+    console.log('Available sounds:');
+    sounds.forEach(s => console.log(`  - ${s}`));
+  });
+
+soundCmd
+  .command('export <name> <output>')
+  .description('Export a sound as a WAV file')
+  .action((name, output) => {
+    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const buffer = SoundPlayer.getSoundBuffer(name);
+    if (!buffer) {
+      console.error(`Unknown sound: ${name}`);
+      process.exit(1);
+    }
+    require('fs').writeFileSync(output, buffer);
+    console.log(`✓ ${name} exported to ${output} (${buffer.length} bytes)`);
+  });
+
+// ── typing ────────────────────────────────────────────────────────────────────
+
+program
+  .command('detect [text]')
+  .description('Detect if text was typed in wrong keyboard layout')
+  .option('--format <fmt>', 'output format (text, json)', 'text')
+  .action((text, opts) => {
+    const { detectWrongLayout, findAllMistakes } = require('@smartlangguard/core/src/typing-detector');
+    
+    if (!text) {
+      // Read from stdin
+      const data = require('fs').readFileSync(0, 'utf8').trim();
+      text = data;
+    }
+    
+    if (!text) {
+      console.error('No text provided');
+      process.exit(1);
+    }
+    
+    const mistakes = findAllMistakes(text);
+    
+    if (opts.format === 'json') {
+      console.log(JSON.stringify({
+        text,
+        mistakes_found: mistakes.length,
+        mistakes
+      }, null, 2));
+    } else {
+      if (mistakes.length === 0) {
+        console.log('No layout mistakes detected.');
+      } else {
+        console.log(`Found ${mistakes.length} mistake(s):\n`);
+        mistakes.forEach((m, i) => {
+          console.log(`  ${i + 1}. "${m.word}" → "${m.suggestion}" (${m.direction}) [pos ${m.range[0]}-${m.range[1]}]`);
+        });
+      }
+    }
+  });
+
 
 // ── Parse ─────────────────────────────────────────────────────────────────────
 

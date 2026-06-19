@@ -4,9 +4,11 @@
  * Wraps the SmartLangGuard CLI binary for use inside VS Code.
  * Provides:
  *   - Fix selected text (command + context menu)
- *   - Fix on type (optional, real-time)
- *   - Status bar showing license tier
+ *   - Fix clipboard contents
  *   - License activation UI
+ *   - Status bar showing license tier
+ *   - **Real-time typing detection** with sound alerts
+ *   - **Quick-fix last word** with single keystroke (Ctrl+Shift+Backspace)
  */
 
 import * as vscode from 'vscode';
@@ -15,9 +17,28 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
+// Core typing detector (compiled from @smartlangguard/core)
+// We can't import ESM directly, so we'll inline the detection logic via the CLI
+
 let statusBar: vscode.StatusBarItem;
+let alertStatusBar: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 let cliPath: string | null = null;
+
+// Real-time detection state
+let lastDetection: {
+  word: string;
+  suggestion: string;
+  direction: string;
+  range: vscode.Range;
+  timestamp: number;
+} | null = null;
+
+let typingTimer: NodeJS.Timeout | null = null;
+let currentWordBuffer = '';
+let lastAlertTime = 0;
+const ALERT_COOLDOWN_MS = 2000;
+const DETECTION_DEBOUNCE_MS = 250;
 
 // ─── Activation ───────────────────────────────────────────────────────────────
 
@@ -37,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     outputChannel.appendLine(`✓ Using CLI: ${cliPath}`);
   }
 
-  // Status bar
+  // Status bar (license tier)
   statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.command = 'smartlangguard.showStatus';
   statusBar.text = '$(check) SmartLangGuard';
@@ -45,94 +66,252 @@ export function activate(context: vscode.ExtensionContext) {
   statusBar.show();
   context.subscriptions.push(statusBar);
 
+  // Alert status bar (shows when wrong layout detected)
+  alertStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
+  alertStatusBar.command = 'smartlangguard.fixLastWord';
+  alertStatusBar.text = '$(warning) Wrong layout! [Ctrl+Shift+Backspace to fix]';
+  alertStatusBar.tooltip = 'SmartLangGuard detected wrong keyboard layout. Click or press Ctrl+Shift+Backspace to fix.';
+  alertStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+  // Hidden by default
+  context.subscriptions.push(alertStatusBar);
+
   // Commands
   context.subscriptions.push(
     vscode.commands.registerCommand('smartlangguard.fixSelection', fixSelection),
     vscode.commands.registerCommand('smartlangguard.fixClipboard', fixClipboard),
     vscode.commands.registerCommand('smartlangguard.activateLicense', activateLicense),
     vscode.commands.registerCommand('smartlangguard.showStatus', showStatus),
-    vscode.commands.registerCommand('smartlangguard.fixOnType', fixOnType)
+    vscode.commands.registerCommand('smartlangguard.fixLastWord', fixLastWord),
+    vscode.commands.registerCommand('smartlangguard.toggleRealTime', toggleRealTime),
+    vscode.commands.registerCommand('smartlangguard.testSound', testSound),
+    vscode.commands.registerCommand('smartlangguard.selectSound', selectSound)
   );
 
   // Watch for config changes
-  vscode.workspace.onDidChangeConfiguration(updateStatusBar);
+  vscode.workspace.onDidChangeConfiguration(updateConfig);
+  
+  // Real-time document change listener
+  vscode.workspace.onDidChangeTextDocument(handleDocumentChange);
+  vscode.window.onDidChangeActiveTextEditor(handleEditorChange);
+
+  updateConfig();
   updateStatusBar();
 
   outputChannel.appendLine(`SmartLangGuard extension activated (v${context.extension.packageJSON.version})`);
+  outputChannel.appendLine(`  Real-time detection: ${isRealTimeEnabled() ? 'ENABLED' : 'disabled'}`);
+  outputChannel.appendLine(`  Sound: ${getSelectedSound()}`);
 }
 
-// ─── CLI Binary Discovery ─────────────────────────────────────────────────────
+// ─── Configuration ────────────────────────────────────────────────────────────
 
-function findCliBinary(): string | null {
-  // 1. Check configured path
-  const config = vscode.workspace.getConfiguration('smartlangguard');
-  const configuredPath = config.get<string>('cliPath');
-  if (configuredPath && fs.existsSync(configuredPath)) {
-    return configuredPath;
-  }
+function isRealTimeEnabled(): boolean {
+  return vscode.workspace.getConfiguration('smartlangguard').get('realTimeDetection', true);
+}
 
-  // 2. Check bundled binary (in extension folder)
-  const platform = os.platform();
-  const arch = os.arch();
-  const binaryName = platform === 'win32' ? 'smartlangguard.exe' : 'smartlangguard';
-  const platformFolder = `${platform}-${arch}`;
+function getSelectedSound(): string {
+  return vscode.workspace.getConfiguration('smartlangguard').get('sound', 'ding');
+}
+
+function getSoundVolume(): number {
+  return vscode.workspace.getConfiguration('smartlangguard').get('soundVolume', 0.5);
+}
+
+function getSensitivity(): 'low' | 'medium' | 'high' {
+  return vscode.workspace.getConfiguration('smartlangguard').get('sensitivity', 'medium');
+}
+
+function updateConfig() {
+  // Re-read config; nothing else needed since we read on-demand
+  outputChannel.appendLine(`  Config updated: realTime=${isRealTimeEnabled()}, sound=${getSelectedSound()}`);
+}
+
+// ─── Real-time Detection ──────────────────────────────────────────────────────
+
+function handleEditorChange(editor: vscode.TextEditor | undefined) {
+  // Reset typing state when switching editors
+  currentWordBuffer = '';
+  lastDetection = null;
+  hideAlert();
+}
+
+function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
+  if (!isRealTimeEnabled()) return;
+  if (!event.contentChanges.length) return;
   
-  const bundledPath = path.join(__dirname, '..', 'bin', platformFolder, binaryName);
-  if (fs.existsSync(bundledPath)) {
-    return bundledPath;
+  // Skip if not the active editor's document
+  const activeEditor = vscode.window.activeTextEditor;
+  if (!activeEditor || event.document !== activeEditor.document) return;
+  
+  // Get the inserted text
+  const change = event.contentChanges[0];
+  const insertedText = change.text;
+  
+  // Only process actual typing (not large paste operations)
+  if (insertedText.length > 10) {
+    currentWordBuffer = '';
+    return;
   }
-
-  // 3. Check global npm install
-  const npmGlobalPath = path.join(os.homedir(), '.npm-global', 'bin', binaryName);
-  if (fs.existsSync(npmGlobalPath)) return npmGlobalPath;
-
-  // 4. Check PATH (fallback to command name)
-  return binaryName; // let OS resolve it
+  
+  // Update word buffer
+  for (const ch of insertedText) {
+    if (/\s/.test(ch)) {
+      currentWordBuffer = '';
+    } else if (ch === '\n' || ch === '\r') {
+      currentWordBuffer = '';
+    } else {
+      currentWordBuffer += ch;
+    }
+  }
+  
+  // Debounce
+  if (typingTimer) clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => analyzeCurrentWord(activeEditor, change), DETECTION_DEBOUNCE_MS);
 }
 
-async function runCli(args: string[], input?: string): Promise<string> {
-  if (!cliPath) {
-    throw new Error('SmartLangGuard CLI not found. Install it with: npm install -g @smartlangguard/cli');
+async function analyzeCurrentWord(editor: vscode.TextEditor, lastChange: vscode.TextDocumentContentChangeEvent) {
+  if (currentWordBuffer.length < 2) {
+    hideAlert();
+    return;
   }
-
-  return new Promise<string>((resolve, reject) => {
-    const child = spawn(cliPath!, args, {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      cwd: os.homedir()
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    child.stdout.on('data', (data) => { stdout += data.toString('utf8'); });
-    child.stderr.on('data', (data) => { stderr += data.toString('utf8'); });
-
-    if (input) {
-      child.stdin.write(input, 'utf8');
-      child.stdin.end();
-    } else {
-      child.stdin.end();
-    }
-
-    const timeout = setTimeout(() => {
-      child.kill('SIGTERM');
-      reject(new Error('SmartLangGuard CLI timed out (30s)'));
-    }, 30000);
-
-    child.on('error', (err) => {
-      clearTimeout(timeout);
-      reject(new Error(`Failed to start CLI: ${err.message}`));
-    });
-
-    child.on('close', (code) => {
-      clearTimeout(timeout);
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        reject(new Error(`CLI exited with code ${code}: ${stderr.trim()}`));
+  
+  // Use the CLI to analyze the current word
+  try {
+    const result = await runCli(['fix', currentWordBuffer, '--format', 'json', '--no-ai']);
+    const data = JSON.parse(result);
+    
+    // Check if it looks like a wrong-layout mistake
+    // (the CLI returns the conversion - if score is high, it's likely a mistake)
+    if (data.score >= 50 && data.corrected !== currentWordBuffer) {
+      // Calculate the range of the typed word
+      const cursorPos = lastChange.range.start.translate(0, lastChange.text.length);
+      const wordStart = cursorPos.translate(0, -currentWordBuffer.length);
+      const range = new vscode.Range(wordStart, cursorPos);
+      
+      // Cooldown check
+      const now = Date.now();
+      const shouldAlert = (now - lastAlertTime) > ALERT_COOLDOWN_MS;
+      
+      lastDetection = {
+        word: currentWordBuffer,
+        suggestion: data.corrected,
+        direction: data.direction,
+        range,
+        timestamp: now
+      };
+      
+      showAlert();
+      
+      if (shouldAlert) {
+        lastAlertTime = now;
+        playAlertSound();
+        outputChannel.appendLine(`  [Alert] "${currentWordBuffer}" → "${data.corrected}" (${data.direction}, ${data.score}%)`);
       }
+    } else {
+      hideAlert();
+    }
+  } catch (err: any) {
+    // Silently fail - don't disrupt typing
+  }
+}
+
+function showAlert() {
+  alertStatusBar.show();
+}
+
+function hideAlert() {
+  alertStatusBar.hide();
+  lastDetection = null;
+}
+
+function playAlertSound() {
+  const sound = getSelectedSound();
+  if (sound === 'off') return;
+  
+  // Play via CLI: smartlangguard sound play <sound>
+  // The CLI handles cross-platform playback
+  try {
+    const child = spawn(cliPath || 'smartlangguard', ['sound', 'play', sound], {
+      stdio: 'ignore',
+      detached: true
     });
-  });
+    child.unref();
+  } catch (err) {
+    // Silently fail
+  }
+}
+
+// ─── Quick Fix Last Word ──────────────────────────────────────────────────────
+
+async function fixLastWord() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || !lastDetection) {
+    // Fallback: detect from current cursor position
+    await fixLastWordFallback(editor);
+    return;
+  }
+  
+  // Check if detection is recent (within 10 seconds)
+  if (Date.now() - lastDetection.timestamp > 10000) {
+    await fixLastWordFallback(editor);
+    return;
+  }
+  
+  try {
+    await editor.edit(editBuilder => {
+      editBuilder.replace(lastDetection!.range, lastDetection!.suggestion);
+    });
+    
+    outputChannel.appendLine(`  [Quick Fix] "${lastDetection.word}" → "${lastDetection.suggestion}"`);
+    vscode.window.showInformationMessage(`✓ Fixed: ${lastDetection.word} → ${lastDetection.suggestion}`);
+    
+    hideAlert();
+  } catch (err: any) {
+    vscode.window.showErrorMessage(`Quick fix failed: ${err.message}`);
+  }
+}
+
+async function fixLastWordFallback(editor: vscode.TextEditor | undefined) {
+  if (!editor) {
+    vscode.window.showWarningMessage('No active editor');
+    return;
+  }
+  
+  // Get the word before the cursor
+  const document = editor.document;
+  const cursor = editor.selection.active;
+  const lineText = document.lineAt(cursor.line).text;
+  const textBeforeCursor = lineText.substring(0, cursor.character);
+  
+  // Find the last word
+  const match = textBeforeCursor.match(/(\S+)\s*$/);
+  if (!match) {
+    vscode.window.showInformationMessage('No word found before cursor');
+    return;
+  }
+  
+  const word = match[1];
+  const wordStart = new vscode.Position(cursor.line, cursor.character - word.length);
+  const wordEnd = new vscode.Position(cursor.line, cursor.character);
+  const range = new vscode.Range(wordStart, wordEnd);
+  
+  try {
+    const result = await runCli(['fix', word, '--format', 'json', '--no-ai']);
+    const data = JSON.parse(result);
+    
+    if (data.corrected === word) {
+      vscode.window.showInformationMessage('No fix needed for current word');
+      return;
+    }
+    
+    await editor.edit(editBuilder => {
+      editBuilder.replace(range, data.corrected);
+    });
+    
+    outputChannel.appendLine(`  [Quick Fix Fallback] "${word}" → "${data.corrected}"`);
+    vscode.window.showInformationMessage(`✓ Fixed: ${word} → ${data.corrected}`);
+  } catch (err: any) {
+    vscode.window.showErrorMessage(`Quick fix failed: ${err.message}`);
+  }
 }
 
 // ─── Commands ─────────────────────────────────────────────────────────────────
@@ -227,7 +406,6 @@ async function showStatus() {
     const stdout = await runCli(['license', 'status']);
     const status = JSON.parse(stdout);
     
-    const message = `Tier: ${status.tier}\nValid: ${status.valid}\nFeatures: ${status.features?.join(', ')}`;
     const choice = await vscode.window.showInformationMessage(
       `SmartLangGuard - ${status.tier.toUpperCase()}`,
       'Activate License',
@@ -241,10 +419,138 @@ async function showStatus() {
   }
 }
 
-async function fixOnType(event: vscode.TextDocumentChangeEvent) {
-  // Optional: real-time fixing as user types
-  // Disabled by default to avoid performance issues
-  // TODO: implement debounced fixing
+async function toggleRealTime() {
+  const config = vscode.workspace.getConfiguration('smartlangguard');
+  const current = config.get('realTimeDetection', true);
+  await config.update('realTimeDetection', !current, vscode.ConfigurationTarget.Global);
+  
+  vscode.window.showInformationMessage(
+    `SmartLangGuard: Real-time detection ${!current ? 'ENABLED' : 'DISABLED'}`
+  );
+  
+  if (current) {
+    hideAlert();
+  }
+}
+
+async function testSound() {
+  const sound = getSelectedSound();
+  if (sound === 'off') {
+    vscode.window.showInformationMessage('Sound is currently set to "off"');
+    return;
+  }
+  
+  playAlertSound();
+  vscode.window.showInformationMessage(`Playing test sound: ${sound}`);
+}
+
+async function selectSound() {
+  const sounds = ['off', 'beep', 'ding', 'chime', 'soft-pop', 'click', 'double-beep'];
+  const descriptions: Record<string, string> = {
+    'off': 'No sound (silent)',
+    'beep': 'Short square-wave beep (~150ms) - attention-grabbing',
+    'ding': 'Soft sine-wave ding (~300ms) - pleasant, recommended',
+    'chime': 'Ascending 3-note chime (~500ms) - musical',
+    'soft-pop': 'Very soft damped pop (~200ms) - least intrusive',
+    'click': 'Short click (~80ms) - very subtle',
+    'double-beep': 'Double beep (~250ms) - more urgent'
+  };
+  
+  const items = sounds.map(s => ({
+    label: s,
+    description: descriptions[s],
+    picked: s === getSelectedSound()
+  }));
+  
+  const choice = await vscode.window.showQuickPick(items, {
+    placeHolder: 'Select alert sound',
+    title: 'SmartLangGuard: Sound Selection'
+  });
+  
+  if (choice) {
+    const config = vscode.workspace.getConfiguration('smartlangguard');
+    await config.update('sound', choice.label, vscode.ConfigurationTarget.Global);
+    
+    if (choice.label !== 'off') {
+      // Play a preview
+      const oldSound = getSelectedSound();
+      // Temporarily set to chosen sound for preview
+      // Actually, playAlertSound already reads from config, so this works
+      playAlertSound();
+    }
+    
+    vscode.window.showInformationMessage(`Sound set to: ${choice.label}`);
+  }
+}
+
+// ─── CLI Binary Discovery ─────────────────────────────────────────────────────
+
+function findCliBinary(): string | null {
+  const config = vscode.workspace.getConfiguration('smartlangguard');
+  const configuredPath = config.get<string>('cliPath');
+  if (configuredPath && fs.existsSync(configuredPath)) {
+    return configuredPath;
+  }
+
+  const platform = os.platform();
+  const arch = os.arch();
+  const binaryName = platform === 'win32' ? 'smartlangguard.exe' : 'smartlangguard';
+  const platformFolder = `${platform}-${arch}`;
+  
+  const bundledPath = path.join(__dirname, '..', 'bin', platformFolder, binaryName);
+  if (fs.existsSync(bundledPath)) {
+    return bundledPath;
+  }
+
+  const npmGlobalPath = path.join(os.homedir(), '.npm-global', 'bin', binaryName);
+  if (fs.existsSync(npmGlobalPath)) return npmGlobalPath;
+
+  return binaryName;
+}
+
+async function runCli(args: string[], input?: string): Promise<string> {
+  if (!cliPath) {
+    throw new Error('SmartLangGuard CLI not found. Install it with: npm install -g @smartlangguard/cli');
+  }
+
+  return new Promise<string>((resolve, reject) => {
+    const child = spawn(cliPath!, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: os.homedir()
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (data) => { stdout += data.toString('utf8'); });
+    child.stderr.on('data', (data) => { stderr += data.toString('utf8'); });
+
+    if (input) {
+      child.stdin.write(input, 'utf8');
+      child.stdin.end();
+    } else {
+      child.stdin.end();
+    }
+
+    const timeout = setTimeout(() => {
+      child.kill('SIGTERM');
+      reject(new Error('SmartLangGuard CLI timed out (30s)'));
+    }, 30000);
+
+    child.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(new Error(`Failed to start CLI: ${err.message}`));
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timeout);
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(new Error(`CLI exited with code ${code}: ${stderr.trim()}`));
+      }
+    });
+  });
 }
 
 // ─── Status Bar ───────────────────────────────────────────────────────────────
@@ -260,9 +566,10 @@ async function updateStatusBar() {
     const stdout = await runCli(['license', 'status']);
     const status = JSON.parse(stdout);
     
+    const realTimeIcon = isRealTimeEnabled() ? '🔊' : '🔇';
     const icon = status.valid ? '$(check)' : '$(circle-slash)';
-    statusBar.text = `${icon} SmartLangGuard: ${status.tier}`;
-    statusBar.tooltip = `Tier: ${status.tier}\nFeatures: ${status.features?.join(', ')}`;
+    statusBar.text = `${icon} SmartLangGuard: ${status.tier} ${realTimeIcon}`;
+    statusBar.tooltip = `Tier: ${status.tier}\nFeatures: ${status.features?.join(', ')}\nReal-time: ${isRealTimeEnabled() ? 'ON' : 'OFF'}\nSound: ${getSelectedSound()}`;
   } catch {
     statusBar.text = '$(circle-slash) SmartLangGuard';
   }
@@ -271,5 +578,5 @@ async function updateStatusBar() {
 // ─── Deactivation ─────────────────────────────────────────────────────────────
 
 export function deactivate() {
-  // Cleanup
+  if (typingTimer) clearTimeout(typingTimer);
 }

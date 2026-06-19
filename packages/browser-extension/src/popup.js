@@ -13,11 +13,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load auto-fix toggle state
   await loadAutoFixToggle();
+  
+  // Load real-time detection toggle state
+  await loadRealTimeToggle();
+  
+  // Load sound selection
+  await loadSoundSelection();
 
   // Setup event listeners
   document.getElementById('fix-btn').addEventListener('click', fixText);
   document.getElementById('copy-btn').addEventListener('click', copyResult);
   document.getElementById('autofix-toggle').addEventListener('click', toggleAutoFix);
+  document.getElementById('realtime-toggle').addEventListener('click', toggleRealTime);
+  document.getElementById('sound-select').addEventListener('change', changeSound);
+  document.getElementById('test-sound-btn').addEventListener('click', testSound);
   document.getElementById('options-btn').addEventListener('click', openOptions);
 
   // Auto-fix on Ctrl+Enter in textarea
@@ -102,4 +111,76 @@ async function copyResult() {
 
 function openOptions() {
   chrome.runtime.openOptionsPage();
+}
+
+// ─── Real-time detection toggle ────────────────────────────────────────────
+
+async function loadRealTimeToggle() {
+  const response = await chrome.runtime.sendMessage({ action: 'getConfig' });
+  if (response?.success) {
+    document.getElementById('realtime-toggle').classList.toggle('on', response.data?.realTimeDetection !== false);
+  }
+}
+
+async function toggleRealTime() {
+  const response = await chrome.runtime.sendMessage({ action: 'getConfig' });
+  if (response?.success) {
+    const currentConfig = response.data || {};
+    const newRealTime = !(currentConfig.realTimeDetection !== false);
+    await chrome.runtime.sendMessage({ 
+      action: 'setConfig', 
+      config: { ...currentConfig, realTimeDetection: newRealTime }
+    });
+    document.getElementById('realtime-toggle').classList.toggle('on', newRealTime);
+  }
+}
+
+// ─── Sound selection ────────────────────────────────────────────────────────
+
+async function loadSoundSelection() {
+  const response = await chrome.runtime.sendMessage({ action: 'getConfig' });
+  if (response?.success) {
+    const sound = response.data?.sound || 'ding';
+    document.getElementById('sound-select').value = sound;
+  }
+}
+
+async function changeSound() {
+  const sound = document.getElementById('sound-select').value;
+  const response = await chrome.runtime.sendMessage({ action: 'getConfig' });
+  if (response?.success) {
+    const currentConfig = response.data || {};
+    await chrome.runtime.sendMessage({ 
+      action: 'setConfig', 
+      config: { ...currentConfig, sound }
+    });
+  }
+}
+
+async function testSound() {
+  // Send test sound command to content script of active tab
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab) {
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'testSound' });
+    } catch (err) {
+      // If we can't message content script, try playing sound directly here
+      try {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {
+        alert('Could not play sound. Make sure you are on a web page.');
+      }
+    }
+  }
 }

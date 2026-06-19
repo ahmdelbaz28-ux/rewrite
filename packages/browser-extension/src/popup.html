@@ -193,9 +193,31 @@
     </div>
   </div>
   
+  <div class="section">
+    <div class="toggle-row">
+      <span>Real-time detection</span>
+      <div class="toggle" id="realtime-toggle"></div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="label">Alert sound</div>
+    <select id="sound-select" style="width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;font-family:inherit;font-size:13px;">
+      <option value="off">🔇 Off (silent)</option>
+      <option value="beep">📢 Beep (attention-grabbing)</option>
+      <option value="ding">🔔 Ding (pleasant, recommended)</option>
+      <option value="chime">🎵 Chime (musical)</option>
+      <option value="soft-pop">💦 Soft pop (least intrusive)</option>
+      <option value="click">🖱️ Click (very subtle)</option>
+      <option value="double-beep">🚨 Double beep (urgent)</option>
+    </select>
+    <button class="btn-secondary" id="test-sound-btn" style="margin-top:6px;width:100%;font-size:12px;">🔊 Test sound</button>
+  </div>
+  
   <div class="footer">
     <span>
-      <span class="kbd">Ctrl+Shift+L</span> Fix selection
+      <span class="kbd">Ctrl+Shift+L</span> Fix selection<br>
+      <span class="kbd">Ctrl+Shift+⌫</span> Quick fix last word
     </span>
     <button class="btn-ghost" id="options-btn">Settings →</button>
   </div>
