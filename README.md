@@ -1,63 +1,90 @@
-# 🚀 SmartLangGuard
+# <img src="https://raw.githubusercontent.com/ahmdelbaz28-ux/rewrite/main/docs/assets/smartlangguard-logo.svg" alt="SmartLangGuard Logo" width="100" />
 
-> **Cross-platform keyboard layout mistake fixer** — works in any terminal, AI tool, browser, or text editor.
+# **SmartLangGuard**
 
-[![License: UNLICENSED](https://img.shields.io/badge/License-UNLICENSED-blue.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg)](https://www.npmjs.com/package/@smartlangguard/cli)
-[![npm downloads](https://img.shields.io/npm/dm/@smartlangguard/cli.svg)](https://www.npmjs.com/package/@smartlangguard/cli)
-[![Node](https://img.shields.io/badge/Node-18%2B-green.svg)](https://nodejs.org)
-[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#installation)
+> **🌍 The Ultimate Keyboard Layout Correction Engine**
+> **Fix mistyped text instantly across all your applications — Terminal, AI Tools, Browsers, Editors, and more.**
 
-Have you ever typed `high hofhv;` but meant `اهلا اخبارك`? Or wrote `اهلا` when you meant `hello`? SmartLangGuard fixes that instantly — in **any** application.
-
----
-
-## ✨ Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔧 **Rules-based translation** | Instant, offline, free. Maps mistyped QWERTY keys to Arabic 101 layout. |
-| 🧠 **AI scoring** | Uses LLM for ambiguous cases (Pro tier). High accuracy on edge cases. |
-| 🖥️ **CLI** | Pipe, file, or interactive mode. Works in any terminal, REPL, SSH session. |
-| 🤖 **MCP Server** | Native integration with Claude Desktop, Cursor, Cline, Continue, etc. |
-| 👻 **Daemon** | Background clipboard monitor + global hotkey (`Ctrl+Shift+Space`). |
-| 🧩 **VS Code Extension** | Wraps the CLI — works inside the editor. |
-| 🌐 **Browser Extension** | (Coming soon) Wraps the daemon. |
-| ☁️ **SaaS Backend** | License validation, telemetry, AI scoring, admin dashboard. |
-| 🔒 **License tiers** | Free / Pro / Team / Enterprise with feature gating. |
-| 🔄 **Auto-updater** | Signed, SHA256-verified differential updates. |
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
+[![npm downloads](https://img.shields.io/npm/dm/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg?style=flat-square)](https://nodejs.org)
+[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square)](#-installation)
+[![CI/CD](https://github.com/ahmdelbaz28-ux/rewrite/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/ahmdelbaz28-ux/rewrite/main.svg)](https://codecov.io/gh/ahmdelbaz28-ux/rewrite)
 
 ---
 
-## 📦 Installation
+## **✨ Why SmartLangGuard?**
 
-### Option 1: NPM (global)
+Have you ever typed **`high hofhv;`** when you meant **`اهلا اخبارك`**?
+Or **`ahla`** when you meant **`hello`**?
 
+**SmartLangGuard** is the **first and only** solution that **instantly fixes keyboard layout mistakes** across **all your applications** — **offline, private, and blazing fast.**
+
+### **🎯 The Problem**
+When switching between **QWERTY (English)** and **Arabic 101** keyboard layouts, it's easy to accidentally type in the wrong layout. This leads to:
+- **Confusing messages** (e.g., `sldk` instead of `hello`)
+- **Wasted time** manually correcting mistakes
+- **Frustration** in fast-paced conversations
+
+### **✅ The Solution**
+SmartLangGuard **automatically detects and corrects** these mistakes using:
+- **🔧 Rules-Based Translation** — Instant, offline, and free.
+- **🧠 AI-Powered Scoring** — Handles ambiguous cases with high accuracy (Pro+).
+- **🚀 Real-Time Correction** — Works in **any** application (Terminal, AI Tools, Browsers, Editors).
+
+---
+
+## **🏆 Features**
+
+| **Feature** | **Free** | **Pro** | **Team** | **Enterprise** |
+|-------------|---------|---------|----------|---------------|
+| **Rules-Based Translation** | ✅ | ✅ | ✅ | ✅ |
+| **AI Scoring (Ambiguous Cases)** | ❌ | ✅ | ✅ | ✅ |
+| **CLI (Terminal Support)** | ✅ | ✅ | ✅ | ✅ |
+| **MCP Server (AI Tools Integration)** | ✅ | ✅ | ✅ | ✅ |
+| **Daemon (Background Clipboard Monitor)** | ✅ | ✅ | ✅ | ✅ |
+| **Global Hotkey (`Ctrl+Shift+Space`)** | ✅ | ✅ | ✅ | ✅ |
+| **VS Code Extension** | ✅ | ✅ | ✅ | ✅ |
+| **Browser Extension** | ❌ | ✅ | ✅ | ✅ |
+| **Cloud Sync (Multi-Device)** | ❌ | ✅ | ✅ | ✅ |
+| **Priority Support** | ❌ | ❌ | ✅ | ✅ |
+| **SSO & SAML** | ❌ | ❌ | ❌ | ✅ |
+| **On-Premise Deployment** | ❌ | ❌ | ❌ | ✅ |
+| **Analytics API** | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+## **📥 Installation**
+
+### **🔹 Option 1: NPM (Recommended)**
 ```bash
 npm install -g @smartlangguard/cli
 ```
 
-### Option 2: Download Binary
+### **🔹 Option 2: Download Pre-Built Binaries**
+Download the latest release for your platform from **[Releases Page](https://github.com/ahmdelbaz28-ux/rewrite/releases)**:
 
-Download the latest release for your platform from the [Releases page](https://github.com/ahmdelbaz28-ux/rewrite/releases):
+| **Platform** | **Architecture** | **Download Link** |
+|--------------|------------------|-------------------|
+| **Windows** | x64 | [`smartlangguard-win-x64.exe`](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-win-x64.exe) |
+| **macOS** | Intel (x64) | [`smartlangguard-macos-x64`](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-x64) |
+| **macOS** | Apple Silicon (arm64) | [`smartlangguard-macos-arm64`](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-arm64) |
+| **Linux** | x64 | [`smartlangguard-linux-x64`](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-x64) |
+| **Linux** | arm64 | [`smartlangguard-linux-arm64`](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-arm64) |
 
-- **Windows**: `smartlangguard-win-x64.exe`
-- **macOS (Intel)**: `smartlangguard-macos-x64`
-- **macOS (Apple Silicon)**: `smartlangguard-macos-arm64`
-- **Linux (x64)**: `smartlangguard-linux-x64`
-- **Linux (arm64)**: `smartlangguard-linux-arm64`
-
+#### **Install on Linux/macOS**
 ```bash
-# Linux/macOS
 chmod +x smartlangguard-*
 sudo mv smartlangguard-* /usr/local/bin/smartlangguard
-
-# Windows
-# Add to PATH or move to C:\Windows\
 ```
 
-### Option 3: Build from Source
+#### **Install on Windows**
+1. Download the `.exe` file.
+2. Move it to `C:\Windows\` or add it to your `PATH`.
 
+### **🔹 Option 3: Build from Source**
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite
@@ -67,51 +94,48 @@ npm run build
 
 ---
 
-## 🎯 Quick Start
+## **🚀 Quick Start**
 
-### 1. Fix text inline
-
+### **1️⃣ Fix Text Inline**
 ```bash
 smartlangguard fix "high hofhv;"
 # Output: اهلا اخبارك
 ```
 
-### 2. Fix from pipe (great for AI tools)
-
+### **2️⃣ Fix from Pipe (Great for AI Tools)**
 ```bash
 echo "high hofhv;" | smartlangguard fix
 # Output: اهلا اخبارك
 ```
 
-### 3. Fix file contents
-
+### **3️⃣ Fix File Contents**
 ```bash
 smartlangguard fix input.txt -o output.txt
 ```
 
-### 4. Interactive mode
-
+### **4️⃣ Interactive Mode**
 ```bash
 smartlangguard interactive
 # smartlangguard> high
 # → اهلا
-#   [en-to-ar | 90% confidence | local]
+# [en-to-ar | 90% confidence | local]
 ```
 
-### 5. Activate Pro license (optional)
-
+### **5️⃣ Activate Pro License (Optional)**
 ```bash
 smartlangguard license activate slg_your_token_here
 ```
 
 ---
 
-## 🤖 MCP Integration (Claude Desktop / Cursor / Cline)
+## **🤖 MCP Integration (Claude Desktop / Cursor / Cline / Continue)**
 
-SmartLangGuard ships with a built-in [Model Context Protocol](https://modelcontextprotocol.io) server. Add it to your AI tool's config:
+SmartLangGuard includes a **built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server** for seamless integration with AI tools.
 
-### Claude Desktop (`claude_desktop_config.json`)
+### **📌 Setup**
 
+#### **Claude Desktop**
+Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -123,8 +147,8 @@ SmartLangGuard ships with a built-in [Model Context Protocol](https://modelconte
 }
 ```
 
-### Cursor (`~/.cursor/mcp.json`)
-
+#### **Cursor**
+Add to `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
@@ -136,241 +160,394 @@ SmartLangGuard ships with a built-in [Model Context Protocol](https://modelconte
 }
 ```
 
-### Cline / Continue / etc.
+#### **Cline / Continue**
+Same configuration pattern. Refer to your tool's MCP documentation.
 
-Same config pattern. See your tool's MCP docs.
+### **🔧 Available MCP Tools**
 
-### Available MCP Tools
+| **Tool** | **Description** | **Example** |
+|----------|----------------|-------------|
+| `fix_text` | Fix a given text string | `fix_text("high hofhv;")` → `اهلا اخبارك` |
+| `fix_clipboard` | Fix clipboard contents | `fix_clipboard()` → Fixed text |
+| `register_license` | Activate a license token | `register_license("slg_...")` |
+| `license_status` | Check current license tier | `license_status()` → `{ tier: "pro" }` |
 
-Once registered, the AI tool can call:
+### **💡 Example Prompt in Cursor**
+> "I typed `high hofhv;` by mistake. Use SmartLangGuard to fix it."
 
-- **`fix_text`** — Fix a given text string
-- **`fix_clipboard`** — Fix whatever's currently in the system clipboard
-- **`register_license`** — Activate a license token
-- **`license_status`** — Check current license tier
-
-**Example prompt in Cursor:**
-> "I typed 'high hofhv;' by mistake. Use smartlangguard to fix it."
-
-The AI will call the `fix_text` tool and return `اهلا اخبارك`.
+The AI will automatically call `fix_text` and return:
+```
+اهلا اخبارك
+```
 
 ---
 
-## 👻 Daemon Mode (Background)
+## **👻 Daemon Mode (Background Service)**
 
-The daemon runs in the background and provides:
+The **Daemon** runs in the background and provides:
 
-1. **Clipboard monitoring** — auto-fixes clipboard contents on demand
-2. **Global hotkey** — press `Ctrl+Shift+Space` to fix whatever's in your clipboard
-3. **Local HTTP API** — for browser extensions to call
+1. **📋 Clipboard Monitoring** — Auto-fixes clipboard contents on demand.
+2. **⌨️ Global Hotkey** — Press `Ctrl+Shift+Space` to fix clipboard text.
+3. **🌐 Local HTTP API** — For browser extensions and custom integrations.
 
+### **📌 Start the Daemon**
 ```bash
 smartlangguard daemon
 ```
 
-### Daemon HTTP API (port 41783)
+### **🔌 Daemon HTTP API (Port `41783`)**
 
-```bash
-# Fix a text string
-curl -X POST http://localhost:41783/fix \
-  -H "Content-Type: application/json" \
-  -d '{"text": "high"}'
-
-# Fix current clipboard
-curl -X POST http://localhost:41783/clipboard/fix
-
-# Toggle auto-fix mode
-curl -X POST http://localhost:41783/autofix/toggle
-
-# Check status
-curl http://localhost:41783/status
-```
+| **Endpoint** | **Method** | **Description** | **Example** |
+|--------------|------------|----------------|-------------|
+| `/fix` | `POST` | Fix a text string | `curl -X POST http://localhost:41783/fix -H "Content-Type: application/json" -d '{"text": "high"}'` |
+| `/clipboard/fix` | `POST` | Fix clipboard contents | `curl -X POST http://localhost:41783/clipboard/fix` |
+| `/autofix/toggle` | `POST` | Toggle auto-fix mode | `curl -X POST http://localhost:41783/autofix/toggle` |
+| `/status` | `GET` | Check daemon status | `curl http://localhost:41783/status` |
 
 ---
 
-## 🧩 VS Code Extension
+## **🧩 VS Code Extension**
 
-1. Install the CLI first (see above)
-2. Search for "SmartLangGuard" in VS Code extensions marketplace
-3. Or build locally: `cd packages/vscode-extension && npm run package`
+### **📌 Installation**
+1. **Install the CLI first** (see [Installation](#-installation)).
+2. Search for **"SmartLangGuard"** in the VS Code Extensions Marketplace.
+3. **OR** build locally:
+   ```bash
+   cd packages/vscode-extension
+   npm run package
+   ```
 
-**Keyboard shortcuts:**
-- `Ctrl+Shift+F1` (Win/Linux) / `Cmd+Shift+F1` (Mac) — Fix selection
-- `Ctrl+Shift+F2` / `Cmd+Shift+F2` — Fix clipboard
+### **⌨️ Keyboard Shortcuts**
 
-Right-click in any editor → "SmartLangGuard: Fix Selection"
+| **Command** | **Windows/Linux** | **macOS** | **Description** |
+|-------------|-------------------|-----------|----------------|
+| **Fix Selection** | `Ctrl+Shift+F1` | `Cmd+Shift+F1` | Fix selected text |
+| **Fix Clipboard** | `Ctrl+Shift+F2` | `Cmd+Shift+F2` | Fix clipboard contents |
+
+### **🖱️ Right-Click Menu**
+- **"SmartLangGuard: Fix Selection"** — Fix the currently selected text.
 
 ---
 
-## ☁️ SaaS Backend
+## **🌐 Browser Extension (Pro+)**
 
-The SaaS backend provides license validation, telemetry, AI scoring, and admin dashboard.
+### **📌 Installation**
+1. **Activate a Pro license** (see [Pricing](#-pricing)).
+2. Download the extension from the **[Chrome Web Store](https://chrome.google.com/webstore/detail/smartlangguard/)** (coming soon).
+3. **OR** load unpacked extension from `packages/browser-extension`.
 
-### Quick start
+### **⚡ Features**
+- **Auto-fix text fields** — Corrects mistyped text in real-time.
+- **Clipboard integration** — Works with the Daemon for seamless fixing.
+- **Customizable hotkeys** — Configure your preferred shortcuts.
 
+---
+
+## **☁️ SaaS Backend (Self-Hosted or Cloud)**
+
+The **SaaS Backend** provides:
+- **License validation & management**
+- **Telemetry ingestion & analytics**
+- **AI scoring (Pro+)**
+- **Admin dashboard**
+- **Stripe integration**
+
+### **📌 Quick Start**
+
+#### **1. Clone & Install**
 ```bash
 cd packages/backend
 cp .env.example .env
 npm install
-npm start
 ```
 
+#### **2. Configure Environment**
+Edit `.env`:
+```env
+# Server Settings
+PORT=4000
+CORS_ORIGIN=*
+SMARTLANGGUARD_DB_PATH=./saas.db
+
+# Stripe Settings (for subscriptions)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Admin Credentials
+ADMIN_DEFAULT_PASSWORD=your_secure_password
+```
+
+#### **3. Start the Server**
+```bash
+npm start
+```
 Server runs on `http://localhost:4000`.
 
-### API Endpoints
+### **🔌 API Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/v1/license/validate` | Validate a license token |
-| `POST` | `/v1/license/activate` | Create a new license |
-| `POST` | `/v1/license/revoke` | Revoke a license |
-| `GET`  | `/v1/license/info/:token` | Get license info |
-| `POST` | `/v1/telemetry/batch` | Submit telemetry events |
-| `GET`  | `/v1/telemetry/stats` | Get aggregated stats (API key) |
-| `POST` | `/v1/ai/score` | AI scoring (Pro+ only) |
-| `POST` | `/v1/admin/login` | Admin login |
-| `GET`  | `/v1/admin/dashboard` | Dashboard stats (admin) |
-| `GET`  | `/v1/admin/licenses` | List all licenses (admin) |
-| `POST` | `/v1/stripe/webhook` | Stripe subscription webhooks |
+| **Method** | **Endpoint** | **Description** | **Auth Required** |
+|------------|--------------|----------------|-------------------|
+| `POST` | `/v1/license/validate` | Validate a license token | ✅ |
+| `POST` | `/v1/license/activate` | Create a new license | ✅ (Admin) |
+| `POST` | `/v1/license/revoke` | Revoke a license | ✅ (Admin) |
+| `GET` | `/v1/license/info/:token` | Get license info | ✅ |
+| `POST` | `/v1/telemetry/batch` | Submit telemetry events | ❌ |
+| `GET` | `/v1/telemetry/stats` | Get aggregated stats | ✅ (API Key) |
+| `POST` | `/v1/ai/score` | AI scoring (Pro+ only) | ✅ |
+| `POST` | `/v1/admin/login` | Admin login | ❌ |
+| `GET` | `/v1/admin/dashboard` | Dashboard stats | ✅ (Admin) |
+| `GET` | `/v1/admin/licenses` | List all licenses | ✅ (Admin) |
+| `POST` | `/v1/stripe/webhook` | Stripe webhook handler | ❌ |
+| `GET` | `/health` | Health check | ❌ |
 
-### Default admin credentials
-
-- Username: `admin`
-- Password: `admin123` (change immediately in production)
+### **🔐 Default Admin Credentials**
+- **Username:** `admin`
+- **Password:** `admin123` (⚠️ **Change immediately in production!**)
 
 ---
 
-## 💳 Pricing Tiers
+## **💳 Pricing**
 
-| Tier | Price | Features |
-|------|-------|----------|
-| **Free** | $0/mo | Rules-only translation, 1 device |
-| **Pro** | $5/mo | + AI scoring, 3 devices, cloud sync |
-| **Team** | $49/mo | + 10 devices, shared workspace, priority support |
-| **Enterprise** | $499/mo | + Unlimited devices, SSO, analytics API, on-prem option |
+| **Tier** | **Price** | **Features** | **Best For** |
+|----------|-----------|--------------|--------------|
+| **Free** | **$0/mo** | Rules-only translation, 1 device | Personal use |
+| **Pro** | **$5/mo** | + AI scoring, 3 devices, cloud sync | Power users |
+| **Team** | **$49/mo** | + 10 devices, shared workspace, priority support | Small teams |
+| **Enterprise** | **$499/mo** | + Unlimited devices, SSO, analytics API, on-prem option | Large organizations |
 
-Buy a license at `https://smartlangguard.com/pricing` (coming soon) or activate a free trial:
-
+### **🎁 Free Trial**
+Activate a **14-day free trial** of **Pro**:
 ```bash
 curl -X POST http://localhost:4000/v1/license/activate \
   -H "Content-Type: application/json" \
   -d '{"email": "you@example.com", "tier": "pro"}'
 ```
 
----
-
-## 🏗️ Architecture
-
-```
-                    ┌──────────────────────────┐
-                    │  SmartLangGuard Core     │
-                    │  (Node.js binary)        │
-                    │  • Translation Engine    │
-                    │  • AI Dictionary Scoring │
-                    │  • License Layer         │
-                    │  • Telemetry             │
-                    │  • Auto-Updater          │
-                    └──────────────────────────┘
-                       ↑       ↑        ↑       ↑
-                  ┌────┴──┐ ┌──┴──┐ ┌───┴──┐ ┌──┴──────┐
-                  │ CLI   │ │ MCP │ │Daemon│ │ VS Code │
-                  │       │ │Srv  │ │      │ │  Ext    │
-                  └───────┘ └─────┘ └──────┘ └─────────┘
-                                            ↓
-                                    ┌──────────────┐
-                                    │   SaaS API   │
-                                    │ (Express +   │
-                                    │  SQLite +    │
-                                    │  Stripe)     │
-                                    └──────────────┘
-```
-
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
+### **🛒 Buy a License**
+Visit **[https://smartlangguard.com/pricing](https://smartlangguard.com/pricing)** (coming soon).
 
 ---
 
-## 🛠️ Development
+## **🏗️ Architecture**
 
-### Monorepo structure
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                SmartLangGuard Core                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │ • Translation Engine (Rules-Based + AI Scoring)                       │  │
+│  │ • License Validation Layer                                            │  │
+│  │ • Telemetry & Analytics                                               │  │
+│  │ • Auto-Updater (SHA256-Verified)                                      │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                      ↑
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+              ▼                       ▼                       ▼
+┌─────────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│       CLI           │ │   MCP Server    │ │     Daemon      │
+│  • Terminal Support │ │ • AI Tools      │ │ • Clipboard     │
+│  • Pipe/File Mode   │ │ • Claude/Cursor │ │ • Hotkey        │
+│  • Interactive Mode │ │ • Cline/Continue│ │ • HTTP API      │
+└─────────────────────┘ └─────────────────┘ └─────────────────┘
+              ↑                       ↑                       ↑
+              │                       │                       │
+              └───────────────────────┼───────────────────────┘
+                                      │
+                                      ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                SaaS Backend (Express + SQLite)                  │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐                  │
+│  │  License API    │ │  Telemetry API  │ │   AI Scoring    │                  │
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘                  │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐                  │
+│  │  Admin Dashboard │ │  Stripe Webhook │ │   Auth (JWT)    │                  │
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘                  │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
 
+### **📦 Monorepo Structure**
 ```
 smartlangguard/
 ├── packages/
-│   ├── core/              # Translation engine, license, telemetry
-│   ├── cli/               # CLI binary (cross-platform)
-│   ├── mcp-server/        # MCP server for AI tools
-│   ├── daemon/            # Background daemon + hotkey
-│   ├── vscode-extension/  # VS Code wrapper
-│   └── backend/           # SaaS backend (Express + SQLite)
+│   ├── core/               # Translation engine, license, telemetry
+│   │   ├── src/
+│   │   │   ├── engine.js   # Rules-based + AI translation
+│   │   │   ├── license.js  # License validation
+│   │   │   └── telemetry.js
+│   │   └── tests/
+│   │
+│   ├── cli/                # CLI binary (cross-platform)
+│   │   ├── bin/
+│   │   │   └── smartlangguard.js
+│   │   └── src/
+│   │
+│   ├── mcp-server/         # MCP server for AI tools
+│   │   └── src/
+│   │       └── mcp-server.js
+│   │
+│   ├── daemon/             # Background daemon + hotkey
+│   │   └── src/
+│   │       └── daemon.js
+│   │
+│   ├── vscode-extension/   # VS Code wrapper
+│   │   └── src/
+│   │       └── extension.ts
+│   │
+│   ├── browser-extension/  # Browser extension (Manifest V3)
+│   │   ├── manifest.json
+│   │   └── src/
+│   │
+│   └── backend/            # SaaS backend (Express + SQLite)
+│       ├── src/
+│       │   ├── server.js   # Express server
+│       │   ├── db.js       # SQLite database
+│       │   └── routes/     # API routes
+│       └── .env.example
+│
 ├── scripts/
-│   ├── build-all.js       # Build all binaries
-│   └── release.js         # Tag + release
+│   ├── build-all.js        # Build all binaries
+│   └── release.js          # Tag + release
+│
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── INSTALL.md
 │   ├── API.md
-│   └── BETA.md
-└── package.json           # Workspace root
+│   └── SECURITY.md
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # GitHub Actions CI/CD
+│
+└── package.json            # Workspace root
 ```
 
-### Setup
+---
 
+## **🛠️ Development**
+
+### **📌 Setup**
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite
-npm install  # Installs all workspace deps
+npm install  # Installs all workspace dependencies
 ```
 
-### Run tests
+### **🔨 Build All Binaries**
+```bash
+npm run build
+```
+Output: `packages/cli/dist/smartlangguard-{platform}-{arch}`
 
+### **🧪 Run Tests**
 ```bash
 npm test
 ```
 
-### Build all binaries
-
+### **📝 Lint & Format**
 ```bash
-npm run build
+npm run lint
+npm run format
 ```
 
-Output: `packages/cli/dist/smartlangguard-{platform}-{arch}`
+---
+
+## **🔒 Security**
+
+### **🔐 Features**
+- **🔑 License tokens** are HMAC-signed for offline validation.
+- **🖨️ Device fingerprinting** prevents license sharing (per-tier device limits).
+- **🔍 Binary updates** are SHA256-verified and signature-checked.
+- **📊 Telemetry** is anonymized and opt-out.
+- **🔏 Admin endpoints** require JWT authentication.
+- **⚡ Rate limiting** on all public endpoints.
+
+### **🛡️ Vulnerability Reporting**
+If you discover a security vulnerability, please report it to **[security@smartlangguard.com](mailto:security@smartlangguard.com)**.
+
+See **[SECURITY.md](docs/SECURITY.md)** for more details.
 
 ---
 
-## 🔒 Security
+## **🗺️ Roadmap**
 
-- **License tokens** are HMAC-signed for offline validation
-- **Device fingerprinting** prevents license sharing (per-tier device limits)
-- **Binary updates** are SHA256-verified and signature-checked
-- **Telemetry** is anonymized and opt-out
-- **Admin endpoints** require JWT auth
-- **Rate limiting** on all public endpoints
-
-See [SECURITY.md](docs/SECURITY.md) for vulnerability reporting.
-
----
-
-## 🗺️ Roadmap
-
-- [x] Phase 1: Core + CLI + MCP + Backend
-- [ ] Phase 2: Daemon hotkey (system-wide) + VS Code marketplace
-- [ ] Phase 3: Browser extension + Admin dashboard UI + Stripe live
-- [ ] Phase 4: AI model fine-tuning (custom Arabic English-mistake model)
-- [ ] Phase 5: On-premise Enterprise deployment
+| **Phase** | **Status** | **Features** |
+|-----------|------------|--------------|
+| **Phase 1** | ✅ **Done** | Core + CLI + MCP + Backend |
+| **Phase 2** | 🚧 **In Progress** | Daemon hotkey (system-wide) + VS Code Marketplace |
+| **Phase 3** | ⏳ **Planned** | Browser Extension + Admin Dashboard UI + Stripe Live |
+| **Phase 4** | ⏳ **Planned** | AI Model Fine-Tuning (Custom Arabic-English Mistake Model) |
+| **Phase 5** | ⏳ **Planned** | On-Premise Enterprise Deployment |
 
 ---
 
-## 📄 License
+## **📄 License**
 
-PROPRIETARY — © 2026 SmartLangGuard. All rights reserved.
+**MIT License** — © 2026 SmartLangGuard. All rights reserved.
 
-See [LICENSE](LICENSE) for details. Source code is provided for transparency and contribution; commercial use requires a license.
+See **[LICENSE](LICENSE)** for details.
 
 ---
 
-## 💬 Support
+## **💬 Support & Community**
 
-- 📧 Email: hello@smartlangguard.com
-- 🐛 Issues: [GitHub Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues)
-- 📖 Docs: [docs/](docs/)
-- 🌐 Website: https://smartlangguard.com (coming soon)
+| **Channel** | **Link** |
+|-------------|----------|
+| **📧 Email** | [hello@smartlangguard.com](mailto:hello@smartlangguard.com) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues) |
+| **📖 Documentation** | [docs/](docs/) |
+| **🌐 Website** | [https://smartlangguard.com](https://smartlangguard.com) (Coming Soon) |
+| **💬 Discord** | [Join our Discord](https://discord.gg/smartlangguard) (Coming Soon) |
+| **🐦 Twitter** | [@SmartLangGuard](https://twitter.com/SmartLangGuard) (Coming Soon) |
+
+---
+
+## **🏆 Contributing**
+
+We welcome contributions! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** before submitting pull requests.
+
+### **🤝 How to Contribute**
+1. **Fork** the repository.
+2. **Create a feature branch** (`git checkout -b feature/your-feature`).
+3. **Commit your changes** (`git commit -m "Add your feature"`).
+4. **Push to the branch** (`git push origin feature/your-feature`).
+5. **Open a Pull Request**.
+
+---
+
+## **🙏 Acknowledgments**
+
+- **🤖 AI Tools** — [Claude](https://claude.ai), [Cursor](https://cursor.com), [Cline](https://cline.ai)
+- **🔧 MCP Protocol** — [Model Context Protocol](https://modelcontextprotocol.io)
+- **📦 Node.js** — [Node.js](https://nodejs.org)
+- **🗃️ SQLite** — [SQLite](https://sqlite.org)
+- **💳 Stripe** — [Stripe](https://stripe.com)
+
+---
+
+**🌟 Made with ❤️ by [SmartLangGuard Team](https://github.com/ahmdelbaz28-ux)**
+
+**🚀 Powered by AI, Built for Developers.**
+
+---
+
+<details>
+<summary>📜 Changelog</summary>
+
+### **v0.1.0 (Latest)**
+- ✅ Initial release of SmartLangGuard Core, CLI, MCP Server, Backend, and Daemon.
+- ✅ Rules-based translation engine for QWERTY ↔ Arabic 101.
+- ✅ License validation & management.
+- ✅ Telemetry ingestion.
+- ✅ MCP integration for AI tools.
+- ✅ Daemon with clipboard monitoring & hotkey support.
+
+### **v0.2.0 (Upcoming)**
+- 🚧 Browser Extension (Chrome/Edge/Firefox).
+- 🚧 Admin Dashboard UI.
+- 🚧 Stripe live integration.
+- 🚧 AI scoring with fine-tuned models.
+
+</details>
