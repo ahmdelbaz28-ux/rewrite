@@ -5,11 +5,15 @@
 'use strict';
 
 const express = require('express');
+
 const router = express.Router();
+
 const crypto = require('crypto');
 
-const db = require('../db').getDb;
+const db = require('../db').prepare;
+
 const { asyncHandler } = require('../middleware');
+
 const { signLicenseToken, TIER_FEATURES } = require('../../../core/src/license');
 
 // ─── POST /v1/license/validate ────────────────────────────────────────────────

@@ -17,11 +17,15 @@
 'use strict';
 
 const express = require('express');
+
 const router = express.Router();
+
 const crypto = require('crypto');
 
-const db = require('../db').getDb;
+const db = require('../db').prepare;
+
 const { asyncHandler, requireApiKey } = require('../middleware');
+
 const { TIER_FEATURES } = require('../../../core/src/license');
 
 // ─── Stripe Client (lazy init) ────────────────────────────────────────────────
@@ -169,18 +173,27 @@ router.post('/portal', asyncHandler(async (req, res) => {
     return res.status(503).json({ error: 'Stripe not configured' });
   }
 
-  // Find customer by email
-  let customerId = null;
-  
-  // Try license first
-  if (license_token) {
-    const license = db().prepare(
-      'SELECT stripe_customer_id FROM licenses WHERE token = ?'
-    ).get(license_token);
-    if (license?.stripe_customer_id) {
-      customerId = license.stripe_customer_id;
-    }
-  }
+      // Find customer by email
+
+      let customerId = null;
+
+      // Try license first
+
+      if (license_token) {
+
+        const license = await db(
+
+          'SELECT stripe_customer_id FROM licenses WHERE token = ?'
+
+        ).get(license_token);
+
+        if (license?.stripe_customer_id) {
+
+          customerId = license.stripe_customer_id;
+
+        }
+
+      }
   
   if (!customerId && email) {
     // Look up via Stripe API
@@ -293,87 +306,139 @@ async function handleWebhook(req, res) {
 // ─── Webhook Event Handlers ───────────────────────────────────────────────────
 
 async function handleCheckoutCompleted(session) {
-  const tier = session.metadata?.tier || mapPriceToTier(session.amount_total);
-  const email = session.metadata?.email || session.customer_email;
-  const customerId = session.customer;
-  const subscriptionId = session.subscription;
-  const existingLicenseToken = session.metadata?.license_token;
 
-  // Find existing license by token or email
-  let license;
-  if (existingLicenseToken) {
-    license = db().prepare('SELECT * FROM licenses WHERE token = ?').get(existingLicenseToken);
-  }
-  if (!license && email) {
-    license = db().prepare('SELECT * FROM licenses WHERE email = ?').get(email);
-  }
+    const tier = session.metadata?.tier || mapPriceToTier(session.amount_total);
 
-  const maxDevices = tier === 'pro' ? 3 : tier === 'team' ? 10 : 100;
-  const expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    const email = session.metadata?.email || session.customer_email;
 
-  if (license) {
-    // Update existing license
-    db().prepare(
-      `UPDATE licenses 
-       SET tier = ?, stripe_customer_id = ?, stripe_subscription_id = ?,
-           features = ?, max_devices = ?, expires_at = ?, revoked = 0, updated_at = ?
-       WHERE id = ?`
-    ).run(
-      tier, customerId, subscriptionId,
-      JSON.stringify(TIER_FEATURES[tier]),
-      maxDevices, expiresAt, Date.now(), license.id
-    );
-    console.log(`  → Updated license ${license.id} to ${tier}`);
-  } else {
-    // Create new license
-    const crypto = require('crypto');
-    const token = 'slg_' + crypto.randomBytes(16).toString('hex');
-    const result = db().prepare(
-      `INSERT INTO licenses 
-       (token, tier, email, stripe_customer_id, stripe_subscription_id, features, max_devices, expires_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      token, tier, email, customerId, subscriptionId,
-      JSON.stringify(TIER_FEATURES[tier]),
-      maxDevices, expiresAt, Date.now(), Date.now()
-    );
-    console.log(`  → Created new license ${result.lastInsertRowid} (${tier})`);
+    const customerId = session.customer;
+
+    const subscriptionId = session.subscription;
+
+    const existingLicenseToken = session.metadata?.license_token;
+
+    // Find existing license by token or email
+
+    let license;
+
+    if (existingLicenseToken) {
+
+      license = await db('SELECT * FROM licenses WHERE token = ?').get(existingLicenseToken);
+
+    }
+
+    if (!license && email) {
+
+      license = await db('SELECT * FROM licenses WHERE email = ?').get(email);
+
+    }
+
+    const maxDevices = tier === 'pro' ? 3 : tier === 'team' ? 10 : 100;
+
+    const expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
+
+    if (license) {
+
+      // Update existing license
+
+      await db(
+
+        `UPDATE licenses SET tier = ?, stripe_customer_id = ?, stripe_subscription_id = ?, features = ?, max_devices = ?, expires_at = ?, revoked = 0, updated_at = ? WHERE id = ?`
+
+      ).run(
+
+        tier, customerId, subscriptionId, JSON.stringify(TIER_FEATURES[tier]), maxDevices, expiresAt, Date.now(), license.id
+
+      );
+
+      console.log(` → Updated license ${license.id} to ${tier}`);
+
+    } else {
+
+      // Create new license
+
+      const token = 'slg_' + crypto.randomBytes(16).toString('hex');
+
+      const result = await db(
+
+        `INSERT INTO licenses (token, tier, email, stripe_customer_id, stripe_subscription_id, features, max_devices, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+      ).run(
+
+        token, tier, email, customerId, subscriptionId, JSON.stringify(TIER_FEATURES[tier]), maxDevices, expiresAt, Date.now(), Date.now()
+
+      );
+
+      console.log(` → Created new license ${result.lastInsertRowid} (${tier})`);
+
+    }
+
   }
-}
 
 async function handleSubscriptionUpdated(subscription) {
+
   const customerId = subscription.customer;
-  const license = db().prepare('SELECT * FROM licenses WHERE stripe_customer_id = ?').get(customerId);
+
+  const license = await db('SELECT * FROM licenses WHERE stripe_customer_id = ?').get(customerId);
+
   if (!license) return;
 
   if (subscription.status === 'active') {
+
     const tier = subscription.metadata?.tier || license.tier;
-    db().prepare('UPDATE licenses SET tier = ?, revoked = 0, updated_at = ? WHERE id = ?')
-      .run(tier, Date.now(), license.id);
+
+    await db(
+
+      'UPDATE licenses SET tier = ?, revoked = 0, updated_at = ? WHERE id = ?'
+
+    ).run(tier, Date.now(), license.id);
+
   } else if (subscription.status === 'past_due' || subscription.status === 'unpaid') {
+
     // Grace period - keep active but log warning
-    console.warn(`  → Subscription ${subscription.id} is ${subscription.status}`);
+
+    console.warn(` → Subscription ${subscription.id} is ${subscription.status}`);
+
   }
+
 }
+
+
 
 async function handleSubscriptionDeleted(subscription) {
+
   const customerId = subscription.customer;
-  db().prepare('UPDATE licenses SET revoked = 1, tier = ?, updated_at = ? WHERE stripe_customer_id = ?')
-    .run('free', Date.now(), customerId);
-  console.log(`  → Subscription deleted, downgraded to free`);
+
+  await db(
+
+    'UPDATE licenses SET revoked = 1, tier = ?, updated_at = ? WHERE stripe_customer_id = ?'
+
+  ).run('free', Date.now(), customerId);
+
+  console.log(` → Subscription deleted, downgraded to free`);
+
 }
 
+
+
 async function handleInvoicePaid(invoice) {
+
   const customerId = invoice.customer;
+
   // Extend license by 30 days
-  db().prepare(
+
+  await db(
+
     'UPDATE licenses SET expires_at = ?, revoked = 0, updated_at = ? WHERE stripe_customer_id = ?'
+
   ).run(
-    Date.now() + (30 * 24 * 60 * 60 * 1000),
-    Date.now(),
-    customerId
+
+    Date.now() + (30 * 24 * 60 * 60 * 1000), Date.now(), customerId
+
   );
-  console.log(`  → Invoice paid, extended license by 30 days`);
+
+  console.log(` → Invoice paid, extended license by 30 days`);
+
 }
 
 function mapPriceToTier(amount) {
