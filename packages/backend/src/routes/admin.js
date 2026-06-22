@@ -8,14 +8,23 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 
 const db = require('../db').getDb;
 const { asyncHandler, requireAdmin, signAdminToken, bcrypt } = require('../middleware');
-const { signLicenseToken, TIER_FEATURES } = require('../../../core/src/license');
+const { signLicenseToken, TIER_FEATURES } = require('@smartlangguard/core');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again later.' }
+});
 
 // ─── POST /v1/admin/login ─────────────────────────────────────────────────────
 
-router.post('/login', asyncHandler(async (req, res) => {
+router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });

@@ -1,14 +1,12 @@
 /**
- * SQLite database layer (using sqlite3 with deasync for synchronous access).
- * Provides a prepare() method for compatibility with better-sqlite3 API.
+ * SQLite database layer (using better-sqlite3 for synchronous, non-blocking access).
+ * better-sqlite3 is natively synchronous and doesn't block the event loop like deasync.
  * Falls back to in-memory if file is not writable.
  */
 'use strict';
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const sqlite3 = require('sqlite3');
-const deasync = require('deasync');
 
 let db;
 const DB_PATH = process.env.SMARTLANGGUARD_DB_PATH || path.join(os.homedir(), '.smartlangguard', 'saas.db');
@@ -20,8 +18,8 @@ const SCHEMA = `
    email TEXT,
    stripe_customer_id TEXT,
    stripe_subscription_id TEXT,
-   device_fingerprints TEXT, -- JSON array
-   features TEXT, -- JSON array
+   device_fingerprints TEXT,
+   features TEXT,
    max_devices INTEGER DEFAULT 1,
    expires_at INTEGER,
    created_at INTEGER NOT NULL,
@@ -42,7 +40,7 @@ const SCHEMA = `
    id INTEGER PRIMARY KEY AUTOINCREMENT,
    anonymous_id TEXT NOT NULL,
    event TEXT NOT NULL,
-   properties TEXT, -- JSON
+   properties TEXT,
    os TEXT,
    app_version TEXT,
    session_id INTEGER,
@@ -61,89 +59,52 @@ const SCHEMA = `
  CREATE TABLE IF NOT EXISTS api_keys (
    key TEXT PRIMARY KEY,
    name TEXT,
-   scopes TEXT, -- JSON array
+   scopes TEXT,
    created_at INTEGER NOT NULL,
    last_used INTEGER,
    revoked INTEGER DEFAULT 0
  );
 `;
 
-// Synchronous wrappers for sqlite3
-function syncExec(db, sql) {
-  let result, error;
-  db.exec(sql, (err) => {
-    if (err) error = err;
-    else result = true;
-  });
-  deasync.loopWhile(() => !result && !error);
-  if (error) throw error;
-  return result;
-}
-
-function syncGet(db, sql, params) {
-  let result, error;
-  db.get(sql, params, (err, row) => {
-    if (err) error = err;
-    else result = row;
-  });
-  deasync.loopWhile(() => !result && !error);
-  if (error) throw error;
-  return result;
-}
-
-function syncRun(db, sql, params) {
-  let result, error;
-  db.run(sql, params, function(err) {
-    if (err) error = err;
-    else result = { lastInsertRowid: this.lastID, changes: this.changes };
-  });
-  deasync.loopWhile(() => !result && !error);
-  if (error) throw error;
-  return result;
-}
-
-function syncAll(db, sql, params) {
-  let result, error;
-  db.all(sql, params, (err, rows) => {
-    if (err) error = err;
-    else result = rows;
-  });
-  deasync.loopWhile(() => !result && !error);
-  if (error) throw error;
-  return result;
-}
-
-async function init() {
+function init() {
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  
-  db = new sqlite3.Database(DB_PATH);
-  
+
+  let Database;
   try {
-    syncExec(db, SCHEMA);
-    syncExec(db, 'PRAGMA journal_mode = WAL');
-    syncExec(db, 'PRAGMA foreign_keys = ON');
-    
-    // Seed default admin if not exists
-    const adminCount = syncGet(db, 'SELECT COUNT(*) as count FROM admin_users');
+    Database = require('better-sqlite3');
+  } catch {
+    throw new Error('better-sqlite3 is required. Install it with: npm install better-sqlite3');
+  }
+
+  try {
+    db = new Database(DB_PATH);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    db.exec(SCHEMA);
+
+    const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get();
     if (adminCount.count === 0) {
       const bcrypt = require('bcryptjs');
-      const defaultHash = await bcrypt.hash(
-        process.env.ADMIN_DEFAULT_PASSWORD || 'admin123',
-        10
-      );
-      syncRun(
-        db,
-        'INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)',
-        ['admin', defaultHash, Date.now()]
-      );
-      console.log(' → Created default admin (username: admin, password: admin123)');
+      const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD;
+      if (!defaultPassword) {
+        console.warn('WARNING: ADMIN_DEFAULT_PASSWORD not set. Using random password.');
+        const crypto = require('crypto');
+        const randomPass = crypto.randomBytes(12).toString('hex');
+        const defaultHash = bcrypt.hashSync(randomPass, 10);
+        db.prepare('INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)').run('admin', defaultHash, Date.now());
+        console.log(` → Created default admin (username: admin, password: <set via ADMIN_DEFAULT_PASSWORD env>)`);
+      } else {
+        const defaultHash = bcrypt.hashSync(defaultPassword, 10);
+        db.prepare('INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)').run('admin', defaultHash, Date.now());
+        console.log(' → Created default admin (username: admin)');
+      }
     }
     console.log(` → Database ready at ${DB_PATH}`);
   } catch (err) {
-    console.warn(` → SQLite not available, using in-memory: ${err.message}`);
-    db = new sqlite3.Database(':memory:');
-    syncExec(db, SCHEMA);
+    console.warn(` → SQLite file not available, using in-memory: ${err.message}`);
+    db = new Database(':memory:');
+    db.exec(SCHEMA);
   }
 }
 
@@ -152,25 +113,14 @@ function getDb() {
   return db;
 }
 
-// Compatibility layer for better-sqlite3's prepare() API
 function prepare(sql) {
   if (!db) throw new Error('Database not initialized. Call init() first.');
-  
-  return {
-    get: (params) => syncGet(db, sql, params),
-    run: (params) => syncRun(db, sql, params),
-    all: (params) => syncAll(db, sql, params)
-  };
+  return db.prepare(sql);
 }
 
-async function close() {
+function close() {
   if (db) {
-    await new Promise((resolve, reject) => {
-      db.close((err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    db.close();
     db = null;
   }
 }

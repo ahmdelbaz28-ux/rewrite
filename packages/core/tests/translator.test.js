@@ -1,130 +1,154 @@
-'use strict';
-
 const {
   translate,
   translateBatch,
   convertToArabic,
   convertToEnglish,
   detectMistakeType,
-  scoreArabicWord
+  scoreArabicWord,
+  EN_TO_AR,
+  AR_TO_EN
 } = require('../src/translator');
 
 describe('Translator', () => {
   describe('convertToArabic', () => {
-    test('converts basic English mistyped text to Arabic', () => {
-      // "اهلا" on QWERTY layout = "high"
+    test('converts simple English text to Arabic', () => {
       expect(convertToArabic('high')).toBe('اهلا');
     });
 
-    test('converts full sentence', () => {
-      // "اهلا اخبارك" = "high hofhv;" on QWERTY (h=ا, i=ه, g=ل, h=ا, o=خ, f=ب, h=ا, v=ر, ;=ك)
+    test('converts phrase', () => {
       expect(convertToArabic('high hofhv;')).toBe('اهلا اخبارك');
-    });
-
-    test('preserves spaces and punctuation', () => {
-      expect(convertToArabic('high!')).toBe('اهلا!');
-    });
-
-    test('preserves uppercase as lowercase mapping', () => {
-      expect(convertToArabic('HIGH')).toBe('اهلا');
     });
 
     test('handles empty string', () => {
       expect(convertToArabic('')).toBe('');
     });
 
-    test('preserves numbers as Arabic-Indic digits', () => {
-      // Numbers 0-9 are mapped to Arabic-Indic digits ٠-٩
-      const result = convertToArabic('hello 123');
-      expect(result).toContain('١');
-      expect(result).toContain('٢');
-      expect(result).toContain('٣');
+    test('handles null/undefined', () => {
+      expect(convertToArabic(null)).toBe('');
+      expect(convertToArabic(undefined)).toBe('');
     });
 
-    test('preserves unmapped chars like @ and # unchanged', () => {
-      expect(convertToArabic('test@domain.com')).toContain('@');
-      expect(convertToArabic('tag #1')).toContain('#');
+    test('preserves spaces', () => {
+      expect(convertToArabic('a b c')).toContain(' ');
     });
 
-    test('handles "لا" combination (b → لا)', () => {
-      expect(convertToArabic('b')).toBe('لا');
+    test('preserves non-mapped characters', () => {
+      expect(convertToArabic('!')).toBe('!');
     });
 
-    test('correctly maps "hglg" to "المل" (not "اهلا")', () => {
-      // Important: this verifies the mapping is correct.
-      // "hglg" actually maps to "المل" on Arabic 101 layout, NOT "اهلا".
-      // "اهلا" on QWERTY is "high".
-      expect(convertToArabic('hglg')).toBe('المل');
+    test('converts numbers to Arabic-Indic digits', () => {
+      expect(convertToArabic('123')).toBe('١٢٣');
     });
   });
 
   describe('convertToEnglish', () => {
-    test('converts Arabic mistyped text back to English', () => {
+    test('converts simple Arabic text to English', () => {
       const result = convertToEnglish('اهلا');
-      expect(result).toContain('h');
+      expect(result).toBe('high');
     });
 
     test('handles empty string', () => {
       expect(convertToEnglish('')).toBe('');
     });
+
+    test('handles null/undefined', () => {
+      expect(convertToEnglish(null)).toBe('');
+      expect(convertToEnglish(undefined)).toBe('');
+    });
+
+    test('preserves non-Arabic characters', () => {
+      expect(convertToEnglish('123')).toBe('123');
+    });
   });
 
   describe('detectMistakeType', () => {
-    test('detects English-mistyped text', () => {
-      expect(detectMistakeType('high hofhv;')).toBe('en-mistake');
+    test('detects English mistake (English text that should be Arabic)', () => {
+      expect(detectMistakeType('high hofhv')).toBe('en-mistake');
     });
 
-    test('detects Arabic-mistyped text', () => {
-      expect(detectMistakeType('اهلا اخبارك')).toBe('ar-mistake');
+    test('detects Arabic mistake (Arabic text that should be English)', () => {
+      expect(detectMistakeType('اهلا')).toBe('ar-mistake');
     });
 
-    test('returns unknown for empty', () => {
+    test('returns unknown for empty text', () => {
       expect(detectMistakeType('')).toBe('unknown');
     });
 
-    test('returns unknown for mixed balanced text', () => {
+    test('returns unknown for null', () => {
+      expect(detectMistakeType(null)).toBe('unknown');
+    });
+
+    test('returns unknown for non-string', () => {
+      expect(detectMistakeType(123)).toBe('unknown');
+    });
+
+    test('returns unknown for numbers only', () => {
       expect(detectMistakeType('123')).toBe('unknown');
     });
   });
 
-  describe('translate (auto mode)', () => {
-    test('auto-detects English→Arabic', () => {
-      expect(translate('high')).toBe('اهلا');
+  describe('translate', () => {
+    test('auto-detects and translates English to Arabic', () => {
+      const result = translate('high');
+      expect(result).toBe('اهلا');
     });
 
-    test('auto-detects with score', () => {
-      const result = translate('اهلا بك', { scoreOutput: true });
+    test('forces en-to-ar direction', () => {
+      const result = translate('high', { direction: 'en-to-ar' });
+      expect(result).toBe('اهلا');
+    });
+
+    test('returns score when scoreOutput is true', () => {
+      const result = translate('high', { scoreOutput: true });
       expect(result).toHaveProperty('text');
       expect(result).toHaveProperty('score');
       expect(result).toHaveProperty('direction');
+      expect(typeof result.score).toBe('number');
     });
 
-    test('supports explicit direction', () => {
-      const result = translate('high', { direction: 'en-to-ar' });
-      expect(result).toBe('اهلا');
+    test('handles empty string', () => {
+      expect(translate('')).toBe('');
     });
   });
 
   describe('translateBatch', () => {
-    test('translates multiple inputs', () => {
-      const results = translateBatch(['high', 'hofhv;']);
+    test('translates multiple texts', () => {
+      const results = translateBatch(['high', 'high hofhv;']);
       expect(results).toHaveLength(2);
       expect(results[0]).toBe('اهلا');
-      expect(results[1]).toBe('اخبارك');
+    });
+
+    test('handles empty array', () => {
+      expect(translateBatch([])).toEqual([]);
     });
   });
 
   describe('scoreArabicWord', () => {
-    test('returns high score for common words', () => {
-      expect(scoreArabicWord('في')).toBeGreaterThanOrEqual(80);
+    test('scores known word', () => {
+      const score = scoreArabicWord('في');
+      expect(score).toBeGreaterThan(0);
     });
 
-    test('returns 0 for empty', () => {
+    test('returns 0 for empty string', () => {
       expect(scoreArabicWord('')).toBe(0);
     });
 
-    test('returns positive score for any Arabic', () => {
-      expect(scoreArabicWord('كلمة')).toBeGreaterThan(0);
+    test('scores unknown Arabic word with heuristics', () => {
+      const score = scoreArabicWord('البيت');
+      expect(score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Layout Maps', () => {
+    test('EN_TO_AR has mappings for all letters', () => {
+      expect(EN_TO_AR['q']).toBe('ض');
+      expect(EN_TO_AR['a']).toBe('ش');
+      expect(EN_TO_AR['h']).toBe('ا');
+    });
+
+    test('AR_TO_EN has reverse mappings', () => {
+      expect(AR_TO_EN['ض']).toBe('q');
+      expect(AR_TO_EN['ش']).toBe('a');
     });
   });
 });

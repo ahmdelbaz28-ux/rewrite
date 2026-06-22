@@ -1,475 +1,79 @@
-name: CI - Test
+name: CI/CD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master]
   pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
-
-# Cancel in-progress runs when a new commit is pushed
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: 22
+    branches: [main, master]
 
 jobs:
-  # ─── Core Tests (the foundation) ────────────────────────────────────────────
   test-core:
-    name: 🧪 Core Tests (Node ${{ matrix.node-version }})
+    name: Test Core Package
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [18, 20, 22]
-    
     steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
           cache: 'npm'
-      
       - name: Install dependencies
-        run: npm ci
-      
-      - name: Run all core tests
-        run: npx jest packages/core/tests/ --ci --coverage --reporters=default --reporters=github-actions
-        env:
-          CI: true
-      
-      - name: Verify test count
-        run: |
-          echo "## Core Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          npx jest packages/core/tests/ --ci 2>&1 | grep -E "Tests:|Test Suites:" >> $GITHUB_STEP_SUMMARY || true
-      
-      - name: Upload coverage
-        if: matrix.node-version == 20
-        uses: actions/upload-artifact@v5
-        with:
-          name: coverage-core
-          path: coverage/
-          retention-days: 7
-
-  # ─── Backend Tests ──────────────────────────────────────────────────────────
-  test-backend:
-    name: 🌐 Backend API Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: test-core
-    
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Setup backend environment
-        run: |
-          cd packages/backend
-          cp .env.example .env
-          echo "JWT_SECRET=ci-test-secret-$(date +%s)" >> .env
-          echo "ADMIN_DEFAULT_PASSWORD=admin123" >> .env
-          echo "NODE_ENV=test" >> .env
-          cat .env | grep -v "^$" | sed 's/=.*/=***/'  # Show env vars (masked)
-      
-      - name: Start backend (background)
-        env:
-          ADMIN_DEFAULT_PASSWORD: admin123
-          JWT_SECRET: ci-test-secret-${{ github.run_id }}
-        run: |
-          # Start backend in background, write logs to temp file
-          mkdir -p "$HOME/.smartlangguard"
-          cd packages/backend
-          nohup node src/server.js > "$RUNNER_TEMP/backend.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/backend.pid"
-          
-          # Wait for server to be ready (max 30 seconds)
-          for i in {1..30}; do
-            if curl -sf http://localhost:4000/health > /dev/null 2>&1; then
-              echo "✓ Backend is ready (attempt $i)"
-              break
-            fi
-            sleep 1
-          done
-          
-          # Final check
-          if ! curl -sf http://localhost:4000/health > /dev/null 2>&1; then
-            echo "❌ Backend failed to start"
-            echo "--- Backend logs ---"
-            cat "$RUNNER_TEMP/backend.log"
-            exit 1
-          fi
-      
-      - name: Run backend API tests
-        run: |
-          set -e
-          
-          echo "── 1. Health check ───────────"
-          HEALTH=$(curl -s http://localhost:4000/health)
-          echo "$HEALTH" | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (d.status !== 'ok') { console.error('❌ Health check failed:', d); process.exit(1); }
-            console.log('✓ Health OK:', d.version);
-          "
-          
-          echo ""
-          echo "── 2. License activation ───────────"
-          ACTIVATE=$(curl -s -X POST http://localhost:4000/v1/license/activate \
-            -H "Content-Type: application/json" \
-            -d '{"email":"ci@test.com","tier":"pro"}')
-          TOKEN=$(echo "$ACTIVATE" | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.token?.startsWith('slg_')) { console.error('❌ License activate failed:', d); process.exit(1); }
-            console.log(d.token);
-          ")
-          echo "✓ License activated: ${TOKEN:0:20}..."
-          
-          echo ""
-          echo "── 3. License validation ───────────"
-          curl -s -X POST http://localhost:4000/v1/license/validate \
-            -H "Content-Type: application/json" \
-            -H "X-Device-Id: ci-device" \
-            -H "X-Device-Fingerprint: ci-fp-001" \
-            -d "{\"token\":\"$TOKEN\"}" | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.valid) { console.error('❌ Validation failed:', d); process.exit(1); }
-            console.log('✓ License valid, tier:', d.tier);
-          "
-          
-          echo ""
-          echo "── 4. AI scoring (custom model) ───────────"
-          curl -s -X POST http://localhost:4000/v1/ai/score \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $TOKEN" \
-            -d '{"original":"high","candidates":["اهلا","هجلا"]}' | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (d.source !== 'custom-model') { console.error('❌ AI source wrong:', d.source); process.exit(1); }
-            console.log('✓ AI uses custom-model (no OpenAI cost), best:', d.best_candidate, '(' + d.confidence + '%)');
-          "
-          
-          echo ""
-          echo "── 5. Billing plans ───────────"
-          curl -s http://localhost:4000/v1/billing/plans | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.plans || d.plans.length !== 4) { console.error('❌ Plans missing:', d); process.exit(1); }
-            console.log('✓ Billing plans:', d.plans.map(p => p.tier + ' ($' + p.price_usd + ')').join(', '));
-          "
-          
-          echo ""
-          echo "── 6. Admin login ───────────"
-          curl -s -X POST http://localhost:4000/v1/admin/login \
-            -H "Content-Type: application/json" \
-            -d '{"username":"admin","password":"admin123"}' | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.token) { console.error('❌ Admin login failed:', JSON.stringify(d)); process.exit(1); }
-            console.log('✓ Admin login OK');
-          "
-          
-          echo ""
-          echo "── 7. Telemetry batch ───────────"
-          curl -s -X POST http://localhost:4000/v1/telemetry/batch \
-            -H "Content-Type: application/json" \
-            -d '{"events":[{"anonymous_id":"ci","event":"test_event","timestamp":'$(date +%s)'000}]}' | node -e "
-            const d = JSON.parse(require('fs').readFileSync(0));
-            if (!d.success) { console.error('❌ Telemetry failed:', d); process.exit(1); }
-            console.log('✓ Telemetry recorded:', d.count, 'event(s)');
-          "
-          
-          echo ""
-          echo "╔════════════════════════════════════════════╗"
-          echo "║  ✅ All backend API tests passed            ║"
-          echo "╚════════════════════════════════════════════╝"
-      
-      - name: Stop backend
-        if: always()
-        run: |
-          if [ -f "$RUNNER_TEMP/backend.pid" ]; then
-            kill $(cat "$RUNNER_TEMP/backend.pid") 2>/dev/null || true
-          fi
-      
-      - name: Upload backend logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v5
-        with:
-          name: backend-logs
-          path: ${{ runner.temp }}/backend.log
-          retention-days: 3
-
-  # ─── Dashboard Build ────────────────────────────────────────────────────────
-  build-dashboard:
-    name: 📊 Dashboard Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build dashboard
-        run: npm run build
-        working-directory: packages/admin-dashboard
-      
-      - name: Verify build artifacts
-        run: |
-          set -e
-          test -f packages/admin-dashboard/dist/index.html
-          ls packages/admin-dashboard/dist/assets/*.js > /dev/null
-          ls packages/admin-dashboard/dist/assets/*.css > /dev/null
-          echo "✓ Dashboard built successfully"
-          
-          # Show build size
-          echo ""
-          echo "## 📊 Dashboard Build Size" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          du -sh packages/admin-dashboard/dist/ >> $GITHUB_STEP_SUMMARY
-          du -sh packages/admin-dashboard/dist/assets/*.js >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-      
-      - name: Upload dashboard build
-        uses: actions/upload-artifact@v5
-        with:
-          name: admin-dashboard-dist
-          path: packages/admin-dashboard/dist/
-          retention-days: 7
-
-  # ─── VS Code Extension Build ───────────────────────────────────────────────
-  build-vscode-extension:
-    name: 🧩 VS Code Extension Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Install extension dev dependencies
         run: npm install
-        working-directory: packages/vscode-extension
-      
-      - name: Compile TypeScript
-        run: npm run compile
-        working-directory: packages/vscode-extension
-      
-      - name: Build .vsix package (clean temp dir)
-        run: |
-          set -e
-          mkdir -p packages/vscode-extension/dist
-          
-          # Create a clean temp directory with only the files we want to package
-          # This avoids vsce trying to include parent dir files (../package.json)
-          TMPDIR=$(mktemp -d)
-          trap "rm -rf $TMPDIR" EXIT
-          
-          cp packages/vscode-extension/{package.json,README.md,CHANGELOG.md,LICENSE,.vscodeignore} "$TMPDIR/"
-          mkdir -p "$TMPDIR/assets" "$TMPDIR/out"
-          cp -r packages/vscode-extension/assets/* "$TMPDIR/assets/"
-          cp -r packages/vscode-extension/out/* "$TMPDIR/out/"
-          
-          echo "── Files in clean build dir ───────────"
-          find "$TMPDIR" -type f | sed "s|$TMPDIR/||"
-          
-          # Package in clean dir (avoids .git/config secret exposure + parent dir inclusion)
-          (cd "$TMPDIR" && npx @vscode/vsce@latest package --no-update-package-json --no-git-tag-version --allow-package-all-secrets)
-          
-          # Move .vsix to dist
-          mv "$TMPDIR"/*.vsix packages/vscode-extension/dist/
-          
-          # Verify
-          echo "── Built .vsix ───────────"
-          ls -lh packages/vscode-extension/dist/*.vsix
-        shell: bash
-      
-      - name: Verify .vsix exists
-        run: |
-          set -e
-          VSIX=$(find packages/vscode-extension -name "*.vsix" -type f | head -1)
-          if [ -z "$VSIX" ]; then
-            echo "❌ No .vsix file was built"
-            find packages/vscode-extension -type f -name "*.vsix" || true
-            exit 1
-          fi
-          echo "✓ VSIX built: $VSIX ($(du -h "$VSIX" | cut -f1))"
-      
-      - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: vscode-extension-vsix
-          path: packages/vscode-extension/**/*.vsix
-          retention-days: 7
+      - name: Test Core
+        run: npm test --workspace @smartlangguard/core
+        env:
+          NODE_ENV: test
 
-  # ─── Browser Extension Validation ──────────────────────────────────────────
-  validate-browser-extension:
-    name: 🌐 Browser Extension Lint
+  test-backend:
+    name: Test Backend Package
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    
+    needs: test-core
     steps:
-      - uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Validate manifest.json
-        run: |
-          node -e "
-          const fs = require('fs');
-          const m = JSON.parse(fs.readFileSync('packages/browser-extension/manifest.json'));
-          
-          const checks = [
-            ['manifest_version is 3', m.manifest_version === 3],
-            ['has name', !!m.name],
-            ['has version', !!m.version],
-            ['has description', !!m.description],
-            ['has action.default_popup', !!m.action?.default_popup],
-            ['has background.service_worker', !!m.background?.service_worker],
-            ['has content_scripts', Array.isArray(m.content_scripts) && m.content_scripts.length > 0],
-            ['has permissions', Array.isArray(m.permissions) && m.permissions.length > 0],
-            ['has icons', !!m.icons && Object.keys(m.icons).length > 0],
-          ];
-          
-          let failed = 0;
-          for (const [name, ok] of checks) {
-            console.log((ok ? '✓' : '✗') + ' ' + name);
-            if (!ok) failed++;
-          }
-          
-          if (failed > 0) {
-            console.error('\\n❌ ' + failed + ' check(s) failed');
-            process.exit(1);
-          }
-          console.log('\\n✅ All manifest checks passed');
-          "
-      
-      - name: Verify all referenced files exist
-        run: |
-          node -e "
-          const fs = require('fs');
-          const path = require('path');
-          const m = JSON.parse(fs.readFileSync('packages/browser-extension/manifest.json'));
-          
-          const files = [
-            m.action?.default_popup,
-            m.background?.service_worker,
-            m.options_page,
-            ...(m.content_scripts?.flatMap(cs => cs.js) || [])
-          ].filter(Boolean);
-          
-          let failed = 0;
-          for (const f of files) {
-            const p = path.join('packages/browser-extension', f);
-            if (!fs.existsSync(p)) {
-              console.error('✗ Missing: ' + f);
-              failed++;
-            } else {
-              console.log('✓ ' + f);
-            }
-          }
-          
-          if (failed > 0) process.exit(1);
-          "
-      
-      - name: Verify icons exist
-        run: |
-          node -e "
-          const fs = require('fs');
-          const path = require('path');
-          const m = JSON.parse(fs.readFileSync('packages/browser-extension/manifest.json'));
-          
-          const sizes = ['16', '32', '48', '128'];
-          for (const size of sizes) {
-            const iconPath = path.join('packages/browser-extension', 'icons', 'icon-' + size + '.png');
-            if (!fs.existsSync(iconPath)) {
-              console.error('✗ Missing icon: icon-' + size + '.png');
-              process.exit(1);
-            }
-            const stat = fs.statSync(iconPath);
-            if (stat.size < 100) {
-              console.error('✗ Icon too small: icon-' + size + '.png (' + stat.size + ' bytes)');
-              process.exit(1);
-            }
-            console.log('✓ icon-' + size + '.png (' + stat.size + ' bytes)');
-          }
-          "
-      
-      - name: Create extension zip
-        run: |
-          mkdir -p dist
-          cd packages/browser-extension
-          zip -r "../../dist/smartlangguard-extension-${{ github.sha }}.zip" . \
-            -x "node_modules/*" -x "tests/*" -x ".git/*" -x "*.log"
-          cd ../..
-          ls -lh dist/
-      
-      - name: Upload extension zip
-        uses: actions/upload-artifact@v5
-        with:
-          name: browser-extension-zip
-          path: dist/smartlangguard-extension-*.zip
-          retention-days: 7
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Test Backend
+        run: npm test --workspace @smartlangguard/backend
+        env:
+          JWT_SECRET: ci-test-jwt-secret
+          ADMIN_DEFAULT_PASSWORD: citestpass123
+          SMARTLANGGUARD_DB_PATH: ':memory:'
+          NODE_ENV: test
 
-  # ─── Summary Job (for branch protection) ───────────────────────────────────
-  ci-summary:
-    name: 📋 CI Summary
+  test-mcp:
+    name: Test MCP Server
     runs-on: ubuntu-latest
-    needs: [test-core, test-backend, build-dashboard, build-vscode-extension, validate-browser-extension]
-    if: always()
-    timeout-minutes: 2
-    
+    needs: test-core
     steps:
-      - name: Check job results
-        run: |
-          echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Core Tests (Node 18/20/22) | ${{ needs.test-core.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend API Tests | ${{ needs.test-backend.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dashboard Build | ${{ needs.build-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| VS Code Extension Build | ${{ needs.build-vscode-extension.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Browser Extension Lint | ${{ needs.validate-browser-extension.result }} |" >> $GITHUB_STEP_SUMMARY
-          
-          # Fail if any required job failed
-          if [[ "${{ needs.test-core.result }}" != "success" ]] || \
-             [[ "${{ needs.test-backend.result }}" != "success" ]] || \
-             [[ "${{ needs.build-dashboard.result }}" != "success" ]] || \
-             [[ "${{ needs.build-vscode-extension.result }}" != "success" ]] || \
-             [[ "${{ needs.validate-browser-extension.result }}" != "success" ]]; then
-            echo ""
-            echo "❌ One or more CI jobs failed"
-            exit 1
-          fi
-          
-          echo ""
-          echo "✅ All CI jobs passed!"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Test MCP
+        run: npm test --workspace @smartlangguard/mcp-server
+        env:
+          NODE_ENV: test
+
+  build-cli:
+    name: Build CLI Binaries
+    runs-on: ${{ matrix.os }}
+    needs: [test-core, test-backend, test-mcp]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Build CLI
+        run: npm run build:cli

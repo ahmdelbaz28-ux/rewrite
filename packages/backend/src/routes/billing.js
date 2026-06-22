@@ -10,7 +10,7 @@ const router = express.Router();
 
 const db = require('../db').getDb;
 const { asyncHandler } = require('../middleware');
-const { TIER_FEATURES } = require('../../../core/src/license');
+const { TIER_FEATURES } = require('@smartlangguard/core');
 
 // ─── GET /v1/billing/status ───────────────────────────────────────────────────
 

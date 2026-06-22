@@ -7,8 +7,15 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'smartlangguard-dev-secret-change-me';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = '24h';
+
+function getJwtSecret() {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required. Set it in your .env file.');
+  }
+  return JWT_SECRET;
+}
 
 function errorHandler(err, req, res, next) {
   console.error('Error:', err.message);
@@ -25,7 +32,7 @@ function errorHandler(err, req, res, next) {
 // ─── Admin Auth ───────────────────────────────────────────────────────────────
 
 function signAdminToken(adminId, username, role) {
-  return jwt.sign({ adminId, username, role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign({ adminId, username, role }, getJwtSecret(), { expiresIn: JWT_EXPIRY });
 }
 
 function requireAdmin(req, res, next) {
@@ -35,7 +42,7 @@ function requireAdmin(req, res, next) {
   }
   const token = authHeader.slice(7);
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     if (decoded.role !== 'admin' && decoded.role !== 'superadmin') {
       return res.status(403).json({ error: 'Admin access required' });
     }
@@ -83,6 +90,6 @@ module.exports = {
   requireAdmin,
   requireApiKey,
   asyncHandler,
-  JWT_SECRET,
+  getJwtSecret,
   bcrypt
 };

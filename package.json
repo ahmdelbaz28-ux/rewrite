@@ -37,6 +37,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@yao-pkg/pkg": "^5.16.1"
+    "@yao-pkg/pkg": "^5.16.1",
+    "jest": "^29.7.0"
   }
 }

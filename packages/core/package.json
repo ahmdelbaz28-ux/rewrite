@@ -7,6 +7,9 @@
   "scripts": {
     "test": "jest --testPathPattern=tests/"
   },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
   "keywords": [
     "arabic",
     "keyboard",
@@ -16,7 +19,7 @@
     "smartlangguard"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
-  "license": "UNLICENSED",
+  "license": "PROPRIETARY",
   "private": false,
   "publishConfig": {
     "access": "public",

@@ -9,11 +9,14 @@
 
 'use strict';
 
-const { translate, translateBatch, detectMistakeType } = require('./translator');
+const { translate, translateBatch, detectMistakeType, convertToArabic, convertToEnglish, scoreArabicWord } = require('./translator');
 const { scoreConversion, scoreWithContext } = require('./ai-scoring');
-const { validateLicense, hasFeature, FEATURES, signLicenseToken } = require('./license');
+const { validateLicense, hasFeature, FEATURES, signLicenseToken, verifyLicenseToken, TIER_FEATURES, getDeviceFingerprint, getDeviceId } = require('./license');
 const telemetry = require('./telemetry');
 const updater = require('./updater');
+const { SoundPlayer } = require('./sound-player');
+const { TypingDetector, detectWrongLayout, detectLastWord, findAllMistakes } = require('./typing-detector');
+const customModel = require('./custom-ai-model');
 
 const VERSION = '0.1.0';
 
@@ -194,11 +197,26 @@ module.exports = {
   // Re-exports for advanced usage
   translate,
   translateBatch,
+  convertToArabic,
+  convertToEnglish,
   detectMistakeType,
+  scoreArabicWord,
   scoreWithContext,
+  scoreConversion,
   validateLicense,
   hasFeature,
   FEATURES,
+  TIER_FEATURES,
+  signLicenseToken,
+  verifyLicenseToken,
+  getDeviceFingerprint,
+  getDeviceId,
   telemetry,
-  telemetryEvents: telemetry.EVENTS
+  telemetryEvents: telemetry.EVENTS,
+  SoundPlayer,
+  TypingDetector,
+  detectWrongLayout,
+  detectLastWord,
+  findAllMistakes,
+  customModel
 };

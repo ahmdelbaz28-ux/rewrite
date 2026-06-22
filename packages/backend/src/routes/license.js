@@ -10,11 +10,11 @@ const router = express.Router();
 
 const crypto = require('crypto');
 
-const db = require('../db').prepare;
+const db = require('../db').getDb;
 
 const { asyncHandler } = require('../middleware');
 
-const { signLicenseToken, TIER_FEATURES } = require('../../../core/src/license');
+const { signLicenseToken, TIER_FEATURES } = require('@smartlangguard/core');
 
 // ─── POST /v1/license/validate ────────────────────────────────────────────────
 

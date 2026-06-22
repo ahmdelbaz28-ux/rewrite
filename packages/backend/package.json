@@ -5,7 +5,12 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   },
   "keywords": [
     "saas",
@@ -16,7 +21,7 @@
     "smartlangguard"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
-  "license": "UNLICENSED",
+  "license": "PROPRIETARY",
   "private": true,
   "files": [
     "src/",
@@ -39,14 +44,13 @@
   "dependencies": {
     "@smartlangguard/core": "^0.1.0",
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
     "cors": "^2.8.5",
-    "deasync": "^0.1.31",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "sqlite3": "^5.1.7"
+    "morgan": "^1.10.0"
   }
 }

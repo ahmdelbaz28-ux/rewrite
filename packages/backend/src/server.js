@@ -35,7 +35,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || '*',
+  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
@@ -87,8 +87,8 @@ app.use(errorHandler);
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
-async function start() {
-  await db.init();
+function start() {
+  db.init();
 
   app.listen(PORT, () => {
     console.log(`╔════════════════════════════════════════════╗`);
@@ -100,23 +100,20 @@ async function start() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.log('SIGTERM received, closing server...');
-  await db.close();
+  db.close();
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   console.log('SIGINT received, closing server...');
-  await db.close();
+  db.close();
   process.exit(0);
 });
 
 if (require.main === module) {
-  start().catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  });
+  start();
 }
 
 module.exports = app;

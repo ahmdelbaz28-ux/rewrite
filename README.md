@@ -5,13 +5,13 @@
 > **🌍 The Ultimate Keyboard Layout Correction Engine**
 > **Fix mistyped text instantly across all your applications — Terminal, AI Tools, Browsers, Editors, and more.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg?style=flat-square)](https://nodejs.org)
 [![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square)](#-installation)
 [![CI/CD](https://github.com/ahmdelbaz28-ux/rewrite/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
-[![Codecov](https://img.shields.io/codecov/c/github/ahmdelbaz28-ux/rewrite/main.svg)](https://codecov.io/gh/ahmdelbaz28-ux/rewrite)
+[![Tests](https://img.shields.io/badge/Tests-166%20passing-brightgreen.svg?style=flat-square)](#)
 
 ---
 
@@ -266,16 +266,19 @@ Edit `.env`:
 ```env
 # Server Settings
 PORT=4000
-CORS_ORIGIN=*
+CORS_ORIGIN=http://localhost:3000
 SMARTLANGGUARD_DB_PATH=./saas.db
+
+# JWT Secret (REQUIRED - generate a random string)
+JWT_SECRET=your_secure_jwt_secret_here
+
+# Admin Credentials (REQUIRED - change from default!)
+ADMIN_DEFAULT_PASSWORD=your_secure_password
 
 # Stripe Settings (for subscriptions)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Admin Credentials
-ADMIN_DEFAULT_PASSWORD=your_secure_password
 ```
 
 #### **3. Start the Server**
@@ -301,9 +304,11 @@ Server runs on `http://localhost:4000`.
 | `POST` | `/v1/stripe/webhook` | Stripe webhook handler | ❌ |
 | `GET` | `/health` | Health check | ❌ |
 
-### **🔐 Default Admin Credentials**
+### **🔐 Admin Authentication**
 - **Username:** `admin`
-- **Password:** `admin123` (⚠️ **Change immediately in production!**)
+- **Password:** Set via `ADMIN_DEFAULT_PASSWORD` environment variable (required)
+- **JWT:** All admin endpoints require a valid JWT token obtained from `/v1/admin/login`
+- **Rate Limiting:** Login endpoint limited to 5 attempts per 15 minutes
 
 ---
 
@@ -372,27 +377,36 @@ Visit **[https://smartlangguard.com/pricing](https://smartlangguard.com/pricing)
 ```
 smartlangguard/
 ├── packages/
-│   ├── core/               # Translation engine, license, telemetry
+│   ├── core/               # Translation engine, license, telemetry, updater
 │   │   ├── src/
-│   │   │   ├── engine.js   # Rules-based + AI translation
-│   │   │   ├── license.js  # License validation
-│   │   │   └── telemetry.js
-│   │   └── tests/
+│   │   │   ├── translator.js       # Rules-based + AI translation
+│   │   │   ├── custom-ai-model.js  # Statistical n-gram scoring model
+│   │   │   ├── ai-scoring.js       # AI scoring layer (local + remote)
+│   │   │   ├── license.js          # License validation (online + offline)
+│   │   │   ├── telemetry.js        # Privacy-first telemetry
+│   │   │   ├── updater.js          # SHA256-verified auto-updater
+│   │   │   ├── typing-detector.js  # Real-time typing detection
+│   │   │   ├── sound-player.js     # Cross-platform alert sounds
+│   │   │   └── index.js            # Unified API entry point
+│   │   └── tests/                  # 146 unit tests
 │   │
 │   ├── cli/                # CLI binary (cross-platform)
-│   │   ├── bin/
-│   │   │   └── smartlangguard.js
-│   │   └── src/
+│   │   └── bin/
+│   │       └── smartlangguard.js
 │   │
 │   ├── mcp-server/         # MCP server for AI tools
-│   │   └── src/
-│   │       └── mcp-server.js
+│   │   ├── src/
+│   │   │   ├── mcp-server.js
+│   │   │   └── clipboard.js
+│   │   └── tests/
 │   │
 │   ├── daemon/             # Background daemon + hotkey
 │   │   └── src/
-│   │       └── daemon.js
+│   │       ├── daemon.js
+│   │       ├── clipboard.js
+│   │       └── hotkey.js
 │   │
-│   ├── vscode-extension/   # VS Code wrapper
+│   ├── vscode-extension/   # VS Code extension
 │   │   └── src/
 │   │       └── extension.ts
 │   │
@@ -400,11 +414,19 @@ smartlangguard/
 │   │   ├── manifest.json
 │   │   └── src/
 │   │
-│   └── backend/            # SaaS backend (Express + SQLite)
+│   └── backend/            # SaaS backend (Express + better-sqlite3)
 │       ├── src/
-│       │   ├── server.js   # Express server
-│       │   ├── db.js       # SQLite database
-│       │   └── routes/     # API routes
+│       │   ├── server.js           # Express server
+│       │   ├── db.js               # SQLite database (better-sqlite3)
+│       │   ├── middleware.js       # JWT auth, rate limiting
+│       │   └── routes/             # API routes
+│       │       ├── license.js
+│       │       ├── admin.js
+│       │       ├── ai.js
+│       │       ├── billing.js
+│       │       ├── stripe.js
+│       │       └── telemetry.js
+│       ├── tests/                  # 14 integration tests
 │       └── .env.example
 │
 ├── scripts/
@@ -421,6 +443,7 @@ smartlangguard/
 │   └── workflows/
 │       └── ci.yml          # GitHub Actions CI/CD
 │
+├── jest.config.json        # Jest test configuration
 └── package.json            # Workspace root
 ```
 
@@ -443,7 +466,10 @@ Output: `packages/cli/dist/smartlangguard-{platform}-{arch}`
 
 ### **🧪 Run Tests**
 ```bash
-npm test
+npm test                    # Run all 166 tests across all packages
+npm test --workspace @smartlangguard/core       # Core tests (146)
+npm test --workspace @smartlangguard/backend     # Backend tests (14)
+npm test --workspace @smartlangguard/mcp-server  # MCP tests (6)
 ```
 
 ### **📝 Lint & Format**
@@ -461,8 +487,11 @@ npm run format
 - **🖨️ Device fingerprinting** prevents license sharing (per-tier device limits).
 - **🔍 Binary updates** are SHA256-verified and signature-checked.
 - **📊 Telemetry** is anonymized and opt-out.
-- **🔏 Admin endpoints** require JWT authentication.
-- **⚡ Rate limiting** on all public endpoints.
+- **🔏 Admin endpoints** require JWT authentication with configurable secret.
+- **⚡ Rate limiting** on all public endpoints (100 req/15min) and admin login (5 req/15min).
+- **🔒 CORS** is restricted to configured origins only (no wildcard in production).
+- **🛡️ Clipboard access** uses stdin piping to prevent command injection.
+- **✅ 166 automated tests** covering core, backend, and MCP server.
 
 ### **🛡️ Vulnerability Reporting**
 If you discover a security vulnerability, please report it to **[security@smartlangguard.com](mailto:security@smartlangguard.com)**.
@@ -485,7 +514,7 @@ See **[SECURITY.md](docs/SECURITY.md)** for more details.
 
 ## **📄 License**
 
-**MIT License** — © 2026 SmartLangGuard. All rights reserved.
+**Proprietary License** — © 2026 SmartLangGuard. All rights reserved.
 
 See **[LICENSE](LICENSE)** for details.
 
@@ -536,7 +565,20 @@ We welcome contributions! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** bef
 <details>
 <summary>📜 Changelog</summary>
 
-### **v0.1.0 (Latest)**
+### **v0.1.1 (Latest)**
+- ✅ Fixed database layer: replaced sqlite3+deasync with better-sqlite3 (no event loop blocking).
+- ✅ Fixed MCP server: added missing clipboard module (was crashing on fix_clipboard tool).
+- ✅ Fixed all npm import paths: packages now use @smartlangguard/core instead of relative paths.
+- ✅ Security: removed hardcoded JWT secret, added rate limiting on admin login, fixed CORS wildcard.
+- ✅ Security: fixed clipboard command injection vulnerability (uses stdin piping now).
+- ✅ Fixed license field consistency: all packages now say "PROPRIETARY".
+- ✅ Fixed code quality: duplicate object keys in custom-ai-model.js and translator.js.
+- ✅ Fixed Stripe route: broken indentation and inconsistent db() calls.
+- ✅ Added 166 automated tests (146 core, 14 backend, 6 MCP server).
+- ✅ Added CI/CD GitHub Actions workflow (test on push/PR, build on all platforms).
+- ✅ Updated README with accurate documentation.
+
+### **v0.1.0**
 - ✅ Initial release of SmartLangGuard Core, CLI, MCP Server, Backend, and Daemon.
 - ✅ Rules-based translation engine for QWERTY ↔ Arabic 101.
 - ✅ License validation & management.

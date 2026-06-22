@@ -360,7 +360,7 @@ soundCmd
   .description('Play a sound (default: ding). Available: beep, ding, chime, soft-pop, click, double-beep, off')
   .option('--volume <n>', 'volume 0.0-1.0', '0.5')
   .action(async (name, opts) => {
-    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const { SoundPlayer } = require('@smartlangguard/core');
     const player = new SoundPlayer({
       sound: name || 'ding',
       volume: parseFloat(opts.volume)
@@ -380,7 +380,7 @@ soundCmd
   .command('list')
   .description('List all available sounds')
   .action(() => {
-    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const { SoundPlayer } = require('@smartlangguard/core');
     const sounds = SoundPlayer.getAvailableSounds();
     console.log('Available sounds:');
     sounds.forEach(s => console.log(`  - ${s}`));
@@ -390,7 +390,7 @@ soundCmd
   .command('export <name> <output>')
   .description('Export a sound as a WAV file')
   .action((name, output) => {
-    const { SoundPlayer } = require('@smartlangguard/core/src/sound-player');
+    const { SoundPlayer } = require('@smartlangguard/core');
     const buffer = SoundPlayer.getSoundBuffer(name);
     if (!buffer) {
       console.error(`Unknown sound: ${name}`);
@@ -407,7 +407,7 @@ program
   .description('Detect if text was typed in wrong keyboard layout')
   .option('--format <fmt>', 'output format (text, json)', 'text')
   .action((text, opts) => {
-    const { detectWrongLayout, findAllMistakes } = require('@smartlangguard/core/src/typing-detector');
+    const { detectWrongLayout, findAllMistakes } = require('@smartlangguard/core');
     
     if (!text) {
       // Read from stdin

@@ -19,7 +19,7 @@
     "smartlangguard"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
-  "license": "UNLICENSED",
+  "license": "PROPRIETARY",
   "private": false,
   "publishConfig": {
     "access": "public",

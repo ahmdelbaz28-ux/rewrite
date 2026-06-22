@@ -7,7 +7,11 @@
     "smartlangguard-mcp": "src/mcp-server.js"
   },
   "scripts": {
-    "start": "node src/mcp-server.js"
+    "start": "node src/mcp-server.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   },
   "keywords": [
     "mcp",
@@ -20,7 +24,7 @@
     "smartlangguard"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
-  "license": "UNLICENSED",
+  "license": "PROPRIETARY",
   "private": false,
   "publishConfig": {
     "access": "public",

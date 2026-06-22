@@ -35,8 +35,12 @@ const DEVICE_ID_FILE = path.join(
 );
 
 // Shared secret for offline token signing (rotated per release)
-const OFFLINE_SECRET = process.env.SMARTLANGGUARD_OFFLINE_SECRET || 
+const OFFLINE_SECRET = process.env.SMARTLANGGUARD_OFFLINE_SECRET ||
   'smkt-2026-offline-signing-key-v1';
+
+if (!process.env.SMARTLANGGUARD_OFFLINE_SECRET && process.env.NODE_ENV === 'production') {
+  console.warn('WARNING: SMARTLANGGUARD_OFFLINE_SECRET not set. Using default (insecure for production).');
+}
 
 // ─── Device Fingerprint ───────────────────────────────────────────────────────
 

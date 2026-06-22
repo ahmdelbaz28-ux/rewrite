@@ -12,9 +12,10 @@ const express = require('express');
 const router = express.Router();
 
 const { asyncHandler } = require('../middleware');
-const { scoreWithContext } = require('../../../core/src/ai-scoring');
-const customModel = require('../../../core/src/custom-ai-model');
-const { verifyLicenseToken } = require('../../../core/src/license');
+const core = require('@smartlangguard/core');
+const { scoreWithContext } = core;
+const customModel = core.customModel;
+const { verifyLicenseToken } = core;
 const db = require('../db').getDb;
 
 /**
