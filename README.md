@@ -6,12 +6,12 @@
 > **Fix mistyped text instantly across all your applications — Terminal, AI Tools, Browsers, Editors, and more.**
 
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
-[![npm downloads](https://img.shields.io/npm/dm/@smartlangguard/cli.svg?style=flat-square)](https://www.npmjs.com/package/@smartlangguard/cli)
+[![GitHub release](https://img.shields.io/github/v/release/ahmdelbaz28-ux/rewrite?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/releases)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg?style=flat-square)](https://nodejs.org)
 [![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square)](#-installation)
-[![CI/CD](https://github.com/ahmdelbaz28-ux/rewrite/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/ahmdelbaz28-ux/rewrite/ci.yml?style=flat-square&label=CI%2FCD)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
 [![Tests](https://img.shields.io/badge/Tests-166%20passing-brightgreen.svg?style=flat-square)](#)
+[![npm](https://img.shields.io/badge/npm-publish%20pending-orange.svg?style=flat-square)](#)
 
 ---
 
@@ -58,10 +58,11 @@ SmartLangGuard **automatically detects and corrects** these mistakes using:
 
 ## **Installation**
 
-### **Option 1: NPM (Recommended)**
+### **Option 1: NPM (Coming Soon)**
 ```bash
 npm install -g @smartlangguard/cli
 ```
+> The package is not yet published to npm. Use Option 2 or 3 below for now.
 
 ### **Option 2: Download Pre-Built Binaries**
 Download the latest release for your platform from **[Releases Page](https://github.com/ahmdelbaz28-ux/rewrite/releases)**:
