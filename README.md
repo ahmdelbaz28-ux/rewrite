@@ -502,56 +502,380 @@ npx jest --verbose      # تفاصيل أكتر
 
 Proprietary — © 2026 SmartLangGuard.
 
-[المشاكل والاقتراحات](https://github.com/ahmdelbaz28-ux/rewrite/issues) · [تواصل معنا](mailto:hello@smartlangguard.com)
+[المشاكل والاقتراحات](https://github.com/ahmdelbaz28-ux/rewrite/issues) · [تواصل معنا](mailto:ahmdelbaz28@gmail.com)
 <div align="center">
-
-<img src="docs/assets/smartlangguard-logo.svg" alt="SmartLangGuard Logo" width="100" />
-
-# SmartLangGuard
-
-**English → Arabic keyboard layout fixer — instant, offline, private.**
-
-`high hofhv;` → `اهلا اخبارك` in ~1ms.
-
-[![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue)](https://www.npmjs.com/package/@smartlangguard/cli)
-[![Tests](https://img.shields.io/badge/Tests-180%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
-[![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
-
-</div>
 
 ---
 
-## Quick Start
+# 🇬🇧 English Guide
+
+---
+
+## What's This?
+
+Imagine you're typing in Arabic, but you forgot to switch your keyboard layout from English to Arabic.  
+Instead of writing **"اهلا اخبارك"**, you end up with **"high hofhv;"** — this isn't a spelling mistake, it's a **keyboard language** mistake.
+
+**SmartLangGuard** detects this error **automatically** and fixes it without any manual effort.
+
+### The Simple Idea
+
+Every key on your keyboard plays two roles:
+
+| When keyboard is set to **English** | Same key when keyboard is set to **Arabic** |
+|:---:|:---:|
+| `h` | `ا` |
+| `i` | `ه` |
+| `g` | `ل` |
+| `h` | `ا` |
+
+So **`high`** (typed in English) = **`اهلا`** (in Arabic) — same exact keys!
+
+---
+
+## Prerequisites (Before You Start)
+
+### 1. Node.js (the JavaScript runtime)
+
+SmartLangGuard needs **Node.js** to run. It's a free program you install once.
+
+**How to check if you have Node.js:**
+
+Open **PowerShell** (Windows) or **Terminal** (Mac/Linux) and type:
+```bash
+node --version
+```
+
+- If you see a number like `v18.20.0` or higher → you're good to go
+- If you see an error → you need to install it
+
+**How to install Node.js:**
+
+1. Go to: [https://nodejs.org](https://nodejs.org)
+2. Click the big green **"Download Node.js"** button (choose LTS)
+3. Run the downloaded file and click **Next → Next → Install → Finish**
+4. Open PowerShell again and type `node --version` — you should now see the version number
+
+### 2. Download the Project
+
+You need a copy of the project on your computer. There are two ways:
+
+**Option A: Git (if you have it installed)**
+```bash
+git clone https://github.com/ahmdelbaz28-ux/rewrite.git
+cd rewrite
+npm install
+```
+
+**Option B: Manual Download**
+1. Go to [https://github.com/ahmdelbaz28-ux/rewrite](https://github.com/ahmdelbaz28-ux/rewrite)
+2. Click **Code** (green button) → **Download ZIP**
+3. Extract the ZIP file
+4. Open PowerShell inside the extracted folder and run:
+```bash
+npm install
+```
+
+> ⏱️ `npm install` takes a minute or two. It downloads all the libraries the project needs.
+
+---
+
+## 10 Ways to Use SmartLangGuard
+
+---
+
+### Method 1: Command Line (CLI) — the simplest way
+
+> **Best for:** quickly fixing a piece of text from anywhere
+
+**Step by step:**
+
+**1.** Open **PowerShell** (Windows) or **Terminal** (Mac/Linux)
+   - **Windows:** press `Win + R` on your keyboard, type `powershell`, press Enter
+   - **Mac:** open the **Terminal** app
+
+**2.** Navigate to the project folder:
+```bash
+cd path/to/your/rewrite/folder
+```
+> Change this path to wherever you extracted the project
+
+**3.** Type this command to fix text:
+```bash
+node packages/cli/bin/smartlangguard.js fix "high hofhv;"
+```
+
+**Output:**
+```
+اهلا اخبارك
+```
+
+**More examples:**
 
 ```bash
-npm install -g @smartlangguard/cli          # install (30 sec)
-smartlangguard fix "high hofhv;"             # → اهلا اخبارك
+# Fix a single word
+node packages/cli/bin/smartlangguard.js fix "high"
+# Output: اهلا
+
+# Reverse direction (Arabic → English) if keyboard was Arabic but you meant English
+node packages/cli/bin/smartlangguard.js fix "اهلا" -d ar-to-en
+# Output: high
+
+# Show more details (confidence + direction)
+node packages/cli/bin/smartlangguard.js fix "high" --format text-with-meta
+# Output:
+# اهلا
+# [direction: en-to-ar | confidence: 90% | source: rules]
+
+# Output as JSON (useful for developers)
+node packages/cli/bin/smartlangguard.js fix "high" --format json
 ```
 
 ---
 
-## All Methods — Install, Run & Use
+### Method 2: Interactive Mode — like a chatbot
 
-| # | Method | Where it works | Install (once) | Run | Use (every day) |
-|:-:|--------|---------------|----------------|-----|-----------------|
-| 1 | **Terminal** | Command Prompt, PowerShell, Bash | `npm install -g @smartlangguard/cli` | `smartlangguard fix "high"` | Type command → get fixed text instantly |
-| 2 | **Clipboard Hotkey** ⭐ | **Any app** — Word, Chrome, WhatsApp, Telegram, VS Code, Slack | `npm install -g @smartlangguard/cli` | `smartlangguard daemon` (keep open) | Copy text → `Ctrl+Shift+Space` → Paste fixed |
-| 3 | **Chat Mode** | Terminal (like talking to a bot) | `npm install -g @smartlangguard/cli` | `smartlangguard interactive` | Type text → get fix → repeat. Type `exit` to quit |
-| 4 | **Pipe** | Scripts, AI tools, automation | `npm install -g @smartlangguard/cli` | `echo "high" \| smartlangguard fix` | Send text in → get fixed text out |
-| 5 | **File** | Any text file (.txt, .md, etc.) | `npm install -g @smartlangguard/cli` | `smartlangguard fix -f file.txt -o fixed.txt` | One command fixes entire file |
-| 6 | **VS Code** | VS Code editor | 1. `npm install -g @smartlangguard/cli`<br>2. Extensions → search "SmartLangGuard" → Install | — | Select text → `Ctrl+Shift+F1` or right-click → Fix Selection |
-| 7 | **Browser** ⭐ | Chrome, Edge, Brave | See [Browser Extension](#-browser-extension) section | `smartlangguard daemon` (keep open) | Select text → right-click → Fix Selection, or `Ctrl+Shift+L` on any page |
-| 8 | **AI Tools (MCP)** | Claude Desktop, Cursor, Cline | `npm install -g @smartlangguard/cli` + add config (see below) | — | AI fixes text automatically when you ask |
-| 9 | **Node.js API** | Your own JavaScript code | `npm install @smartlangguard/core` | `require('@smartlangguard/core')` | `core.fixText('high')` → `{ corrected: 'اهلا' }` |
-| 10 | **Binary** (no npm) | Any computer without Node.js | Download `.exe` / binary from [Releases](https://github.com/ahmdelbaz28-ux/rewrite/releases) | `./smartlangguard fix "high"` | Same as Terminal method |
+> **Best for:** fixing multiple texts one after another
 
-> ⭐ **For non-coders:** Method 2 (Clipboard Hotkey) is the easiest — install once, then use `Ctrl+Shift+Space` in any app.
+**Step by step:**
 
-### MCP Config (for Method 8)
+**1.** Open PowerShell and navigate to the project folder (like Method 1)
 
-Add to your AI tool's config file:
+**2.** Run:
+```bash
+node packages/cli/bin/smartlangguard.js interactive
+```
 
+**You'll see:**
+```
+SmartLangGuard Interactive Mode
+Type text and press Enter to fix. Type "exit" or Ctrl+D to quit.
+
+smartlangguard>
+```
+
+**3.** Type any text and press **Enter**:
+```
+smartlangguard> high
+→ اهلا
+  [en-to-ar | 90% confidence | rules]
+```
+
+**4.** Type another:
+```
+smartlangguard> hofhv;
+→ اخبارك
+  [en-to-ar | 85% confidence | rules]
+```
+
+**5.** When done, type `exit`:
+```
+smartlangguard> exit
+Goodbye!
+```
+
+---
+
+### Method 3: Detect Mistakes Without Fixing (Detect)
+
+> **Best for:** finding exactly where the mistakes are without making changes
+
+**Step by step:**
+
+```bash
+node packages/cli/bin/smartlangguard.js detect "high hofhv;"
+```
+
+**Output:**
+```
+Found 2 mistake(s):
+
+  1. "high" → "اهلا" (en-to-ar) [pos 0-4]
+  2. "hofhv;" → "اخبارك" (en-to-ar) [pos 5-11]
+```
+
+> It tells you: found 2 mistakes. The first "high" should be "اهلا", and "hofhv;" should be "اخبارك"
+
+**As JSON:**
+```bash
+node packages/cli/bin/smartlangguard.js detect "high hofhv;" --format json
+```
+
+---
+
+### Method 4: Fix an Entire File
+
+> **Best for:** if you have a text file (.txt, .md) with text typed in the wrong keyboard layout
+
+**Step by step:**
+
+**1.** Create a file called `myfile.txt` and put the wrong text in it, for example:
+```
+high hofhv;
+```
+
+**2.** Run:
+```bash
+node packages/cli/bin/smartlangguard.js fix -f myfile.txt -o fixed.txt
+```
+
+**3.** Open `fixed.txt` — you'll find:
+```
+اهلا اخبارك
+```
+
+---
+
+### Method 5: Pipe (automatic use from other programs)
+
+> **Best for:** connecting the tool with other tools or scripts
+
+```bash
+# On Windows (PowerShell)
+echo "high" | node packages/cli/bin/smartlangguard.js fix
+# Output: اهلا
+
+# On Mac/Linux
+echo "high" | node packages/cli/bin/smartlangguard.js fix
+# Output: اهلا
+```
+
+---
+
+### Method 6: Daemon (background service) — ⭐ best for everyday users
+
+> **Best for:** running the tool in the background to monitor your clipboard and fix any text you copy
+
+**The big advantage:** it runs in the background and watches everything you copy. If you press `Ctrl+Shift+Space`, it fixes the clipboard instantly.
+
+**Step by step:**
+
+**1.** Open PowerShell and navigate to the project folder
+
+**2.** Start the Daemon:
+```bash
+node packages/daemon/src/daemon.js
+```
+
+**You'll see:**
+```
++--------------------------------------------+
+|  SmartLangGuard Daemon v0.1.3              |
+|--------------------------------------------|
+|  + Clipboard monitor: ACTIVE               |
+|  + Global hotkey: Ctrl+Shift+Space         |
+|  + Local API: http://localhost:41783       |
++--------------------------------------------+
+Press Ctrl+C to stop.
+```
+
+> ⚠️ **Important:** keep this terminal window open. If you close it, the Daemon stops.
+
+**3.** Try it:
+   - Copy any English text (e.g., `high hofhv;`)
+   - Press **`Ctrl+Shift+Space`**
+   - Paste (`Ctrl+V`) — you'll see the text is now fixed!
+
+**4.** To stop the Daemon: press `Ctrl+C` in the terminal
+
+---
+
+### Method 7: Browser Extension
+
+> **Best for:** if you write a lot in the browser (Facebook, Twitter, Gmail, WhatsApp Web...)
+
+**What the extension does in the browser:**
+- Detects while you type if the keyboard layout is wrong
+- Plays an alert sound
+- Fixes text with one keystroke: `Ctrl+Shift+Backspace`
+
+**Step by step:**
+
+**1.** Start the Daemon first (Method 6) — keep it running in the background
+
+**2.** Open **Chrome** and type in the address bar:
+```
+chrome://extensions
+```
+
+**3.** Turn on **Developer mode** (toggle in the top-right corner)
+
+**4.** Click **Load unpacked**
+
+**5.** Select this folder:
+```
+packages/browser-extension
+```
+(inside the project folder)
+
+**6.** You'll see the SmartLangGuard icon appear in the toolbar ✓
+
+**How to use it:**
+
+| What you want to do | How |
+|---|---|
+| Fix selected text | Select text → right-click → **SmartLangGuard: Fix Selection** |
+| Quick shortcut | Select text → `Ctrl+Shift+L` |
+| Fix the last word you typed | While typing → `Ctrl+Shift+Backspace` |
+| Open settings | Click the icon → **Settings** |
+| Open the popup | Click the SmartLangGuard icon in the toolbar |
+
+**If you see "Daemon offline":**
+- Make sure the Daemon is running (Method 6)
+- Click the icon → it should show "Daemon running"
+
+---
+
+### Method 8: VS Code Extension
+
+> **Best for:** if you write code or notes in VS Code and want automatic correction
+
+**Step by step:**
+
+**1.** Install the CLI globally:
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**2.** Open **VS Code**
+
+**3.** Press `Ctrl+Shift+X` (to open the Extensions panel)
+
+**4.** Search for `SmartLangGuard` and click **Install**
+
+> If you can't find it, you can build from source:
+> ```bash
+> cd packages/vscode-extension
+> npm run compile
+> ```
+
+**5.** After installation, the tool works automatically:
+
+| What you want to do | How |
+|---|---|
+| Fix selected text | Select text → `Ctrl+Shift+P` → type "Fix Selection" |
+| Fix last word | `Ctrl+Shift+Backspace` |
+| Check status | Click "SmartLangGuard" in the status bar (bottom) |
+| Change alert sound | `Ctrl+Shift+P` → "SmartLangGuard: Sound Selection" |
+
+---
+
+### Method 9: MCP Server (with AI tools)
+
+> **Best for:** if you use Claude Desktop, Cursor, or Cline and want AI to fix text for you
+
+**Step by step:**
+
+**1.** Install the CLI:
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**2.** Open the Claude Desktop config file:
+   - **Windows:** `C:\Users\YOUR_NAME\AppData\Roaming\Claude\claude_desktop_config.json`
+   - **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**3.** Add this configuration:
 ```json
 {
   "mcpServers": {
@@ -563,145 +887,107 @@ Add to your AI tool's config file:
 }
 ```
 
----
+**4.** Restart Claude Desktop
+
+**5.** Now Claude can use the tool. Try asking:
+> "Fix this text: high hofhv;"
+
+And it will respond with: **"اهلا اخبارك"**
 
 ---
 
-## 🌐 Browser Extension
+### Method 10: Node.js API (for developers)
 
-Fix keyboard layout mistakes on any webpage. Works with Chrome, Edge, and Brave.
+> **Best for:** if you want to build your own app and integrate the tool inside it
 
-### How it works
+**Step by step:**
 
-The browser extension talks to the daemon (background service) running on your computer.
-All fixing happens **locally** — no data leaves your machine.
-
-### Step-by-step installation
-
-#### 1. Install the CLI (one time)
-
+**1.** Install the library in your project:
 ```bash
-npm install -g @smartlangguard/cli
+npm install @smartlangguard/core
 ```
 
-> If you don't have Node.js, download it from [nodejs.org](https://nodejs.org) first.
+**2.** Write the code:
+```javascript
+const core = require('@smartlangguard/core');
 
-#### 2. Start the daemon
+// Initialize (once)
+await core.init({ telemetryEnabled: false });
 
-```bash
-smartlangguard daemon
+// Fix text
+const result = await core.fixText('high hofhv;');
+console.log(result.corrected);  // اهلا اخبارك
+console.log(result.direction);  // en-to-ar
+console.log(result.score);      // 88
+
+// Reverse direction
+const result2 = await core.fixText('اهلا', { direction: 'ar-to-en' });
+console.log(result2.corrected); // high
 ```
-
-Keep this terminal window open. You should see:
-
-```
-+--------------------------------------------+
-|  SmartLangGuard Daemon v0.1.3              |
-+--------------------------------------------+
-|  + Local API: http://localhost:41783       |
-+--------------------------------------------+
-```
-
-#### 3. Load the extension in your browser
-
-**Chrome:**
-1. Open Chrome and go to `chrome://extensions`
-2. Turn on **Developer mode** (toggle in top-right corner)
-3. Click **Load unpacked**
-4. Navigate to the `packages/browser-extension` folder and select it
-5. The SmartLangGuard icon appears in your toolbar ✓
-
-**Edge:**
-1. Open Edge and go to `edge://extensions`
-2. Turn on **Developer mode**
-3. Click **Load unpacked**
-4. Select the `packages/browser-extension` folder
-
-**Brave:**
-1. Open Brave and go to `brave://extensions`
-2. Turn on **Developer mode**
-3. Click **Load unpacked**
-4. Select the `packages/browser-extension` folder
-
-> The extension folder is at `packages/browser-extension` inside the project.
-> If you cloned the repo, run `git clone https://github.com/ahmdelbaz28-ux/rewrite.git`
-> and use the folder from there.
-
-### How to use it
-
-| Action | How |
-|--------|-----|
-| Fix selected text | Select text on any page → Right-click → **SmartLangGuard: Fix Selection** |
-| Quick shortcut | Select text → Press `Ctrl+Shift+L` |
-| Fix clipboard | Press `Ctrl+Shift+K` to fix whatever is in your clipboard |
-| Fix last word typed | Press `Ctrl+Shift+Backspace` (while typing in a text box) |
-| Open popup | Click the SmartLangGuard icon in your browser toolbar |
-| Open settings | Click the icon → click **Settings** |
-
-### Popup features
-
-- **Fix text**: Type or paste text into the popup and click **Fix**
-- **Auto-fix on paste**: Turn on to automatically fix text when you paste
-- **Real-time detection**: Get an alert when you type in the wrong keyboard layout
-- **Alert sound**: Choose a sound that plays when a mistake is detected
-
-### What if the icon shows "Daemon offline"?
-
-1. Make sure `smartlangguard daemon` is running in a terminal
-2. Click the extension icon → it should show "Daemon running"
-3. If still offline, restart the daemon and refresh the page
 
 ---
 
-## All Commands
+## All Commands in One Place
 
 | Command | What it does |
 |---------|-------------|
-| `fix "text"` | Fix text |
-| `fix -f in.txt -o out.txt` | Fix file |
-| `fix --format json "text"` | Fix with JSON result |
-| `fix -d ar-to-en "اهلا"` | Force Arabic → English |
-| `detect "text"` | Find mistakes (no fix) |
-| `interactive` | Chat-like mode |
-| `daemon` | Background hotkey + clipboard |
-| `mcp` | MCP server for AI |
-| `license activate <token>` | Activate license |
-| `license status` | Check license |
-| `config set <key> <val>` | Change settings |
-| `update check` | Check for update |
-| `sound play <name>` | Play alert sound |
+| `fix "text"` | Fix the text |
+| `fix -f file.txt -o output.txt` | Fix a file and save the result to another file |
+| `fix --format json "text"` | Fix and output the result as JSON |
+| `fix --format text-with-meta "text"` | Fix and show the confidence level |
+| `fix -d ar-to-en "اهلا"` | Reverse direction (Arabic → English) |
+| `detect "text"` | Find mistakes without fixing them |
+| `interactive` | Interactive (chat) mode |
+| `daemon` | Run as a background service |
+| `mcp` | Run the MCP server for AI tools |
+| `license activate <token>` | Activate a license |
+| `license status` | Show license status |
+| `config set telemetry false` | Disable telemetry |
+| `update check` | Check for updates |
+| `sound play ding` | Play an alert sound |
+| `sound list` | List available sounds |
 
 ---
 
-## Features
+## Features & Pricing
 
 | Feature | Free | Pro ($5/mo) |
 |---------|:----:|:-----------:|
-| Fix text | ✅ | ✅ |
+| Text correction | ✅ | ✅ |
 | CLI + Daemon + Hotkey | ✅ | ✅ |
 | VS Code Extension | ✅ | ✅ |
 | Browser Extension | ✅ | ✅ |
-| AI scoring | — | ✅ |
-| Devices | 1 | 3 |
+| AI-powered scoring | — | ✅ |
+| Number of devices | 1 | 3 |
+| Priority support | — | ✅ |
 
 ---
 
-## Programmatic API
+## Frequently Asked Questions
 
-```js
-const core = require('@smartlangguard/core');
-await core.init({ telemetryEnabled: false });
-const result = await core.fixText('high hofhv;');
-console.log(result.corrected); // اهلا اخبارك
+### Q: Does the tool send my data anywhere?
+**No.** All correction happens **on your device**. No data is sent to any server.
+
+### Q: Does it work offline?
+**Yes.** Once installed, the tool works without internet.
+
+### Q: Does it support languages other than Arabic and English?
+**Not yet.** Only Arabic and English for now. Other languages may be added in the future.
+
+### Q: How do I know the tool is working?
+Try this:
+```bash
+node packages/cli/bin/smartlangguard.js fix "high"
 ```
+If the output is `اهلا` → the tool is working perfectly ✓
 
 ---
 
-## Testing
+## Tests
 
 ```bash
-npm test               # 180 tests
-npx jest --verbose     # detailed
+npm test                # 180 tests
+npx jest --verbose      # more details
 ```
 
 ---
@@ -710,4 +996,4 @@ npx jest --verbose     # detailed
 
 Proprietary — © 2026 SmartLangGuard.
 
-[Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues) · [Email](mailto:hello@smartlangguard.com)
+[Issues & Suggestions](https://github.com/ahmdelbaz28-ux/rewrite/issues) · [Contact Us](mailto:ahmdelbaz28@gmail.com)
