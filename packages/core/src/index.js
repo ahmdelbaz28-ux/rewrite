@@ -9,7 +9,7 @@
 
 'use strict';
 
-const { translate, translateBatch, detectMistakeType, convertToArabic, convertToEnglish, scoreArabicWord } = require('./translator');
+const { translate, translateBatch, detectMistakeType, convertToArabic, convertToEnglish, scoreArabicWord, isFalsePositive, setKeyboardLayout, getKeyboardLayout, detectKeyboardLayout } = require('./translator');
 const { scoreConversion, scoreWithContext } = require('./ai-scoring');
 const { validateLicense, hasFeature, FEATURES, signLicenseToken, verifyLicenseToken, TIER_FEATURES, getDeviceFingerprint, getDeviceId } = require('./license');
 const telemetry = require('./telemetry');
@@ -17,8 +17,9 @@ const updater = require('./updater');
 const { SoundPlayer } = require('./sound-player');
 const { TypingDetector, detectWrongLayout, detectLastWord, findAllMistakes } = require('./typing-detector');
 const customModel = require('./custom-ai-model');
+const userDictionary = require('./user-dictionary');
 
-const VERSION = '0.1.3';
+const VERSION = '0.2.0';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -27,7 +28,9 @@ const DEFAULT_CONFIG = {
   telemetryEnabled: true,
   autoUpdate: true,
   defaultDirection: 'auto',
-  useRemoteScoring: true
+  useRemoteScoring: true,
+  keyboardLayout: 'qwerty',
+  enableLearning: true
 };
 
 let currentConfig = { ...DEFAULT_CONFIG };
@@ -39,6 +42,14 @@ let currentLicense = null;
  */
 async function init(config = {}) {
   currentConfig = { ...DEFAULT_CONFIG, ...config };
+
+  // Set keyboard layout
+  if (config.keyboardLayout) {
+    setKeyboardLayout(config.keyboardLayout);
+  }
+
+  // Initialize user dictionary
+  userDictionary.load();
 
   if (currentConfig.telemetryEnabled) {
     telemetry.init({
@@ -70,6 +81,7 @@ async function init(config = {}) {
 
 /**
  * Fixes mistyped text using rules + optional AI scoring.
+ * Now respects user dictionary whitelist and false positive patterns.
  * 
  * @param {string} text - mistyped input
  * @param {Object} [options]
@@ -79,11 +91,45 @@ async function init(config = {}) {
  */
 async function fixText(text, options = {}) {
   if (text == null) text = '';
+  
+  // Check false positive first
+  if (isFalsePositive(text)) {
+    return {
+      original: text,
+      corrected: text,
+      direction: 'none',
+      score: 0,
+      source: 'false-positive'
+    };
+  }
+  
+  // Check user dictionary whitelist
+  if (userDictionary.isWhitelisted(text)) {
+    return {
+      original: text,
+      corrected: text,
+      direction: 'none',
+      score: 0,
+      source: 'whitelist'
+    };
+  }
+  
   const direction = options.direction || currentConfig.defaultDirection;
   const useAI = options.useAI !== false && currentConfig.useRemoteScoring;
 
   // 1. Apply rules-based translation
   const result = translate(text, { direction, scoreOutput: true });
+  
+  // If direction is 'unknown' (false positive or ambiguous), return original
+  if (result.direction === 'unknown') {
+    return {
+      original: text,
+      corrected: text,
+      direction: 'none',
+      score: 0,
+      source: 'unknown'
+    };
+  }
 
   let score = result.score || 0;
   let source = 'rules';
@@ -124,9 +170,6 @@ async function fixTextBatch(texts, options = {}) {
 
 // ─── License Management ───────────────────────────────────────────────────────
 
-/**
- * Activates a license key.
- */
 async function activateLicense(token) {
   currentLicense = await validateLicense(token, {
     endpoint: currentConfig.endpoint,
@@ -144,9 +187,6 @@ async function activateLicense(token) {
   return { success: false, error: 'Invalid or expired license' };
 }
 
-/**
- * Returns current license status.
- */
 function getLicenseStatus() {
   if (!currentLicense) {
     return { valid: false, tier: 'free', features: ['rules-only'] };
@@ -162,16 +202,10 @@ function getLicenseStatus() {
 
 // ─── Update Management ────────────────────────────────────────────────────────
 
-/**
- * Checks for available updates.
- */
 async function checkForUpdate() {
   return updater.checkForUpdate();
 }
 
-/**
- * Performs the full update flow.
- */
 async function performUpdate(options) {
   return updater.performUpdate(options);
 }
@@ -179,6 +213,7 @@ async function performUpdate(options) {
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 
 function shutdown() {
+  userDictionary.save();
   telemetry.flush();
   telemetry.disable();
 }
@@ -195,6 +230,14 @@ module.exports = {
   checkForUpdate,
   performUpdate,
   shutdown,
+  // False positive detection
+  isFalsePositive,
+  // Keyboard layout support
+  setKeyboardLayout,
+  getKeyboardLayout,
+  detectKeyboardLayout,
+  // User dictionary
+  userDictionary,
   // Re-exports for advanced usage
   translate,
   translateBatch,

@@ -5,22 +5,24 @@
  * to the correct layout. Uses a deterministic character-mapping approach
  * with word-level dictionary scoring for ambiguous cases.
  * 
+ * Supports multiple keyboard layouts: QWERTY (US), AZERTY (French), QWERTZ (German)
+ * 
  * @module core/translator
  */
 
 'use strict';
 
-// ─── Layout Maps ──────────────────────────────────────────────────────────────
+// ─── Keyboard Layout Maps ──────────────────────────────────────────────────────
 
 /**
- * English QWERTY → Arabic 101 layout mapping.
+ * English US QWERTY → Arabic 101 layout mapping.
  * Each key on the English keyboard maps to its Arabic equivalent
  * when the OS is set to Arabic layout.
  */
-const EN_TO_AR = {
+const EN_TO_AR_QWERTY = {
   q: 'ض', w: 'ص', e: 'ث', r: 'ق', t: 'ف', y: 'غ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
   a: 'ش', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
-  z: 'ئ', x: 'ء', c: 'ؤ', v: 'ر', b: 'لا', n: 'ى', m: 'ة',
+  z: 'ئ', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
   '`': 'ذ', 1: '١', 2: '٢', 3: '٣', 4: '٤', 5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩', 0: '٠',
   '-': '-', '=': '=', '[': 'ج', ']': 'د', '\\': '\\', ';': 'ك', "'": 'ط',
   ',': 'و', '.': 'ز', '/': 'ظ',
@@ -28,25 +30,233 @@ const EN_TO_AR = {
 };
 
 /**
+ * French AZERTY → Arabic 101 layout mapping.
+ * Used by French-speaking Arabic users (Algeria, Morocco, Tunisia, Lebanon).
+ */
+const EN_TO_AR_AZERTY = {
+  a: 'ش', z: 'ئ', e: 'ث', r: 'ق', t: 'ف', y: 'غ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
+  q: 'ض', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
+  w: 'ص', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
+  '`': 'ذ', '&': '١', 'é': '٢', '"': '٣', "'": '٤', '(': '٥', '-': '٦',
+  'è': '٧', '_': '٨', 'ç': '٩', 'à': '٠',
+  ')': '=', '^': 'ج', '$': 'د', '*': '\\', ';': 'ك', ':': 'ط',
+  ',': 'و', '.': 'ز', '/': 'ظ',
+  ' ': ' '
+};
+
+/**
+ * German QWERTZ → Arabic 101 layout mapping.
+ */
+const EN_TO_AR_QWERTZ = {
+  q: 'ض', w: 'ص', e: 'ث', r: 'ق', t: 'ف', z: 'ئ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
+  a: 'ش', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
+  y: 'غ', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
+  '`': 'ذ', 1: '١', 2: '٢', 3: '٣', 4: '٤', 5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩', 0: '٠',
+  '-': '-', '=': '=', '[': 'ج', ']': 'د', '\\': '\\', ';': 'ك', "'": 'ط',
+  ',': 'و', '.': 'ز', '/': 'ظ',
+  ' ': ' '
+};
+
+// Active layout (default: QWERTY)
+let activeLayout = 'qwerty';
+const LAYOUTS = {
+  qwerty: EN_TO_AR_QWERTY,
+  azerty: EN_TO_AR_AZERTY,
+  qwertz: EN_TO_AR_QWERTZ
+};
+
+/**
+ * Get the active EN_TO_AR map based on current layout.
+ */
+function getActiveMap() {
+  return LAYOUTS[activeLayout] || LAYOUTS.qwerty;
+}
+
+// Keep backward-compatible EN_TO_AR reference
+const EN_TO_AR = EN_TO_AR_QWERTY;
+
+/**
+ * Sets the active keyboard layout.
+ * @param {'qwerty'|'azerty'|'qwertz'} layout
+ */
+function setKeyboardLayout(layout) {
+  if (LAYOUTS[layout]) {
+    activeLayout = layout;
+  }
+}
+
+/**
+ * Gets the current active keyboard layout name.
+ */
+function getKeyboardLayout() {
+  return activeLayout;
+}
+
+/**
+ * Auto-detects keyboard layout from text patterns.
+ * Checks if certain key combinations are more consistent with one layout.
+ */
+function detectKeyboardLayout(text) {
+  if (!text) return 'qwerty';
+  
+  // Check for AZERTY indicators: é, è, ç, à are common in French text
+  if (/[éèçà]/.test(text)) return 'azerty';
+  
+  // Check for QWERTZ indicators: z/y swap pattern
+  // If text has 'z' where 'y' would be expected in QWERTY→Arabic context
+  // This is a heuristic - not perfect but helps
+  return 'qwerty';
+}
+
+// ─── Reverse Mapping ──────────────────────────────────────────────────────────
+
+/**
  * Arabic 101 → English QWERTY reverse mapping.
  * Used when user typed Arabic text but intended English.
+ * Properly handles hamza variants as distinct mappings.
  */
 const AR_TO_EN = (() => {
   const map = {};
   for (const [en, ar] of Object.entries(EN_TO_AR)) {
     if (!map[ar]) map[ar] = en;
   }
-  // Manual overrides for ambiguous characters
-  map['ى'] = 'n';
-  map['ي'] = 'd'; // ensure ي→d since ى→n
-  map['ة'] = 'm';
-  map['ه'] = 'i';
-  map['ا'] = 'h';
-  map['أ'] = 'h';
-  map['إ'] = 'h';
-  map['آ'] = 'h';
+  // Proper manual overrides for ambiguous characters
+  // Note: ي (ya) and ى (alef maqsura) are distinct letters
+  map['ى'] = 'n';   // ى ← from key 'n' in Arabic layout
+  map['ي'] = 'd';   // ي ← from key 'd' in Arabic layout (but mapped to 'ي' same as d→ي)
+  map['ة'] = 'm';   // ة ← from key 'm'
+  map['ه'] = 'i';   // ه ← from key 'i'
+  map['ا'] = 'h';   // ا ← from key 'h'
+  // Hamza variants: each has a distinct mapping context
+  map['أ'] = 'h';   // alef with hamza above
+  map['إ'] = 'h';   // alef with hamza below
+  map['آ'] = 'h';   // alef with madda
+  map['ؤ'] = 'c';   // waw with hamza ← from key 'c'
+  map['ئ'] = 'z';   // ya with hamza ← from key 'z'
+  map['ء'] = 'x';   // bare hamza ← from key 'x'
   return map;
 })();
+
+// ─── False Positive Patterns ──────────────────────────────────────────────────
+
+/**
+ * Patterns that should NEVER be auto-converted.
+ * These are legitimate text that happens to look like keyboard mistakes.
+ */
+const FALSE_POSITIVE_PATTERNS = [
+  // URLs
+  /^https?:\/\/.+/i,
+  /^www\..+/i,
+  /^ftp:\/\/.+/i,
+  
+  // Email addresses
+  /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
+  
+  // File paths (Windows, Unix, relative)
+  /^[A-Za-z]:[\\\/].+/,
+  /^~\/.+/,
+  /^\.{0,2}[\/\\].+\.[a-zA-Z]{1,5}$/,
+  
+  // Code patterns (common programming keywords/syntax)
+  /^(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|new|this|typeof|null|undefined|true|false|console|require|module)\b/,
+  /^\/\/.*$/,        // line comments
+  /^\/\*.+$/,        // block comments
+  /^#include.+/,     // C preprocessor
+  /^#\s*\w+/,        // Python/shell comments and directives
+  
+  // Hex colors
+  /^#[0-9A-Fa-f]{3,8}$/,
+  
+  // IP addresses
+  /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
+  
+  // Version numbers
+  /^v?\d+\.\d+(\.\d+)?$/,
+  
+  // Pure numbers / math expressions
+  /^\d[\d+\-*/().\s,]*$/,
+  
+  // Common abbreviations (2-3 letters, all uppercase)
+  /^[A-Z]{2,4}$/,
+  
+  // Git references
+  /^git\s+/,
+  /^(HEAD|main|master|develop|feature\/).+/,
+  
+  // Package names (npm scoped packages, pip packages)
+  /^@[a-z0-9\-]+\/[a-z0-9\-]+$/,
+  // Note: removed broad ^[a-z][a-z0-9\-]{0,30}$ pattern - too many false negatives
+];
+
+/**
+ * Common English words that are frequently typed intentionally.
+ * If the ENTIRE input is one of these words, don't auto-convert.
+ */
+const INTENTIONAL_ENGLISH_WORDS = new Set([
+  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her',
+  'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how',
+  'its', 'may', 'new', 'now', 'old', 'see', 'way', 'who', 'did', 'got',
+  'let', 'say', 'she', 'too', 'use', 'yes', 'add', 'ask', 'big', 'end',
+  'far', 'few', 'fun', 'guy', 'hit', 'hot', 'job', 'lot', 'man', 'men',
+  'mom', 'non', 'own', 'pay', 'put', 'run', 'set', 'sit', 'six', 'top',
+  'try', 'two', 'act', 'age', 'ago', 'air', 'arm', 'art', 'bad', 'bag',
+  'bed', 'bit', 'box', 'boy', 'bus', 'buy', 'car', 'cat', 'cup', 'cut',
+  'dad', 'die', 'dog', 'eat', 'eye', 'fan', 'fat', 'fly', 'gas', 'god',
+  'gun', 'hat', 'hey', 'ice', 'key', 'kid', 'law', 'leg', 'lie', 'low',
+  'map', 'mix', 'mom', 'mom', 'net', 'oil', 'pay', 'per', 'red', 'row',
+  'sea', 'sir', 'sky', 'sun', 'tax', 'tea', 'tie', 'tip', 'war', 'web',
+  'win', 'wow', 'api', 'css', 'git', 'html', 'http', 'json', 'sql',
+  'url', 'xml', 'npm', 'app', 'bug', 'cli', 'doc', 'env', 'ftp', 'gui',
+  'ios', 'jar', 'lib', 'log', 'oop', 'pip', 'ram', 'sdk', 'ssh', 'ssl',
+  'tcp', 'usb', 'utc', 'api', 'aws', 'cdn', 'cpu', 'dns', 'gpu', 'iot',
+  'lan', 'mac', 'os', 'php', 'rss', 'spa', 'ssd', 'svg', 'ui', 'ux',
+  'vpn', 'wan', 'wifi', 'yaml', 'ok', 'no', 'hi', 'tv', 'pc', 'vs',
+  // Programming terms that look like Arabic keyboard mistakes
+  'function', 'class', 'return', 'const', 'export', 'import', 'async',
+  'array', 'object', 'string', 'number', 'boolean', 'null', 'undefined',
+  'true', 'false', 'console', 'window', 'document', 'element', 'style',
+  'click', 'input', 'event', 'value', 'index', 'count', 'total', 'error',
+  'hello', 'world', 'test', 'data', 'user', 'name', 'type', 'code',
+  'file', 'path', 'node', 'npm', 'git', 'push', 'pull', 'merge', 'commit',
+]);
+
+/**
+ * Checks if text matches any false positive pattern.
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isFalsePositive(text) {
+  if (!text) return false;
+  const trimmed = text.trim();
+  
+  // Check against regex patterns
+  for (const pattern of FALSE_POSITIVE_PATTERNS) {
+    if (pattern.test(trimmed)) return true;
+  }
+  
+  // Check if entire text is a common intentional English word
+  const words = trimmed.toLowerCase().split(/\s+/);
+  if (words.length <= 3 && words.every(w => INTENTIONAL_ENGLISH_WORDS.has(w))) {
+    return true;
+  }
+  
+  // Pure uppercase (acronyms): API, CSS, HTML, etc.
+  if (/^[A-Z]{2,10}$/.test(trimmed)) return true;
+  
+  // Text with mixed case (CamelCase, PascalCase) - likely code
+  if (/^[a-z]+[A-Z]/.test(trimmed) || /^[A-Z][a-z]+[A-Z]/.test(trimmed)) return true;
+  
+  // Contains special chars typical of code: =, {, }, (, ), =>, ::, ->, etc.
+  if (/[={}()]/.test(trimmed) && /[a-zA-Z]/.test(trimmed)) return true;
+  
+  // Phone numbers
+  if (/^\+?\d[\d\s\-()]{6,}$/.test(trimmed)) return true;
+  
+  // Date formats
+  if (/^\d{1,4}[\/\-.]\d{1,2}[\/\-.]\d{1,4}$/.test(trimmed)) return true;
+  
+  return false;
+}
 
 // ─── Common Arabic Words Dictionary ───────────────────────────────────────────
 
@@ -59,7 +269,7 @@ const ARABIC_WORD_SCORES = {
   'هذا': 95, 'هذه': 95, 'ذلك': 90, 'التي': 90, 'الذي': 90,
   'كان': 95, 'كانت': 90, 'يكون': 85, 'قد': 85, 'كل': 90, 'بعض': 85,
   'عند': 85, 'عندما': 80, 'ثم': 80, 'او': 80, 'اما': 75, 'لكن': 85,
-  'ايضا': 80, 'حيث': 80, 'كما': 80, 'لكي': 75, 'حتى': 85, '_since': 0,
+  'ايضا': 80, 'حيث': 80, 'كما': 80, 'لكي': 75, 'حتى': 85,
   'اهلا': 90, 'السلام': 85, 'عليكم': 85, 'مرحبا': 90, 'شكرا': 95,
   'جزاك': 80, 'الله': 100, 'الرحمن': 85, 'الرحيم': 85,
   'الكتاب': 80, 'المدرسة': 75, 'البيت': 80, 'العمل': 80,
@@ -69,18 +279,20 @@ const ARABIC_WORD_SCORES = {
   'محمد': 85, 'احمد': 85, 'علي': 85, 'حسن': 80,
   'مشروع': 80, 'برنامج': 80, 'كود': 75, 'تطبيق': 80,
   'انترنت': 75, 'كمبيوتر': 75, 'هاتف': 75, 'شاشة': 75,
-  // Common English→Arabic mistakes (raw English shouldn't appear in Arabic output)
-  'high': 0, // 'اهلا' raw - shouldn't appear
 };
 
 // ─── Detection Heuristics ─────────────────────────────────────────────────────
 
 /**
  * Detects whether text appears to be typed in wrong layout.
+ * Now includes false-positive detection to avoid corrupting legitimate text.
  * Returns: 'en-mistake' | 'ar-mistake' | 'unknown'
  */
 function detectMistakeType(text) {
   if (!text || typeof text !== 'string') return 'unknown';
+  
+  // False positive check FIRST - don't touch legitimate text
+  if (isFalsePositive(text)) return 'unknown';
 
   let enCount = 0;
   let arCount = 0;
@@ -117,15 +329,17 @@ function detectMistakeType(text) {
 
 /**
  * Converts English-typed text to Arabic (mistyped with English layout).
+ * Uses the active keyboard layout mapping.
  * @param {string} text
  * @returns {string}
  */
 function convertToArabic(text) {
   if (!text) return '';
+  const map = getActiveMap();
   return text.split('').map(ch => {
     const lower = ch.toLowerCase();
-    if (EN_TO_AR.hasOwnProperty(lower)) {
-      return EN_TO_AR[lower];
+    if (map.hasOwnProperty(lower)) {
+      return map[lower];
     }
     return ch;
   }).join('');
@@ -169,11 +383,17 @@ function scoreArabicWord(word) {
 /**
  * Scores a converted word in context with its neighbors.
  * Used by the AI scoring layer for ambiguous cases.
+ * @param {string} original - the original (mistyped) word
+ * @param {string} converted - the converted (corrected) word
  */
 function scoreConversion(original, converted) {
   const wordScore = scoreArabicWord(converted);
-  // Penalize if converted word has unusual character patterns
+  // Penalize if converted word still has Latin letters (incomplete conversion)
   if (/[A-Za-z]/.test(converted)) return wordScore * 0.3;
+  // Penalize if original looks like a valid English word (false positive risk)
+  if (original && /^[a-zA-Z]+$/.test(original) && original.length <= 3) {
+    return wordScore * 0.5; // short English words are often intentional
+  }
   return wordScore;
 }
 
@@ -181,6 +401,7 @@ function scoreConversion(original, converted) {
 
 /**
  * Main translation function. Auto-detects direction and applies conversion.
+ * Now safely returns original text for 'unknown' detection to prevent corruption.
  * @param {string} text - Input text (likely mistyped)
  * @param {Object} [options]
  * @param {'auto'|'en-to-ar'|'ar-to-en'} [options.direction='auto']
@@ -193,7 +414,13 @@ function translate(text, options = {}) {
 
   if (direction === 'auto') {
     detected = detectMistakeType(text);
-    if (detected === 'unknown') detected = 'en-mistake'; // default
+    // IMPORTANT: Don't convert 'unknown' text - return original to prevent corruption
+    if (detected === 'unknown') {
+      if (options.scoreOutput) {
+        return { text: text, score: 0, direction: 'unknown' };
+      }
+      return text;
+    }
   }
 
   let result;
@@ -236,7 +463,16 @@ module.exports = {
   detectMistakeType,
   scoreArabicWord,
   scoreConversion,
+  isFalsePositive,
+  setKeyboardLayout,
+  getKeyboardLayout,
+  detectKeyboardLayout,
   EN_TO_AR,
   AR_TO_EN,
-  ARABIC_WORD_SCORES
-};
+  ARABIC_WORD_SCORES,
+  EN_TO_AR_QWERTY,
+  EN_TO_AR_AZERTY,
+  EN_TO_AR_QWERTZ,
+  FALSE_POSITIVE_PATTERNS,
+  INTENTIONAL_ENGLISH_WORDS
+}

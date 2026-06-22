@@ -7,21 +7,22 @@
  * Designed for real-time use with debounced input events from:
  *   - VS Code: onDidChangeTextDocument
  *   - Browser: input/keydown events
- *   - Daemon: global keylogger (optional, OS-level)
+ *   - Daemon: clipboard monitoring
  * 
- * Detection triggers:
- *   1. 3+ consecutive Latin letters while previous text was Arabic
- *   2. 3+ consecutive Arabic letters while previous text was Latin
- *   3. Common layout-mistake patterns (e.g., "high" instead of "اهلا")
- *   4. Rapid transition (within 500ms) from Arabic context to Latin typing
+ * Features:
+ *   - User dictionary whitelist integration (never flags whitelisted words)
+ *   - Auto-learning from dismissed alerts
+ *   - Proper deletion/backspace tracking
+ *   - First-word context awareness
  * 
  * @module core/typing-detector
  */
 
 'use strict';
 
-const { translate, detectMistakeType } = require('./translator');
+const { translate, detectMistakeType, isFalsePositive } = require('./translator');
 const { scoreSentence } = require('./custom-ai-model');
+const userDictionary = require('./user-dictionary');
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ class TypingDetector {
       debounceMs: 250,               // delay before analyzing (in ms)
       sensitivity: 'medium',         // 'low' | 'medium' | 'high'
       requireContext: false,         // require preceding text in other language
+      enableLearning: true,          // auto-learn from dismissals
       ...options
     };
     
@@ -54,16 +56,18 @@ class TypingDetector {
     this.currentWord = '';
     this.previousWord = '';
     this.contextLanguage = null; // 'ar' | 'en' | null
+    this.contextConfidence = 0;  // 0-100, how confident we are in the context
     this.detectionCount = 0;
     this.lastAlertTime = 0;
     this.alertCooldownMs = 2000; // don't re-alert within 2s
+    this.completedWords = [];     // track recent completed words for context
   }
 
   /**
    * Process a text change event.
    * Returns a detection result if a layout mistake is detected, null otherwise.
    * 
-   * @param {Object} change - { text, range, insertedText }
+   * @param {Object} change - { text, range, insertedText, deletedText }
    * @returns {Promise<{detected: boolean, direction: string, confidence: number, originalText: string, suggestedText: string, alert: boolean}|null>}
    */
   async analyze(change) {
@@ -75,7 +79,14 @@ class TypingDetector {
     }
     this.lastAnalysisTime = now;
     
-    const { text, insertedText } = change;
+    const { text, insertedText, deletedText } = change;
+    
+    // Handle deletions
+    if (deletedText && !insertedText) {
+      this._handleDeletion(deletedText);
+      return null;
+    }
+    
     if (!insertedText) return null;
     
     // Update word tracking
@@ -106,32 +117,123 @@ class TypingDetector {
   }
 
   /**
+   * Handles deletion events (backspace, select+delete).
+   */
+  _handleDeletion(deletedText) {
+    if (!deletedText) return;
+    
+    // If large deletion (select all + delete), reset state
+    if (deletedText.length > 50) {
+      this.currentWord = '';
+      this.contextLanguage = null;
+      this.contextConfidence = 0;
+      return;
+    }
+    
+    // Trim current word based on what was deleted
+    const deleteLen = deletedText.length;
+    if (this.currentWord.length > deleteLen) {
+      this.currentWord = this.currentWord.slice(0, -deleteLen);
+    } else {
+      this.currentWord = '';
+    }
+  }
+
+  /**
    * Updates the current word tracking based on inserted text.
+   * Properly handles word boundaries and special characters.
    */
   _updateWordTracking(insertedText) {
     for (const ch of insertedText) {
       if (/\s/.test(ch)) {
-        // Word boundary
+        // Word boundary - save completed word for context
         if (this.currentWord) {
           this.previousWord = this.currentWord;
+          this.completedWords.push({
+            word: this.currentWord,
+            language: this._detectWordLanguage(this.currentWord)
+          });
+          // Keep only last 10 words for context
+          if (this.completedWords.length > 10) {
+            this.completedWords.shift();
+          }
           this.currentWord = '';
         }
-      } else if (ch === '\b' || ch === '\u0008') {
-        // Backspace
-        this.currentWord = this.currentWord.slice(0, -1);
+      } else if (/[.,!?;:،؟]/.test(ch)) {
+        // Punctuation also ends a word
+        if (this.currentWord) {
+          this.previousWord = this.currentWord;
+          this.completedWords.push({
+            word: this.currentWord,
+            language: this._detectWordLanguage(this.currentWord)
+          });
+          if (this.completedWords.length > 10) {
+            this.completedWords.shift();
+          }
+          this.currentWord = '';
+        }
       } else {
         this.currentWord += ch;
       }
+    }
+    
+    // Update context from completed words
+    this._updateContextFromHistory();
+  }
+
+  /**
+   * Detects the language of a single word.
+   */
+  _detectWordLanguage(word) {
+    if (!word) return null;
+    const hasLatin = /[a-zA-Z]/.test(word);
+    const hasArabic = /[\u0600-\u06FF]/.test(word);
+    if (hasArabic && !hasLatin) return 'ar';
+    if (hasLatin && !hasArabic) return 'en';
+    return null;
+  }
+
+  /**
+   * Updates context language based on recent word history.
+   * This fixes the first-word detection problem by looking at completed words.
+   */
+  _updateContextFromHistory() {
+    if (this.completedWords.length === 0) return;
+    
+    // Count recent languages
+    let arCount = 0;
+    let enCount = 0;
+    for (const entry of this.completedWords.slice(-5)) {
+      if (entry.language === 'ar') arCount++;
+      else if (entry.language === 'en') enCount++;
+    }
+    
+    if (arCount > enCount) {
+      this.contextLanguage = 'ar';
+      this.contextConfidence = Math.min(100, arCount * 20);
+    } else if (enCount > arCount) {
+      this.contextLanguage = 'en';
+      this.contextConfidence = Math.min(100, enCount * 20);
+    } else {
+      this.contextLanguage = null;
+      this.contextConfidence = 0;
     }
   }
 
   /**
    * Checks if the current word appears to be typed in the wrong layout.
+   * Integrates with user dictionary to skip whitelisted words.
    */
   _detectWrongLayout() {
     const word = this.currentWord;
     
     if (word.length < this.options.minWordLength) return null;
+    
+    // Check user dictionary first - never flag whitelisted words
+    if (userDictionary.isWhitelisted(word)) return null;
+    
+    // Check false positive patterns
+    if (isFalsePositive(word)) return null;
     
     // Count Latin and Arabic chars
     let latinCount = 0;
@@ -161,11 +263,16 @@ class TypingDetector {
     // Determine if this looks like a layout mistake
     let direction = null;
     
+    // Need stronger evidence when context is weak
+    const contextMultiplier = this.contextConfidence > 50 ? 1 : 1.5;
+    const minConsecutive = Math.ceil(this.options.minConsecutiveChars * contextMultiplier);
+    
     // Latin chars in an Arabic context (or vice versa)
-    const isLatinMistake = maxConsecutiveLatin >= this.options.minConsecutiveChars && 
-                           (arabicCount > 0 || this.contextLanguage === 'ar' || latinCount > arabicCount * 3);
-    const isArabicMistake = maxConsecutiveArabic >= this.options.minConsecutiveChars &&
-                            (latinCount > 0 || this.contextLanguage === 'en' || arabicCount > latinCount * 3);
+    const hasArabicContext = arabicCount > 0 || this.contextLanguage === 'ar';
+    const hasEnglishContext = latinCount > 0 || this.contextLanguage === 'en';
+    
+    const isLatinMistake = maxConsecutiveLatin >= minConsecutive && hasArabicContext;
+    const isArabicMistake = maxConsecutiveArabic >= minConsecutive && hasEnglishContext;
     
     if (isLatinMistake && !isArabicMistake) {
       direction = 'en-to-ar';
@@ -182,12 +289,16 @@ class TypingDetector {
     const result = translate(word, { direction, scoreOutput: true });
     const confidence = result.score || 0;
     
+    // Don't flag low-confidence detections
+    if (confidence < 30) return null;
+    
     // Update context language based on what user typed previously
     if (direction === 'en-to-ar') {
-      // They meant to type Arabic
       this.contextLanguage = 'ar';
+      this.contextConfidence = Math.min(100, this.contextConfidence + 10);
     } else {
       this.contextLanguage = 'en';
+      this.contextConfidence = Math.min(100, this.contextConfidence + 10);
     }
     
     return {
@@ -201,14 +312,35 @@ class TypingDetector {
   }
 
   /**
+   * Records that the user dismissed the current alert.
+   * Used for auto-learning.
+   */
+  dismissCurrentAlert() {
+    if (this.currentWord && this.options.enableLearning) {
+      userDictionary.recordDismissal(this.currentWord);
+    }
+  }
+
+  /**
+   * Adds the current word to the whitelist.
+   */
+  whitelistCurrentWord() {
+    if (this.currentWord) {
+      userDictionary.addToWhitelist(this.currentWord);
+    }
+  }
+
+  /**
    * Resets the detector state (e.g., when switching editors).
    */
   reset() {
     this.currentWord = '';
     this.previousWord = '';
     this.contextLanguage = null;
+    this.contextConfidence = 0;
     this.lastDetection = null;
     this.detectionCount = 0;
+    this.completedWords = [];
   }
 
   /**
@@ -219,8 +351,10 @@ class TypingDetector {
       currentWord: this.currentWord,
       previousWord: this.previousWord,
       contextLanguage: this.contextLanguage,
+      contextConfidence: this.contextConfidence,
       detectionCount: this.detectionCount,
-      lastAlertTime: this.lastAlertTime
+      lastAlertTime: this.lastAlertTime,
+      completedWords: this.completedWords.length
     };
   }
 }
@@ -229,13 +363,16 @@ class TypingDetector {
 
 /**
  * Quick check: does this text look like it was typed in the wrong layout?
- * Stateless - doesn't track history.
- * 
- * @param {string} text - text to check
- * @returns {{ detected: boolean, direction: string, confidence: number, suggestion: string } | null}
+ * Stateless - doesn't track history. Integrates false positive detection.
  */
 function detectWrongLayout(text) {
   if (!text || text.length < 2) return null;
+  
+  // Check false positive patterns first
+  if (isFalsePositive(text)) return null;
+  
+  // Check user dictionary
+  if (userDictionary.isWhitelisted(text)) return null;
   
   const mistakeType = detectMistakeType(text);
   if (mistakeType === 'unknown') return null;
@@ -243,12 +380,11 @@ function detectWrongLayout(text) {
   const direction = mistakeType === 'en-mistake' ? 'en-to-ar' : 'ar-to-en';
   const result = translate(text, { direction, scoreOutput: true });
   
-  // Score the original (mistyped) text in its original form
-  // and the converted text - if converted scores higher, it's likely a mistake
+  // Score the original text and converted text
   const originalScore = scoreSentence(text);
   const convertedScore = scoreSentence(result.text);
   
-  // If converted text scores significantly higher, it's a real mistake
+  // Only flag if converted text scores significantly higher
   if (convertedScore > originalScore + 20) {
     return {
       detected: true,
@@ -264,11 +400,6 @@ function detectWrongLayout(text) {
 
 /**
  * Detects layout mistakes in the most recent word of a text buffer.
- * Useful for analyzing "what was just typed".
- * 
- * @param {string} fullText - the full text buffer
- * @param {number} cursorPos - cursor position (default: end of text)
- * @returns {{ detected: boolean, direction: string, word: string, suggestion: string, range: [number, number] } | null}
  */
 function detectLastWord(fullText, cursorPos) {
   if (!fullText) return null;
@@ -297,10 +428,7 @@ function detectLastWord(fullText, cursorPos) {
 
 /**
  * Finds all "wrong layout" words in a text buffer.
- * Returns array of detected mistakes with their positions.
- * 
- * @param {string} text
- * @returns {Array<{ word: string, suggestion: string, direction: string, range: [number, number] }>}
+ * Handles punctuation attached to words.
  */
 function findAllMistakes(text) {
   if (!text) return [];
@@ -309,25 +437,32 @@ function findAllMistakes(text) {
   const words = text.split(/(\s+)/); // keep separators
   
   let pos = 0;
-  for (const word of words) {
-    if (word.length === 0) continue;
+  for (const rawWord of words) {
+    if (rawWord.length === 0) continue;
     
-    if (/\s/.test(word[0])) {
-      pos += word.length;
+    if (/\s/.test(rawWord[0])) {
+      pos += rawWord.length;
       continue;
     }
     
-    const detection = detectWrongLayout(word);
+    // Strip trailing punctuation for detection
+    const cleanWord = rawWord.replace(/[.,!?;:،؟]+$/, '');
+    if (cleanWord.length < 2) {
+      pos += rawWord.length;
+      continue;
+    }
+    
+    const detection = detectWrongLayout(cleanWord);
     if (detection) {
       results.push({
-        word,
+        word: cleanWord,
         suggestion: detection.suggestion,
         direction: detection.direction,
-        range: [pos, pos + word.length]
+        range: [pos, pos + cleanWord.length]
       });
     }
     
-    pos += word.length;
+    pos += rawWord.length;
   }
   
   return results;
@@ -338,4 +473,4 @@ module.exports = {
   detectWrongLayout,
   detectLastWord,
   findAllMistakes
-};
+}

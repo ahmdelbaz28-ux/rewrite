@@ -10,10 +10,27 @@
 
 [![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![Tests](https://img.shields.io/badge/Tests-180%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
+[![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](#-whats-new-in-v020)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
 
 </div>
+
+---
+
+## ✨ إيه الجديد في النسخة 0.2.0؟
+
+| الميزة الجديدة | الوصف |
+|----------------|--------|
+| 🔍 **كشف النصوص المشروعة** | URLs, إيميلات, أكواد, مسارات ملفات، ألوان Hex، أرقام IP — كلها متتغيرش |
+| 🌍 **دعم 3 أنواع كيبورد** | QWERTY (أمريكي), AZERTY (فرنسي), QWERTZ (ألماني) |
+| 📖 **قاموس مستخدم ذكي** | الأداة بتتعلم من رفضك للتنبيهات — بعد 3 مرات بتضيف الكلمة تلقائي |
+| 🔒 **أمان الـ Daemon** | رمز مصادقة (Token) لكل طلب API + CORS مقيد |
+| 🚀 **تشغيل تلقائي** | اختياري: شغّل الأداة مع بدء تشغيل Windows/macOS/Linux |
+| 🔔 **إشعارات Toast** | إشعارات غير مزعجة في الخلفية بدل الرسائل المنبثقة |
+| 📚 **قاموس عربي موسّع** | أكتر من 500 كلمة + اللهجات: المصرية، الخليجية، الشامية |
+| 🧠 **تحليل صرفي لاصق** | كشف الجذور العربية مع البادئات واللواحق (وبالكتب → كتب) |
+| ⌨️ **كشف السياق** | الأداة بتفهم لو إنت بتكتب عربي أو إنجليزي من الكلمات السابقة |
 
 ---
 
@@ -266,23 +283,38 @@ node packages/daemon/src/daemon.js
 **هتظهر لك:**
 ```
 +--------------------------------------------+
-|  SmartLangGuard Daemon v0.1.3              |
+|  SmartLangGuard Daemon v0.2.0              |
 |--------------------------------------------|
 |  + Clipboard monitor: ACTIVE               |
 |  + Global hotkey: Ctrl+Shift+Space         |
-|  + Local API: http://localhost:41783       |
+|  + Local API: http://localhost:41783        |
+|  + Auth token: 34867282...                 |
 +--------------------------------------------+
 Press Ctrl+C to stop.
 ```
 
-> ⚠️ **مهم:** خلي الـ Terminal ده مفتوح. لو قفلته، الـ Daemon هيقف.
+> ⚠️ **مهم:** 
+> - خلي الـ Terminal ده مفتوح. لو قفلته، الـ Daemon هيقف.
+> - الـ **Auth Token** ده لازم يتبعت مع كل طلب للـ API (الأمان)
 
 **3.** جرّب:
    - انسخ أي نص إنجليزي (مثلا: `high hofhv;`)
    - اضغط **`Ctrl+Shift+Space`**
    - اعمل **Paste** (`Ctrl+V`) — هتلاقي النص اتصلح!
 
-**4.** إيقاف الـ Daemon: اضغط `Ctrl+C` في الـ Terminal
+**4.** خيارات إضافية:
+```bash
+# تشغيل مع بدء التشغيل التلقائي
+node packages/daemon/src/daemon.js --auto-start
+
+# إيقاف التشغيل التلقائي
+node packages/daemon/src/daemon.js --disable-auto-start
+
+# من غير مراقبة Clipboard
+node packages/daemon/src/daemon.js --no-clipboard
+```
+
+**5.** إيقاف الـ Daemon: اضغط `Ctrl+C` في الـ Terminal
 
 ---
 
@@ -463,6 +495,11 @@ console.log(result2.corrected); // high
 | CLI + Daemon + Hotkey | ✅ | ✅ |
 | إضافة VS Code | ✅ | ✅ |
 | إضافة المتصفح | ✅ | ✅ |
+| كشف النصوص المشروعة (URLs, أكواد) | ✅ | ✅ |
+| قاموس المستخدم الذكي | ✅ | ✅ |
+| دعم 3 أنواع كيبورد | ✅ | ✅ |
+| قاموس عربي 500+ كلمة + لهجات | ✅ | ✅ |
+| تشغيل تلقائي مع النظام | ✅ | ✅ |
 | تصحيح بالذكاء الاصطناعي (AI) | — | ✅ |
 | عدد الأجهزة | 1 | 3 |
 | دعم فني | — | ✅ أولوية |
@@ -496,6 +533,17 @@ npm test                # 180 اختبار
 npx jest --verbose      # تفاصيل أكتر
 ```
 
+### إيه اللي بيتختبر؟
+| الوحدة | عدد الاختبارات | بتختبر إيه |
+|--------|:-:|--------|
+| Translator | 28 | تحويل الحروف، كشف الأخطاء، كشف النصوص المشروعة |
+| Custom AI Model | 25 | تسجيل الكلمات، Bigrams، قاموس 500+ كلمة |
+| Typing Detector | 17 | تتبع الكتابة، Backspace، السياق |
+| User Dictionary | 20 | Whitelist، التعلم التلقائي، التخزين |
+| Index (Core) | 20 | fixText, False Positives, Keyboard Layouts |
+| Daemon | 12 | API, Auth Token, CORS |
+| باقى الوحدات | 58 | CLI, Backend, License, Sound, Telemetry |
+
 ---
 
 ## الترخيص (License)
@@ -508,6 +556,22 @@ Proprietary — © 2026 SmartLangGuard.
 ---
 
 # 🇬🇧 English Guide
+
+---
+
+## ✨ What's New in v0.2.0?
+
+| New Feature | Description |
+|-------------|-------------|
+| 🔍 **False Positive Detection** | URLs, emails, code, file paths, hex colors, IP addresses are never touched |
+| 🌍 **3 Keyboard Layouts** | QWERTY (US), AZERTY (French), QWERTZ (German) |
+| 📖 **Smart User Dictionary** | Auto-learns from dismissed alerts — after 3 dismissals, word is whitelisted |
+| 🔒 **Daemon Security** | Token-based API authentication + restricted CORS |
+| 🚀 **Auto-start on Login** | Optional: start SmartLangGuard when Windows/macOS/Linux boots |
+| 🔔 **Toast Notifications** | Non-blocking background notifications instead of modal dialogs |
+| 📚 **500+ Arabic Words** | Expanded dictionary including Egyptian, Gulf, and Levantine dialects |
+| 🧠 **Agglutinative Morphology** | Strips prefix + suffix to find Arabic roots (وبالكتب → كتب) |
+| ⌨️ **Context Awareness** | Understands if you're typing Arabic or English from previous words |
 
 ---
 
@@ -760,23 +824,38 @@ node packages/daemon/src/daemon.js
 **You'll see:**
 ```
 +--------------------------------------------+
-|  SmartLangGuard Daemon v0.1.3              |
+|  SmartLangGuard Daemon v0.2.0              |
 |--------------------------------------------|
 |  + Clipboard monitor: ACTIVE               |
 |  + Global hotkey: Ctrl+Shift+Space         |
-|  + Local API: http://localhost:41783       |
+|  + Local API: http://localhost:41783        |
+|  + Auth token: 34867282...                 |
 +--------------------------------------------+
 Press Ctrl+C to stop.
 ```
 
-> ⚠️ **Important:** keep this terminal window open. If you close it, the Daemon stops.
+> ⚠️ **Important:**
+> - Keep this terminal window open. If you close it, the Daemon stops.
+> - The **Auth Token** must be sent with every API request (security)
 
 **3.** Try it:
    - Copy any English text (e.g., `high hofhv;`)
    - Press **`Ctrl+Shift+Space`**
    - Paste (`Ctrl+V`) — you'll see the text is now fixed!
 
-**4.** To stop the Daemon: press `Ctrl+C` in the terminal
+**4.** Extra options:
+```bash
+# Start with auto-start on login enabled
+node packages/daemon/src/daemon.js --auto-start
+
+# Disable auto-start
+node packages/daemon/src/daemon.js --disable-auto-start
+
+# Without clipboard monitoring
+node packages/daemon/src/daemon.js --no-clipboard
+```
+
+**5.** To stop the Daemon: press `Ctrl+C` in the terminal
 
 ---
 
@@ -957,6 +1036,11 @@ console.log(result2.corrected); // high
 | CLI + Daemon + Hotkey | ✅ | ✅ |
 | VS Code Extension | ✅ | ✅ |
 | Browser Extension | ✅ | ✅ |
+| False positive detection (URLs, code) | ✅ | ✅ |
+| Smart user dictionary | ✅ | ✅ |
+| 3 keyboard layouts | ✅ | ✅ |
+| 500+ word Arabic dictionary + dialects | ✅ | ✅ |
+| Auto-start on login | ✅ | ✅ |
 | AI-powered scoring | — | ✅ |
 | Number of devices | 1 | 3 |
 | Priority support | — | ✅ |
@@ -989,6 +1073,17 @@ If the output is `اهلا` → the tool is working perfectly ✓
 npm test                # 180 tests
 npx jest --verbose      # more details
 ```
+
+### What's tested?
+| Module | Tests | What's tested |
+|--------|:-:|--------|
+| Translator | 28 | Char mapping, mistake detection, false positive detection |
+| Custom AI Model | 25 | Word scoring, bigrams, 500+ word dictionary |
+| Typing Detector | 17 | Word tracking, backspace handling, context awareness |
+| User Dictionary | 20 | Whitelist, auto-learning, persistence |
+| Index (Core) | 20 | fixText, false positives, keyboard layouts |
+| Daemon | 12 | API endpoints, auth token, CORS |
+| Other modules | 58 | CLI, Backend, License, Sound, Telemetry |
 
 ---
 
