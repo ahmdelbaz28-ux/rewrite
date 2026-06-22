@@ -11,76 +11,42 @@
 [![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![Tests](https://img.shields.io/badge/Tests-180%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
-[![Node](https://img.shields.io/badge/Node-18%2B-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org)
 [![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
 
 </div>
 
 ---
 
-## Quick Start (30 seconds)
+## Quick Start
 
 ```bash
-# 1. Install
-npm install -g @smartlangguard/cli
-
-# 2. Fix your first text
-smartlangguard fix "high hofhv;"
-# → اهلا اخبارك
-
-# 3. Verify
-smartlangguard --version   # → 0.1.3
+npm install -g @smartlangguard/cli          # install (30 sec)
+smartlangguard fix "high hofhv;"             # → اهلا اخبارك
 ```
-
-**No npm?** Download a binary from [Releases](https://github.com/ahmdelbaz28-ux/rewrite/releases).
 
 ---
 
-## Usage
+## All Methods — Install, Run & Use
 
-After installing, these commands work anywhere:
+| # | Method | Where it works | Install (once) | Run | Use (every day) |
+|:-:|--------|---------------|----------------|-----|-----------------|
+| 1 | **Terminal** | Command Prompt, PowerShell, Bash | `npm install -g @smartlangguard/cli` | `smartlangguard fix "high"` | Type command → get fixed text instantly |
+| 2 | **Clipboard Hotkey** ⭐ | **Any app** — Word, Chrome, WhatsApp, Telegram, VS Code, Slack | `npm install -g @smartlangguard/cli` | `smartlangguard daemon` (keep open) | Copy text → `Ctrl+Shift+Space` → Paste fixed |
+| 3 | **Chat Mode** | Terminal (like talking to a bot) | `npm install -g @smartlangguard/cli` | `smartlangguard interactive` | Type text → get fix → repeat. Type `exit` to quit |
+| 4 | **Pipe** | Scripts, AI tools, automation | `npm install -g @smartlangguard/cli` | `echo "high" \| smartlangguard fix` | Send text in → get fixed text out |
+| 5 | **File** | Any text file (.txt, .md, etc.) | `npm install -g @smartlangguard/cli` | `smartlangguard fix -f file.txt -o fixed.txt` | One command fixes entire file |
+| 6 | **VS Code** | VS Code editor | 1. `npm install -g @smartlangguard/cli`<br>2. Extensions → search "SmartLangGuard" → Install | — | Select text → `Ctrl+Shift+F1` or right-click → Fix Selection |
+| 7 | **Browser** (Pro+) | Chrome, Edge, Brave | 1. Buy Pro license<br>2. Install extension | — | Select text on any webpage → right-click → Fix |
+| 8 | **AI Tools (MCP)** | Claude Desktop, Cursor, Cline | `npm install -g @smartlangguard/cli` + add config (see below) | — | AI fixes text automatically when you ask |
+| 9 | **Node.js API** | Your own JavaScript code | `npm install @smartlangguard/core` | `require('@smartlangguard/core')` | `core.fixText('high')` → `{ corrected: 'اهلا' }` |
+| 10 | **Binary** (no npm) | Any computer without Node.js | Download `.exe` / binary from [Releases](https://github.com/ahmdelbaz28-ux/rewrite/releases) | `./smartlangguard fix "high"` | Same as Terminal method |
 
-### Fix Text
-```bash
-smartlangguard fix "high"                 # → اهلا
-echo "high hofhv;" | smartlangguard fix   # pipe from anywhere
-smartlangguard fix -f input.txt -o fixed.txt  # files
-smartlangguard fix --format json "high"   # JSON with score
-```
+> ⭐ **For non-coders:** Method 2 (Clipboard Hotkey) is the easiest — install once, then use `Ctrl+Shift+Space` in any app.
 
-### Detect Mistakes
-```bash
-smartlangguard detect "hello high hofhv"
-# Found 2 mistake(s):
-#   1. "high" → "اهلا"  (en-to-ar)
-#   2. "hofhv" → "اخبار" (en-to-ar)
-```
+### MCP Config (for Method 8)
 
-### Interactive Mode (chat-like)
-```bash
-smartlangguard interactive
-# smartlangguard> high
-# → اهلا  [en-to-ar | 90%]
-```
+Add to your AI tool's config file:
 
-### Daemon + Hotkey (use from ANY app)
-```bash
-smartlangguard daemon
-# Starts background service with:
-#   • Global Hotkey: Ctrl+Shift+Space
-#   • Clipboard monitor
-#   • Local API: http://localhost:41783
-```
-**Workflow:** Copy text → `Ctrl+Shift+Space` → Paste fixed text. Works in Word, Chrome, WhatsApp, VS Code — any app.
-
-```bash
-# Options
-smartlangguard daemon --no-clipboard   # disable clipboard monitor
-smartlangguard daemon --no-hotkey      # disable global hotkey
-```
-
-### AI Tools (MCP)
-Add to Claude Desktop / Cursor config:
 ```json
 {
   "mcpServers": {
@@ -91,56 +57,43 @@ Add to Claude Desktop / Cursor config:
   }
 }
 ```
-Then AI assistants can fix text automatically.
 
 ---
 
 ## All Commands
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `fix [text]` | Fix mistyped text |
-| `fix -f <file> -o <file>` | Fix files |
-| `fix --format json` | JSON output with score |
-| `fix -d ar-to-en` | Force direction |
-| `detect [text]` | Find mistakes without fixing |
-| `interactive` | Chat-like REPL mode |
-| `daemon` | Background service + hotkey |
-| `mcp` | MCP server for AI tools |
+| `fix "text"` | Fix text |
+| `fix -f in.txt -o out.txt` | Fix file |
+| `fix --format json "text"` | Fix with JSON result |
+| `fix -d ar-to-en "اهلا"` | Force Arabic → English |
+| `detect "text"` | Find mistakes (no fix) |
+| `interactive` | Chat-like mode |
+| `daemon` | Background hotkey + clipboard |
+| `mcp` | MCP server for AI |
 | `license activate <token>` | Activate license |
-| `license status` | Check license tier |
-| `config set <k> <v>` | Set config |
-| `update check` | Check for updates |
+| `license status` | Check license |
+| `config set <key> <val>` | Change settings |
+| `update check` | Check for update |
 | `sound play <name>` | Play alert sound |
 
 ---
 
-## Features by Tier
+## Features
 
-| Feature | Free | Pro ($5/mo) | Team ($49/mo) |
-|---------|:----:|:-----------:|:--------------:|
-| Rules-based translation | ✅ | ✅ | ✅ |
-| AI scoring | — | ✅ | ✅ |
-| CLI + MCP + Daemon | ✅ | ✅ | ✅ |
-| Global Hotkey | ✅ | ✅ | ✅ |
-| VS Code Extension | ✅ | ✅ | ✅ |
-| Browser Extension | — | ✅ | ✅ |
-| Cloud Sync | — | ✅ | ✅ |
-| Max devices | 1 | 3 | 10 |
+| Feature | Free | Pro ($5/mo) |
+|---------|:----:|:-----------:|
+| Fix text | ✅ | ✅ |
+| CLI + Daemon + Hotkey | ✅ | ✅ |
+| VS Code Extension | ✅ | ✅ |
+| AI scoring | — | ✅ |
+| Browser Extension | — | ✅ |
+| Devices | 1 | 3 |
 
 ---
 
-## VS Code Extension
-
-1. Install CLI: `npm install -g @smartlangguard/cli`
-2. In VS Code: Extensions → search "SmartLangGuard" → Install
-3. Select text → `Ctrl+Shift+F1` (Win) / `Cmd+Shift+F1` (Mac)
-
-Or right-click → **"SmartLangGuard: Fix Selection"**
-
----
-
-## Programmatic API (Node.js)
+## Programmatic API
 
 ```js
 const core = require('@smartlangguard/core');
@@ -154,21 +107,14 @@ console.log(result.corrected); // اهلا اخبارك
 ## Testing
 
 ```bash
-npm test                 # all 180 tests
-npx jest --verbose       # detailed output
+npm test               # 180 tests
+npx jest --verbose     # detailed
 ```
 
 ---
 
 ## License
 
-Proprietary — © 2026 SmartLangGuard. See [LICENSE](LICENSE).
+Proprietary — © 2026 SmartLangGuard.
 
----
-
-<div align="center">
-
-**Powered by AI, Built for Developers.**  
 [Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues) · [Email](mailto:hello@smartlangguard.com)
-
-</div>
