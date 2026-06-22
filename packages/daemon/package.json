@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/daemon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SmartLangGuard Daemon - Background clipboard monitor + global hotkey for fixing keyboard layout mistakes",
   "main": "src/daemon.js",
   "bin": {

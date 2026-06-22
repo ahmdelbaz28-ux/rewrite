@@ -18,7 +18,7 @@ const { SoundPlayer } = require('./sound-player');
 const { TypingDetector, detectWrongLayout, detectLastWord, findAllMistakes } = require('./typing-detector');
 const customModel = require('./custom-ai-model');
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 

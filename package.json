@@ -1,6 +1,6 @@
 {
   "name": "smartlangguard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "SmartLangGuard - Cross-platform keyboard layout mistake fixer (CLI, MCP, Daemon, VS Code, SaaS)",
   "workspaces": [
@@ -17,10 +17,12 @@
     "start:backend": "npm start --workspace @smartlangguard/backend",
     "start:daemon": "npm start --workspace @smartlangguard/daemon",
     "start:mcp": "node packages/mcp-server/src/mcp-server.js",
-    "test": "npm test --workspaces --if-present",
-    "test:core": "npm test --workspace @smartlangguard/core",
+    "test": "jest --config jest.config.json",
+    "test:core": "jest --config jest.config.json --testPathPattern=\"packages/core/tests\"",
+    "test:backend": "jest --config jest.config.json --testPathPattern=\"packages/backend/tests\"",
+    "test:mcp": "jest --config jest.config.json --testPathPattern=\"packages/mcp-server/tests\"",
     "release": "node scripts/release.js",
-    "clean": "rm -rf packages/*/node_modules packages/*/dist packages/*/out"
+    "clean": "node -e \"const fs=require('fs'),p=require('path');['packages'].forEach(d=>fs.readdirSync(d).forEach(s=>{const pp=p.join(d,s);['node_modules','dist','out'].forEach(n=>{const fp=p.join(pp,n);if(fs.existsSync(fp))fs.rmSync(fp,{recursive:true})})}))\""
   },
   "keywords": [
     "arabic",
