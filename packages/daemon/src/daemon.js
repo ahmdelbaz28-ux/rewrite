@@ -15,12 +15,16 @@ const core = require('@smartlangguard/core');
 const clipboard = require('./clipboard');
 const hotkey = require('./hotkey');
 const http = require('http');
+const { execFile } = require('child_process');
 
-const DAEMON_PORT = 41783; // SLG (S=1? L=?...) - arbitrary local port
+const DAEMON_PORT = 41783;
 
 let monitoring = false;
 let lastClipboardHash = null;
 let autoFixClipboard = false;
+let clipboardCheckInterval = null;
+let httpServer = null;
+let shutdownRegistered = false;
 
 // ─── Initialization ───────────────────────────────────────────────────────────
 
@@ -30,53 +34,70 @@ async function startDaemon(options = {}) {
     telemetryEnabled: true
   });
 
-  console.log(`╔════════════════════════════════════════════╗`);
-  console.log(`║  SmartLangGuard Daemon v${core.VERSION}            ║`);
-  console.log(`╠════════════════════════════════════════════╣`);
+  console.log(`+--------------------------------------------+`);
+  console.log(`|  SmartLangGuard Daemon v${core.VERSION.padEnd(30)}|`);
+  console.log(`|--------------------------------------------|`);
 
   // Start clipboard monitor
   if (options.monitorClipboard !== false) {
     monitoring = true;
     startClipboardMonitor();
-    console.log(`║  ✓ Clipboard monitor: ACTIVE               ║`);
+    console.log(`|  + Clipboard monitor: ACTIVE               |`);
   }
 
   // Start global hotkey listener
   if (options.enableHotkey !== false) {
     try {
       await hotkey.register('Ctrl+Shift+Space', handleHotkey);
-      console.log(`║  ✓ Global hotkey: Ctrl+Shift+Space         ║`);
+      console.log(`|  + Global hotkey: Ctrl+Shift+Space         |`);
     } catch (err) {
-      console.log(`║  ✗ Hotkey unavailable: ${err.message.padEnd(22)}║`);
+      console.log(`|  - Hotkey unavailable: ${err.message.padEnd(22)}|`);
     }
   }
 
   // Start local HTTP server (for browser extensions)
   startLocalServer();
-  console.log(`║  ✓ Local API: http://localhost:${DAEMON_PORT}      ║`);
-  console.log(`╚════════════════════════════════════════════╝`);
-  console.log(`\nPress Ctrl+C to stop.\n`);
+  const port = httpServer ? DAEMON_PORT : 'FAILED';
+  console.log(`|  + Local API: http://localhost:${String(port).padEnd(37)}|`);
+  console.log(`+--------------------------------------------+`);
+  console.log('');
 
-  // Graceful shutdown
-  process.on('SIGINT', async () => {
+  // Graceful shutdown - only register once
+  registerShutdown();
+  console.log('Press Ctrl+C to stop.\n');
+}
+
+function registerShutdown() {
+  if (shutdownRegistered) return;
+  shutdownRegistered = true;
+
+  async function shutdown() {
     console.log('\nShutting down...');
-    await hotkey.unregisterAll();
-    core.shutdown();
+    try {
+      await hotkey.unregisterAll();
+    } catch {}
+    if (clipboardCheckInterval) {
+      clearInterval(clipboardCheckInterval);
+      clipboardCheckInterval = null;
+    }
+    if (httpServer) {
+      httpServer.close();
+      httpServer = null;
+    }
+    try { core.shutdown(); } catch {}
     process.exit(0);
-  });
+  }
 
-  process.on('SIGTERM', async () => {
-    await hotkey.unregisterAll();
-    core.shutdown();
-    process.exit(0);
-  });
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 }
 
 // ─── Clipboard Monitor ────────────────────────────────────────────────────────
 
-let clipboardCheckInterval;
-
 function startClipboardMonitor() {
+  if (clipboardCheckInterval) {
+    clearInterval(clipboardCheckInterval);
+  }
   clipboardCheckInterval = setInterval(async () => {
     try {
       const text = await clipboard.readClipboard();
@@ -104,10 +125,14 @@ function startClipboardMonitor() {
 }
 
 function looksLikeMistake(text) {
-  // Heuristic: 3+ consecutive English letters, or Arabic-only text shorter than 50 chars
   if (!text || text.length > 200) return false;
-  if (!/[a-zA-Z]{3,}/.test(text) && !/^[\u0600-\u06FF\s]+$/.test(text)) return false;
-  return true;
+  const hasEnglish = /[a-zA-Z]{3,}/.test(text);
+  const onlyArabic = /^[\u0600-\u06FF\s]+$/.test(text);
+  const mixed = hasEnglish && /[\u0600-\u06FF]/.test(text);
+  if (mixed) return false;
+  if (hasEnglish) return true;
+  if (onlyArabic) return text.length < 50;
+  return false;
 }
 
 // ─── Hotkey Handler ───────────────────────────────────────────────────────────
@@ -137,26 +162,26 @@ async function handleHotkey() {
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 function showNotification(message) {
-  const { exec } = require('child_process');
   const platform = require('os').platform();
   
-  let cmd;
+  const escaped = message.replace(/'/g, "'\\''").replace(/"/g, '\\"');
+  
   switch (platform) {
     case 'darwin':
-      cmd = `osascript -e 'display notification "${message.replace(/"/g, '\\"')}" with title "SmartLangGuard"'`;
+      execFile('osascript', ['-e', `display notification "${escaped}" with title "SmartLangGuard"`], () => {});
       break;
-    case 'win32':
-      cmd = `powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('${message}', 'SmartLangGuard')"`;
+    case 'win32': {
+      const psCode = `Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('${message.replace(/'/g, "''")}', 'SmartLangGuard')`;
+      execFile('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCode], () => {});
       break;
+    }
     case 'linux':
-      cmd = `notify-send "SmartLangGuard" "${message.replace(/"/g, '\\"')}"`;
+      execFile('notify-send', ['SmartLangGuard', message], () => {});
       break;
     default:
       console.log(`[Notification] ${message}`);
       return;
   }
-  
-  exec(cmd, () => {});
   console.log(`[Notification] ${message}`);
 }
 
@@ -231,9 +256,11 @@ function startLocalServer() {
   });
 
   server.listen(DAEMON_PORT, '127.0.0.1');
+  httpServer = server;
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      console.log('  ⚠ Daemon already running on this port');
+      console.log('  - Port already in use: daemon already running');
+      console.log('  - Use Ctrl+C to stop this instance');
     } else {
       console.error('Server error:', err);
     }

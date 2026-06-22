@@ -13,6 +13,13 @@ function spawnAsync(cmd, args, input) {
     const child = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
+    let killed = false;
+    const timeout = setTimeout(() => {
+      killed = true;
+      child.kill();
+      reject(new Error(`Process timed out: ${cmd} ${args.join(' ')}`));
+    }, 30000);
+    child.stdin.on('error', () => {});
     if (input) {
       child.stdin.write(input);
       child.stdin.end();
@@ -22,10 +29,16 @@ function spawnAsync(cmd, args, input) {
     child.stdout.on('data', (d) => { stdout += d; });
     child.stderr.on('data', (d) => { stderr += d; });
     child.on('close', (code) => {
+      clearTimeout(timeout);
+      if (killed) return;
       if (code === 0) resolve(stdout);
       else reject(new Error(stderr || `Process exited with code ${code}`));
     });
-    child.on('error', reject);
+    child.on('error', (err) => {
+      clearTimeout(timeout);
+      if (killed) return;
+      reject(err);
+    });
   });
 }
 

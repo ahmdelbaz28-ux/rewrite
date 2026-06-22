@@ -56,6 +56,7 @@ async function registerMacOS(combo) {
   console.log('  → Install skhd (brew install skhd) and configure manually');
   console.log('  → Or use the daemon local API on port 41783');
   state = 'error';
+  return Promise.resolve();
 }
 
 // ─── Windows (PowerShell) ─────────────────────────────────────────────────────
@@ -215,6 +216,8 @@ try {
     });
     
     child.on('close', (code) => {
+      const idx = registeredProcesses.indexOf(child);
+      if (idx !== -1) registeredProcesses.splice(idx, 1);
       if (!resolved) {
         resolved = true;
         clearTimeout(startupTimeout);
@@ -223,6 +226,7 @@ try {
       }
     });
     
+    child.unref();
     registeredProcesses.push(child);
   });
 }
@@ -230,8 +234,6 @@ try {
 // ─── Linux (xdotool / xbindkeys) ──────────────────────────────────────────────
 
 async function registerLinux(combo) {
-  // For Linux, we recommend xbindkeys config file
-  // Generate a config snippet
   const configSnippet = `
 # SmartLangGuard hotkey
 "${process.execPath} ${process.argv[1]} --trigger-hotkey"
@@ -242,6 +244,8 @@ async function registerLinux(combo) {
   console.log(`  → Add this to ${xbindkeysConfig}:`);
   console.log(configSnippet);
   console.log('  → Then run: xbindkeys -f ~/.xbindkeysrc');
+  state = 'error';
+  return Promise.resolve();
 }
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
