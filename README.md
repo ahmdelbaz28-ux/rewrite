@@ -36,7 +36,7 @@ smartlangguard fix "high hofhv;"             # → اهلا اخبارك
 | 4 | **Pipe** | Scripts, AI tools, automation | `npm install -g @smartlangguard/cli` | `echo "high" \| smartlangguard fix` | Send text in → get fixed text out |
 | 5 | **File** | Any text file (.txt, .md, etc.) | `npm install -g @smartlangguard/cli` | `smartlangguard fix -f file.txt -o fixed.txt` | One command fixes entire file |
 | 6 | **VS Code** | VS Code editor | 1. `npm install -g @smartlangguard/cli`<br>2. Extensions → search "SmartLangGuard" → Install | — | Select text → `Ctrl+Shift+F1` or right-click → Fix Selection |
-| 7 | **Browser** (Pro+) | Chrome, Edge, Brave | 1. Buy Pro license<br>2. Install extension | — | Select text on any webpage → right-click → Fix |
+| 7 | **Browser** | Chrome, Edge, Brave | 1. `npm install -g @smartlangguard/cli`<br>2. `smartlangguard daemon` (keep open)<br>3. Load extension from `packages/browser-extension` | — | Select text on any webpage → right-click → Fix |
 | 8 | **AI Tools (MCP)** | Claude Desktop, Cursor, Cline | `npm install -g @smartlangguard/cli` + add config (see below) | — | AI fixes text automatically when you ask |
 | 9 | **Node.js API** | Your own JavaScript code | `npm install @smartlangguard/core` | `require('@smartlangguard/core')` | `core.fixText('high')` → `{ corrected: 'اهلا' }` |
 | 10 | **Binary** (no npm) | Any computer without Node.js | Download `.exe` / binary from [Releases](https://github.com/ahmdelbaz28-ux/rewrite/releases) | `./smartlangguard fix "high"` | Same as Terminal method |
@@ -87,8 +87,8 @@ Add to your AI tool's config file:
 | Fix text | ✅ | ✅ |
 | CLI + Daemon + Hotkey | ✅ | ✅ |
 | VS Code Extension | ✅ | ✅ |
+| Browser Extension | ✅ | ✅ |
 | AI scoring | — | ✅ |
-| Browser Extension | — | ✅ |
 | Devices | 1 | 3 |
 
 ---
