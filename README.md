@@ -19,6 +19,7 @@
 [![Platform](https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=for-the-badge)](#-installation)
 
 [Install Now](#-installation) ·
+[All Usage Methods](#-usage-methods) ·
 [Quick Start](#-quick-start) ·
 [Features](#-features) ·
 [Pricing](#-pricing) ·
@@ -42,28 +43,29 @@
 
 | # | Section | Description |
 |:-:|---------|-------------|
-| 01 | [❓ The Problem](#-the-problem) | Why keyboard layout mistakes happen and their real cost |
-| 02 | [💡 The Solution](#-the-solution) | How SmartLangGuard fixes it in one command |
-| 03 | [⚙️ How It Works](#-how-it-works) | The correction engine explained step by step |
-| 04 | [⚡ Quick Demo](#-quick-demo) | See it in action with real examples |
-| 05 | [✨ Features](#-features) | Complete feature breakdown by tier |
-| 06 | [📦 Installation](#-installation) | Install via npm, binary download, or source |
-| 07 | [🚀 Quick Start](#-quick-start) | From zero to first fix in 30 seconds |
-| 08 | [📖 CLI Reference](#-cli-reference) | Every command, flag, and option documented |
-| 09 | [🤖 MCP Integration](#-mcp-integration-ai-tools) | Connect directly to Claude, Cursor, Cline |
-| 10 | [⚙️ Daemon Mode](#-daemon-mode-background-service) | Background clipboard monitor + global hotkey |
-| 11 | [🖥️ VS Code Extension](#-vs-code-extension) | Fix text directly in your editor |
-| 12 | [🌐 Browser Extension](#-browser-extension-pro) | Auto-fix text in any web page |
-| 13 | [☁️ SaaS Backend](#-saas-backend) | License, billing, admin dashboard |
-| 14 | [🎯 Benefits](#-benefits) | Advantage for individuals, devs, teams, enterprise |
-| 15 | [💰 Pricing](#-pricing) | Free, Pro, Team, and Enterprise tiers |
-| 16 | [🏗️ Architecture](#-architecture) | System design and monorepo structure |
-| 17 | [🧪 Testing](#-testing) | 166 tests across 10 suites |
-| 18 | [🔒 Security](#-security) | Privacy-first, offline-first security model |
-| 19 | [📊 CI/CD](#-cicd) | Automated GitHub Actions pipeline |
-| 20 | [👣 Roadmap](#-roadmap) | Past, present, and future development |
-| 21 | [📜 Changelog](#-changelog) | Version history and release notes |
-| 22 | [📞 Support & Community](#-support--community) | Get help and stay connected |
+| 01 | [❓ The Problem](#-the-problem) | Why keyboard layout mistakes happen |
+| 02 | [💡 The Solution](#-the-solution) | How SmartLangGuard fixes it |
+| 03 | [⚙️ How It Works](#-how-it-works) | The engine explained step by step |
+| 04 | [⚡ Quick Demo](#-quick-demo) | See it in action |
+| 05 | [🎯 All Usage Methods](#-usage-methods) | **Every way to use the program** + install guide |
+| 06 | [✨ Features](#-features) | Feature breakdown by tier |
+| 07 | [📦 Installation](#-installation) | Install via npm, binary, or source |
+| 08 | [🚀 Quick Start](#-quick-start) | From zero to first fix |
+| 09 | [📖 CLI Reference](#-cli-reference) | All commands documented |
+| 10 | [🤖 MCP Integration](#-mcp-integration-ai-tools) | Connect to Claude, Cursor, Cline |
+| 11 | [⚙️ Daemon Mode](#-daemon-mode-background-service) | Background service + hotkey |
+| 12 | [🖥️ VS Code Extension](#-vs-code-extension) | Fix text in your editor |
+| 13 | [🌐 Browser Extension](#-browser-extension-pro) | Fix text in any web page |
+| 14 | [☁️ SaaS Backend](#-saas-backend) | License, billing, admin |
+| 15 | [🎯 Benefits](#-benefits) | Why choose SmartLangGuard |
+| 16 | [💰 Pricing](#-pricing) | Free, Pro, Team, Enterprise |
+| 17 | [🏗️ Architecture](#-architecture) | System design |
+| 18 | [🧪 Testing](#-testing) | 166 tests across 10 suites |
+| 19 | [🔒 Security](#-security) | Privacy-first security model |
+| 20 | [📊 CI/CD](#-cicd) | GitHub Actions pipeline |
+| 21 | [👣 Roadmap](#-roadmap) | Development plan |
+| 22 | [📜 Changelog](#-changelog) | Version history |
+| 23 | [📞 Support & Community](#-support--community) | Get help and stay connected |
 
 <br/>
 
@@ -75,7 +77,7 @@
 
 ## You type `high hofhv;` but you meant `اهلا اخبارك`
 
-Every bilingual user knows this pain. You switch between **QWERTY (English)** and **Arabic 101** keyboard layouts, and suddenly your text comes out as gibberish. The result? Embarrassing messages, confused colleagues, and lost productivity.
+Every bilingual user knows this pain. You switch between **QWERTY (English)** and **Arabic 101** keyboard layouts, and suddenly your text comes out as gibberish.
 
 ```mermaid
 flowchart LR
@@ -95,31 +97,27 @@ flowchart LR
 
 <br/>
 
-## 💸 The Hidden Cost of Keyboard Mistakes
+## 💸 The Real Cost
 
-| Scenario | 😫 Without SmartLangGuard | 🚀 With SmartLangGuard |
-|----------|--------------------------|------------------------|
-| 💬 **Chat message** | Type `sldk hofhv;` → delete → switch layout → retype → send — **15 seconds** | Type → fix → send — **0.001 seconds** |
-| 💻 **Code comment** | Write `// hghl` instead of `// شرح` → manually correct — **10 seconds** | Auto-fix with hotkey — **0.5 seconds** |
-| 🤖 **AI prompt** | Paste `high hofhv;` into ChatGPT → confused response — **30 seconds** | Pipe through SmartLangGuard — **0.1 seconds** |
-| 📝 **Professional email** | Send `lhg jhg` → recipient confused → apologize → resend — **60 seconds** | Fix before sending — **0 seconds** |
-| 📊 **Daily total** | **~15 minutes wasted** on layout mistakes | **~0 minutes wasted** |
+| Without SmartLangGuard | With SmartLangGuard |
+|------------------------|-------------------|
+| 😤 Type → Delete → Switch layout → Retype → Send | ⌨️ Type → ⚡ Fix → ✅ Send |
+| ⏱️ **15–30 seconds** per mistake | ⚡ **~1 millisecond** |
+| 😫 **~15 minutes wasted daily** | ✅ **~0 minutes wasted** |
 
 <br/>
 
-## 📊 Comparison: SmartLangGuard vs The Alternatives
+## 📊 SmartLangGuard vs Alternatives
 
 | Criteria | 🛡️ SmartLangGuard | ✏️ Manual Fix | 🌐 Online Tools | 📟 Other CLI |
 |----------|:-----------------:|:-------------:|:---------------:|:------------:|
 | ⚡ **Speed** | **~1ms** | 5–10 sec | 200–500ms | 200–500ms |
 | 📡 **Offline** | ✅ **100%** | ✅ Yes | ❌ No | ⚠️ Partial |
 | 🔒 **Privacy** | ✅ **No data leaves device** | ✅ Yes | ❌ Sent to server | ⚠️ Varies |
-| 🎯 **AI Accuracy** | **92%** | Human-dependent | 78% | 78% |
-| 💵 **Cost** | **$0 (Free tier)** | Your time | Your privacy | Free or $$ |
-| 🤖 **AI Tools (MCP)** | ✅ **Built-in** | ❌ | ❌ | ❌ |
-| 📋 **Clipboard + Hotkey** | ✅ **Yes** | ❌ | ❌ | ❌ |
-| 🖥️ **VS Code + Browser** | ✅ **Native** | ❌ | ❌ | ❌ |
-| 🖥️ **Cross-Platform** | ✅ **Win/Mac/Linux** | ✅ Yes | ✅ Web | ⚠️ Limited |
+| 🎯 **Accuracy** | **92% AI** | Human error | 78% | 78% |
+| 💵 **Cost** | **$0 Free tier** | Your time | Your privacy | Free or $ |
+| 🤖 **AI Tools** | ✅ **Built-in MCP** | ❌ | ❌ | ❌ |
+| 🔑 **Hotkey** | ✅ **Ctrl+Shift+Space** | ❌ | ❌ | ❌ |
 
 <br/>
 
@@ -129,9 +127,7 @@ flowchart LR
 
 # 💡 The Solution
 
-## SmartLangGuard — One tool, every platform, instant correction
-
-SmartLangGuard detects when you've typed in the wrong keyboard layout and corrects it automatically — whether you're in a terminal, a browser, an editor, or chatting with an AI.
+## One tool — every platform — instant correction
 
 ```mermaid
 flowchart TD
@@ -178,15 +174,735 @@ flowchart TD
     style B3 fill:#ffd54f,color:#000
 ```
 
-### ✨ Available Interfaces
+<br/>
 
-| Interface | Method | Command / Action |
-|-----------|--------|-----------------|
-| 🖥️ **Terminal** | Direct CLI | `smartlangguard fix "high hofhv;"` |
-| 📋 **Clipboard** | Hotkey | Copy → **Ctrl+Shift+Space** → Paste |
-| 🤖 **AI Tools** | MCP Protocol | Configuration in Claude/Cursor/Cline |
-| ✏️ **VS Code** | Keyboard shortcut | Select → **Ctrl+Shift+F1** |
-| 🌐 **Browser** | Extension | Right-click → Fix selection |
+---
+
+<br/>
+
+# ⚡ Quick Demo
+
+## See it in action
+
+### 🔹 Basic Fix
+```bash
+$ smartlangguard fix "high hofhv;"
+اهلا اخبارك
+```
+
+### 🔹 JSON Output with Score
+```bash
+$ smartlangguard fix "high" --format json
+{
+  "original": "high",
+  "corrected": "اهلا",
+  "direction": "en-to-ar",
+  "score": 90,
+  "source": "rules"
+}
+```
+
+### 🔹 Detect Mistakes
+```bash
+$ smartlangguard detect "hello high hofhv"
+Found 2 mistake(s):
+  1. "high" -> "اهلا"     (en-to-ar)   [pos 6-10]
+  2. "hofhv" -> "اخبار"   (en-to-ar)   [pos 11-16]
+```
+
+### 🔹 Pipe from Any Source
+```bash
+$ echo "high hofhv;" | smartlangguard fix
+اهلا اخبارك
+```
+
+### 🔹 Interactive Mode
+```bash
+$ smartlangguard interactive
+smartlangguard> high
+-> اهلا  [en-to-ar | 90% confidence | rules]
+smartlangguard> hofhv;
+-> اخبارك  [en-to-ar | 85% confidence | rules]
+smartlangguard> exit
+Goodbye!
+```
+
+<br/>
+
+---
+
+<br/>
+
+# 🎯 Usage Methods
+
+## All the ways to use SmartLangGuard — explained for everyone
+
+> 💡 **Don't know how to code? No problem!** Each method below shows you exactly what to do, step by step. You only need ONE method that works for you.
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 1 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 1: Direct Terminal Fix
+
+> **🎯 What it does:** You type a command in the terminal, and SmartLangGuard fixes your text instantly. Best for quick corrections.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install (First Time Only)
+
+**Step 1:** Open **Terminal** (macOS/Linux) or **Command Prompt** / **PowerShell** (Windows).
+
+**Step 2:** Copy-paste this line and press Enter:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+⏳ Wait 10–20 seconds for it to finish.
+
+**Step 3:** Verify it worked:
+
+```bash
+smartlangguard --version
+```
+
+If you see `0.1.2` — you're ready! ✅
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Every time you need to fix text:**
+
+```bash
+smartlangguard fix "your mistyped text here"
+```
+
+**Real example:**
+
+```bash
+smartlangguard fix "high hofhv;"
+```
+
+**Result:**
+```
+اهلا اخبارك
+```
+
+### 📋 More Examples
+
+| Command | Result |
+|---------|--------|
+| `smartlangguard fix "high"` | `اهلا` |
+| `smartlangguard fix "sldm"` | `شكرا` |
+| `smartlangguard fix "hg` | `ش` |
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 2 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 2: Clipboard Quick Fix (No Typing Needed!)
+
+> **🎯 What it does:** Copy any text → Press a key combination → Paste the fixed version. **No commands needed after setup!** Works in any app (Word, Chrome, WhatsApp, Telegram...).
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install (First Time Only)
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install the program:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**Step 3:** Start the background service:
+
+```bash
+smartlangguard daemon
+```
+
+You'll see:
+```
+SmartLangGuard Daemon v0.1.2
+[OK] Clipboard Monitor: ACTIVE
+[OK] Global Hotkey: Ctrl+Shift+Space
+[OK] Local HTTP API: http://localhost:41783
+```
+
+✅ **Keep this window open** in the background. Minimize it.
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It (Every Day)
+
+**Step 1:** Select the mistyped text **anywhere** (Word, browser, chat).
+
+**Step 2:** Press **Ctrl+C** to copy it.
+
+**Step 3:** Press **Ctrl+Shift+Space** (the hotkey).
+
+**Step 4:** Press **Ctrl+V** to paste the fixed text.
+
+### 🎬 Visual Guide
+
+```
+1. 📋 Select text → Ctrl+C
+                ↓
+2. 🔑 Press Ctrl+Shift+Space
+                ↓
+3. 📋 Press Ctrl+V → Text is fixed! ✅
+```
+
+**That's it!** Works in any app — no commands needed after setup.
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 3 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 3: Interactive Mode (Chat-Like)
+
+> **🎯 What it does:** Opens a chat-like interface where you type text and get corrections instantly. Like having a conversation with the program.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install (First Time Only)
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+✅ Done! No other setup needed.
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Step 1:** Run this command:
+
+```bash
+smartlangguard interactive
+```
+
+**Step 2:** Start typing! The program will fix each line:
+
+```
+smartlangguard> high
+-> اهلا  [en-to-ar | 90% confidence]
+
+smartlangguard> hofhv;
+-> اخبارك  [en-to-ar | 85% confidence]
+
+smartlangguard> sldm lhgi
+-> شكرا جزيلا  [en-to-ar | 88% confidence]
+```
+
+**Step 3:** Type `exit` or press `Ctrl+C` to quit.
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 4 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 4: Pipe Mode (For AI Tools & Scripts)
+
+> **🎯 What it does:** Send text FROM any program TO SmartLangGuard and get the fixed version back. Perfect for AI tools like ChatGPT, Claude, or for fixing text in scripts.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install (First Time Only)
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+✅ Done!
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**In Terminal:**
+
+```bash
+echo "high hofhv;" | smartlangguard fix
+```
+
+**Fix your clipboard (macOS):**
+
+```bash
+pbpaste | smartlangguard fix | pbcopy
+```
+
+**Fix your clipboard (Windows PowerShell):**
+
+```powershell
+Get-Clipboard | smartlangguard fix | Set-Clipboard
+```
+
+**Fix your clipboard (Linux):**
+
+```bash
+xclip -o | smartlangguard fix | xclip -sel clip
+```
+
+**In a script:**
+
+```bash
+CORRECTED=$(echo "$INPUT" | smartlangguard fix)
+```
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 5 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 5: File Mode (Fix Entire Documents)
+
+> **🎯 What it does:** Fix all the text in a file at once. Great for correcting documents, notes, or code files.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install (First Time Only)
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+✅ Done!
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Fix a file and see the result:**
+
+```bash
+smartlangguard fix -f input.txt
+```
+
+**Fix a file and save to a new file:**
+
+```bash
+smartlangguard fix -f input.txt -o fixed.txt
+```
+
+**Fix from one language direction to another:**
+
+```bash
+smartlangguard fix -f arabic.txt -d ar-to-en -o english.txt
+```
+
+### 📋 Example
+If `input.txt` contains `"high hofhv;"`, running the command will output `"اهلا اخبارك"`.
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 6 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 6: VS Code Extension (For Coders)
+
+> **🎯 What it does:** Adds SmartLangGuard directly inside VS Code. Select text → Press a shortcut → Text is fixed automatically.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install the CLI:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**Step 3:** Open **VS Code**.
+
+**Step 4:** Press `Ctrl+Shift+X` (extensions).
+
+**Step 5:** Search for **"SmartLangGuard"** and click **Install**.
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Option A — Keyboard Shortcut:**
+
+| Action | Keys |
+|--------|:----:|
+| Fix selected text | `Ctrl+Shift+F1` (Win/Linux) |
+| Fix selected text | `Cmd+Shift+F1` (Mac) |
+| Fix clipboard | `Ctrl+Shift+F2` (Win/Linux) |
+| Fix clipboard | `Cmd+Shift+F2` (Mac) |
+
+**Option B — Right-Click:**
+
+1. Select the mistyped text
+2. Right-click
+3. Choose **"SmartLangGuard: Fix Selection"**
+
+✅ Text is replaced with the corrected version!
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 7 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 7: Browser Extension (Pro+ — For Web Users)
+
+> **🎯 What it does:** Fix text in any website — Gmail, Facebook, WhatsApp Web, Twitter, forums, forms. Right-click any text field and fix it.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install
+
+**Requirements:** You need a **Pro** license (or higher).
+
+**Step 1:** [Buy a Pro license](#-pricing).
+
+**Step 2:** Install the browser extension:
+- Chrome Web Store (coming soon)
+- Or load from `packages/browser-extension`
+
+**Step 3:** (Optional) Start the Daemon for hotkey support:
+
+```bash
+smartlangguard daemon
+```
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Option A — Right-Click:**
+1. Select mistyped text in any web page
+2. Right-click
+3. Choose **"Fix with SmartLangGuard"**
+
+**Option B — Auto-Fill:**
+Text is automatically corrected as you type in form fields.
+
+**Option C — Hotkey:**
+Same `Ctrl+Shift+Space` works in the browser too!
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 8 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 8: MCP AI Tools (Claude, Cursor, Cline)
+
+> **🎯 What it does:** Connects SmartLangGuard directly to AI assistants. When you ask Claude or Cursor to fix text, it uses SmartLangGuard automatically. **No manual commands needed!**
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install
+
+**Step 1:** Install the CLI:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**Step 2:** Configure your AI tool:
+
+**For Claude Desktop:**
+Add to `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "smartlangguard": {
+      "command": "smartlangguard",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+**For Cursor:**
+Add to `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "smartlangguard": {
+      "command": "smartlangguard",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+Just type in the AI chat:
+
+> *"I typed \`high hofhv;\` by accident. Can you fix it with SmartLangGuard?"*
+
+The AI will automatically call SmartLangGuard and show you the corrected text:
+
+```
+اهلا اخبارك
+```
+
+**No commands needed!** The AI does everything for you. 🔥
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 9 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 9: Detect Mode (Find Mistakes)
+
+> **🎯 What it does:** Scans text and shows you ALL the mistakes, without changing anything. Useful for checking messages before sending.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+✅ Done!
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**Detect mistakes in a phrase:**
+
+```bash
+smartlangguard detect "hello high hofhv"
+```
+
+**Result:**
+```
+Found 2 mistake(s):
+  1. "high" -> "اهلا"     (en-to-ar)   [pos 6-10]
+  2. "hofhv" -> "اخبار"   (en-to-ar)   [pos 11-16]
+```
+
+**Detect from a file:**
+
+```bash
+cat myfile.txt | smartlangguard detect
+```
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+<!-- ============================================================ -->
+<!-- METHOD 10 -->
+<!-- ============================================================ -->
+
+## 🔹 Method 10: Daemon Background Service (Always-On)
+
+> **🎯 What it does:** Runs in the background and watches your clipboard. Fix text with a single hotkey from **any app**. Set it once and forget it.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%">
+
+### 🛠️ How to Install
+
+**Step 1:** Open **Terminal** / **Command Prompt**.
+
+**Step 2:** Install:
+
+```bash
+npm install -g @smartlangguard/cli
+```
+
+**Step 3:** Start the Daemon:
+
+```bash
+smartlangguard daemon
+```
+
+✅ **Keep this terminal window open** (minimize it). The Daemon is now running.
+
+### 🔄 Auto-Start (Optional)
+
+Add `smartlangguard daemon` to your computer's startup programs so it runs automatically when you turn on your PC.
+
+</td>
+<td width="50%">
+
+### ▶️ How to Use It
+
+**The Daemon gives you 3 features:**
+
+| Feature | How to Use |
+|---------|------------|
+| 🔑 **Global Hotkey** | Copy text → press `Ctrl+Shift+Space` → paste fixed text |
+| 📋 **Clipboard Monitor** | The daemon watches your clipboard and can auto-fix |
+| 🌐 **Local API** | Other programs can connect to `http://localhost:41783` |
+
+### 🎬 Hotkey in Action
+
+```
+Any app → Select text → Ctrl+C → Ctrl+Shift+Space → Ctrl+V → Done! ✅
+```
+
+Works in: **Word, Chrome, WhatsApp, Telegram, VS Code, Slack, Discord, any app!**
+
+</td>
+</tr>
+</table>
+
+---
+
+<br/>
+
+## 📊 Quick Comparison — Which Method Should You Use?
+
+| # | Method | Best For | Difficulty | Install Time |
+|:-:|--------|----------|:----------:|:------------:|
+| 1 | 🖥️ **Direct Terminal** | Quick fixes in terminal | Easy | 30 sec |
+| 2 | 🔑 **Clipboard Hotkey** | **Non-coders, any app** ⭐ | **Easy** 🔥 | 30 sec |
+| 3 | 💬 **Interactive Mode** | Multiple quick fixes | Easy | 30 sec |
+| 4 | 🔗 **Pipe Mode** | AI tools, scripts | Medium | 30 sec |
+| 5 | 📄 **File Mode** | Fixing documents | Easy | 30 sec |
+| 6 | ✏️ **VS Code** | Developers | Easy | 2 min |
+| 7 | 🌐 **Browser** | Web users (Pro+) | Easy | 2 min |
+| 8 | 🤖 **MCP AI Tools** | Claude, Cursor users | Medium | 2 min |
+| 9 | 🔍 **Detect Mode** | Checking text | Easy | 30 sec |
+| 10 | ⚙️ **Daemon Service** | **Always-on, every app** ⭐ | **Easy** 🔥 | 1 min |
+
+> ⭐ **Recommendation for non-programmers:** Start with **Method 2 (Clipboard Hotkey)** or **Method 3 (Interactive Mode)** — no coding knowledge needed!
 
 <br/>
 
@@ -204,116 +920,40 @@ sequenceDiagram
     participant CLI as 🖥️ SmartLangGuard
     participant Engine as 🧠 Core Engine
     participant AI as 🤖 AI Scorer
-    participant Output as ✅ Result
     
     User->>CLI: smartlangguard fix "high hofhv;"
     CLI->>Engine: translate("high hofhv;")
     
     rect rgb(232, 245, 233)
-        Note over Engine,AI: Step 1: Rules-Based Lookup
-        Engine->>Engine: Map each character from QWERTY → Arabic 101
-        Engine->>Engine: "high" → "اهلا" (direct mapping)
-        Engine->>Engine: "hofhv;" → "اخبارك" (direct mapping)
+        Note over Engine,AI: Step 1: Character Mapping
+        Engine->>Engine: Map each QWERTY key → Arabic 101 key
+        Engine->>Engine: "high" → "اهلا" ✓
     end
     
     rect rgb(255, 243, 224)
-        Note over Engine,AI: Step 2: AI Confidence Scoring (Pro+)
+        Note over Engine,AI: Step 2: AI Confidence Check (Pro+)
         Engine->>AI: score("high hofhv;", "اهلا اخبارك")
-        AI-->>Engine: { confidence: 92%, source: "rules" }
+        AI-->>Engine: { confidence: 92% }
     end
     
     rect rgb(227, 242, 253)
         Note over Engine,AI: Step 3: License Validation
-        Engine->>Engine: Check license tier
-        Engine->>Engine: Enable/disable AI features
+        Engine->>Engine: Check license → Enable features
     end
     
-    Engine-->>CLI: { corrected: "اهلا اخبارك", direction: "en-to-ar", score: 92 }
-    CLI-->>User: اهلا اخبارك
-    
-    rect rgb(252, 228, 236)
-        Note over User,Output: Step 4: Done! 🎉
-        User->>Output: Copy & paste anywhere
-    end
+    Engine-->>CLI: { corrected: "اهلا اخبارك", score: 92 }
+    CLI-->>User: اهلا اخبارك 🎉
 ```
 
 ### 🔬 Technical Breakdown
 
 | Step | Component | What Happens | Time |
 |:----:|-----------|--------------|:----:|
-| 1 | **Rules Engine** | Character-by-character mapping using lookup tables | ~0.3ms |
-| 2 | **AI Scorer** | N-gram statistical model validates the result | ~0.5ms |
-| 3 | **License Check** | HMAC-signed license verification (offline-capable) | ~0.1ms |
-| 4 | **Output** | Formatted result returned to the user | ~0.1ms |
+| 1 | **Rules Engine** | Character-by-character mapping | ~0.3ms |
+| 2 | **AI Scorer** | N-gram model validates result | ~0.5ms |
+| 3 | **License Check** | HMAC-signed verification | ~0.1ms |
+| 4 | **Output** | Return formatted result | ~0.1ms |
 | | **Total** | | **~1ms** |
-
-<br/>
-
----
-
-<br/>
-
-# ⚡ Quick Demo
-
-## See it in action
-
-### Basic Fix
-```bash
-$ smartlangguard fix "high hofhv;"
-اهلا اخبارك
-```
-
-### JSON Output with Confidence Score
-```bash
-$ smartlangguard fix "high" --format json
-{
-  "original": "high",
-  "corrected": "اهلا",
-  "direction": "en-to-ar",
-  "score": 90,
-  "source": "rules"
-}
-```
-
-### Detect Mode
-```bash
-$ smartlangguard detect "hello high hofhv"
-Found 2 mistake(s):
-  1. "high" -> "اهلا"     (en-to-ar)   [pos 6-10]
-  2. "hofhv" -> "اخبار"   (en-to-ar)   [pos 11-16]
-```
-
-### Pipe from Any Source
-```bash
-$ echo "high hofhv;" | smartlangguard fix
-اهلا اخبارك
-
-# ── macOS ──
-$ pbpaste | smartlangguard fix | pbcopy
-
-# ── Windows ──
-$ powershell "Get-Clipboard" | smartlangguard fix | Set-Clipboard
-
-# ── Linux ──
-$ xclip -o | smartlangguard fix | xclip -sel clip
-```
-
-### Interactive REPL Mode
-```bash
-$ smartlangguard interactive
-
-smartlangguard> high
--> اهلا  [en-to-ar | 90% confidence | rules]
-
-smartlangguard> hofhv;
--> اخبارك  [en-to-ar | 85% confidence | rules]
-
-smartlangguard> sldm
--> شكرا  [en-to-ar | 88% confidence | ai]
-
-smartlangguard> exit
-Goodbye!
-```
 
 <br/>
 
@@ -325,30 +965,22 @@ Goodbye!
 
 ## Complete feature breakdown by tier
 
-```mermaid
-pie title Feature Distribution Across Tiers
-    "Free (Core)" : 30
-    "Pro (AI + Cloud)" : 25
-    "Team (Collaboration)" : 25
-    "Enterprise (Everything)" : 20
-```
-
 | Feature | 🆓 Free | ⭐ Pro | 👥 Team | 🏛️ Enterprise |
 |---------|:-------:|:------:|:-------:|:--------------:|
-| **Rules-Based Translation** | ✅ | ✅ | ✅ | ✅ |
-| **AI Scoring (Ambiguous Cases)** | ❌ | ✅ | ✅ | ✅ |
-| **CLI (Terminal Support)** | ✅ | ✅ | ✅ | ✅ |
-| **MCP Server (AI Tools)** | ✅ | ✅ | ✅ | ✅ |
-| **Daemon (Background Monitor)** | ✅ | ✅ | ✅ | ✅ |
-| **Global Hotkey (Ctrl+Shift+Space)** | ✅ | ✅ | ✅ | ✅ |
-| **VS Code Extension** | ✅ | ✅ | ✅ | ✅ |
-| **Browser Extension** | ❌ | ✅ | ✅ | ✅ |
-| **Cloud Sync (Multi-Device)** | ❌ | ✅ | ✅ | ✅ |
-| **Max Devices** | 1 | 3 | 10 | ♾️ Unlimited |
-| **Priority Support** | ❌ | ❌ | ✅ | ✅ |
-| **SSO & SAML** | ❌ | ❌ | ❌ | ✅ |
-| **On-Premise Deployment** | ❌ | ❌ | ❌ | ✅ |
-| **Analytics API** | ❌ | ❌ | ❌ | ✅ |
+| Rules-Based Translation | ✅ | ✅ | ✅ | ✅ |
+| AI Scoring (Ambiguous Cases) | ❌ | ✅ | ✅ | ✅ |
+| CLI (Terminal Support) | ✅ | ✅ | ✅ | ✅ |
+| MCP Server (AI Tools) | ✅ | ✅ | ✅ | ✅ |
+| Daemon (Background Monitor) | ✅ | ✅ | ✅ | ✅ |
+| Global Hotkey (Ctrl+Shift+Space) | ✅ | ✅ | ✅ | ✅ |
+| VS Code Extension | ✅ | ✅ | ✅ | ✅ |
+| Browser Extension | ❌ | ✅ | ✅ | ✅ |
+| Cloud Sync (Multi-Device) | ❌ | ✅ | ✅ | ✅ |
+| Max Devices | 1 | 3 | 10 | ♾️ Unlimited |
+| Priority Support | ❌ | ❌ | ✅ | ✅ |
+| SSO & SAML | ❌ | ❌ | ❌ | ✅ |
+| On-Premise Deployment | ❌ | ❌ | ❌ | ✅ |
+| Analytics API | ❌ | ❌ | ❌ | ✅ |
 | **💵 Price** | **$0** | **$5/mo** | **$49/mo** | **$499/mo** |
 
 <br/>
@@ -364,71 +996,47 @@ pie title Feature Distribution Across Tiers
 ```mermaid
 flowchart TD
     START([📥 Install SmartLangGuard]) --> CHOICE{Choose your method}
-    
     CHOICE -->|npm ⭐| NPM[npm install -g @smartlangguard/cli]
     CHOICE -->|Binary 📦| BIN[Download from Releases]
     CHOICE -->|Source 🔧| SRC[Clone & build from GitHub]
-    
     NPM --> VERIFY[✅ smartlangguard --version]
     BIN --> VERIFY
     SRC --> VERIFY
-    
     VERIFY --> READY[🎉 Ready to use!]
-    
     style START fill:#1a1a2e,color:#fff
     style VERIFY fill:#00c851,color:#fff
     style READY fill:#00c851,color:#fff
 ```
 
-<br/>
-
-### ⭐ Option 1: npm (Recommended)
-
+### ⭐ Option 1: npm (Recommended — Easiest)
 ```bash
 npm install -g @smartlangguard/cli
-
-smartlangguard --version
-# Output: 0.1.2
-
-slg --version
-# Output: 0.1.2 (short alias)
+smartlangguard --version   # Verify: 0.1.2
+slg --version              # Short alias also works
 ```
 
 ### 📦 Option 2: Pre-Built Binaries
-
-| Platform | Architecture | Download |
-|----------|:-----------:|----------|
-| 🪟 **Windows** | x64 | [smartlangguard-win-x64.exe](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-win-x64.exe) |
-| 🍎 **macOS** | Intel (x64) | [smartlangguard-macos-x64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-x64) |
-| 🍎 **macOS** | Apple Silicon (arm64) | [smartlangguard-macos-arm64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-arm64) |
-| 🐧 **Linux** | x64 | [smartlangguard-linux-x64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-x64) |
-| 🐧 **Linux** | arm64 (RPi, etc.) | [smartlangguard-linux-arm64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-arm64) |
-
-```bash
-# ── Linux / macOS ──
-chmod +x smartlangguard-*
-sudo mv smartlangguard-* /usr/local/bin/smartlangguard
-
-# ── Windows (PowerShell) ──
-Move-Item smartlangguard-win-x64.exe C:\Windows\smartlangguard.exe
-```
+| Platform | Download |
+|----------|----------|
+| 🪟 Windows x64 | [smartlangguard-win-x64.exe](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-win-x64.exe) |
+| 🍎 macOS Intel | [smartlangguard-macos-x64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-x64) |
+| 🍎 macOS Apple Silicon | [smartlangguard-macos-arm64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-macos-arm64) |
+| 🐧 Linux x64 | [smartlangguard-linux-x64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-x64) |
+| 🐧 Linux arm64 | [smartlangguard-linux-arm64](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest/download/smartlangguard-linux-arm64) |
 
 ### 🔧 Option 3: Build from Source
-
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite
 npm install
 npm run build
-node packages/cli/bin/smartlangguard.js --version
 ```
 
 ### 🔍 Verify Installation
-
 ```bash
 smartlangguard --version           # → 0.1.2
-smartlangguard --help              # → Shows all 20+ commands
-smartlangguard fix "high hofhv;"   # → اهلا اخبارك
+smartlangguard --help              # → Shows all commands
+smartlangguard fix "high hofhv;"   # → اهلا اخبارك ✅
 ```
 
 <br/>
@@ -439,44 +1047,20 @@ smartlangguard fix "high hofhv;"   # → اهلا اخبارك
 
 # 🚀 Quick Start
 
-## From zero to first fix in 30 seconds
+## From zero to first fix
 
-```mermaid
-flowchart LR
-    A[📥 Install] -->|10 sec| B[🔧 Verify]
-    B -->|2 sec| C[🔍 Fix Text]
-    C -->|1ms| D[📋 Copy]
-    D -->|1 sec| E[📨 Use Everywhere]
-    
-    A -.->|npm install -g @smartlangguard/cli| A1[⚡]
-    B -.->|smartlangguard --version| B1[⚡]
-    C -.->|smartlangguard fix "high hofhv;"| C1[⚡]
-    
-    style A fill:#1565c0,color:#fff
-    style E fill:#2e7d32,color:#fff
-```
-
-### Step 1: Install
 ```bash
+# 1. Install
 npm install -g @smartlangguard/cli
-```
 
-### Step 2: Fix your first text
-```bash
+# 2. Fix your first text
 smartlangguard fix "high hofhv;"
-# ─► اهلا اخبارك
+
+# 3. Try more modes
+smartlangguard interactive
+echo "high" | smartlangguard fix
+smartlangguard detect "hello hofhv"
 ```
-
-### Step 3: Use it everywhere
-
-| Where | How | Command / Action |
-|-------|-----|-----------------|
-| 🖥️ Terminal | Direct fix | `smartlangguard fix "your text"` |
-| 📋 Clipboard | Fix clipboard | Copy → `smartlangguard fix` → Paste |
-| 🤖 AI Tools | Pipe | `echo "text" \| smartlangguard fix` |
-| 📝 Files | Fix document | `smartlangguard fix -f input.txt -o output.txt` |
-| 🎮 Interactive | REPL | `smartlangguard interactive` |
-| 🔑 Any app | Hotkey | `Ctrl+Shift+Space` (with daemon) |
 
 <br/>
 
@@ -486,19 +1070,19 @@ smartlangguard fix "high hofhv;"
 
 # 📖 CLI Reference
 
-## Complete command documentation
+## Complete command index
 
 | Command | Description | Example |
 |---------|-------------|---------|
 | `fix [text]` | Fix mistyped text | `smartlangguard fix "high"` |
 | `fix -f <file>` | Fix text from file | `smartlangguard fix -f input.txt` |
 | `fix -o <file>` | Write result to file | `smartlangguard fix "high" -o out.txt` |
-| `fix -d <dir>` | Force correction direction | `smartlangguard fix "اهلا" -d ar-to-en` |
+| `fix -d <dir>` | Force direction | `smartlangguard fix "اهلا" -d ar-to-en` |
 | `fix --format json` | JSON output | `smartlangguard fix "high" --format json` |
 | `fix --no-ai` | Disable AI scoring | `smartlangguard fix "high" --no-ai` |
 | `interactive` | Start REPL mode | `smartlangguard interactive` |
-| `detect [text]` | Detect layout mistakes | `smartlangguard detect "high hofhv"` |
-| `license activate <tok>` | Activate a license | `smartlangguard license activate slg_...` |
+| `detect [text]` | Detect mistakes | `smartlangguard detect "high hofhv"` |
+| `license activate <tok>` | Activate license | `smartlangguard license activate slg_...` |
 | `license status` | Check license status | `smartlangguard license status` |
 | `license revoke` | Revoke license | `smartlangguard license revoke` |
 | `mcp` | Start MCP server | `smartlangguard mcp` |
@@ -507,22 +1091,9 @@ smartlangguard fix "high hofhv;"
 | `config get <k>` | Get configuration | `smartlangguard config get endpoint` |
 | `config list` | List all config | `smartlangguard config list` |
 | `update check` | Check for updates | `smartlangguard update check` |
-| `update apply` | Apply latest update | `smartlangguard update apply` |
+| `update apply` | Apply update | `smartlangguard update apply` |
 | `sound play <name>` | Play alert sound | `smartlangguard sound play ding` |
 | `sound list` | List available sounds | `smartlangguard sound list` |
-
-### Detect Mode — JSON Output
-```bash
-$ smartlangguard detect "high hofhv" --format json
-{
-  "text": "high hofhv",
-  "mistakes_found": 2,
-  "mistakes": [
-    { "word": "high", "suggestion": "اهلا", "direction": "en-to-ar", "range": [0, 4] },
-    { "word": "hofhv", "suggestion": "اخبار", "direction": "en-to-ar", "range": [5, 10] }
-  ]
-}
-```
 
 <br/>
 
@@ -532,38 +1103,21 @@ $ smartlangguard detect "high hofhv" --format json
 
 # 🤖 MCP Integration (AI Tools)
 
-## Connect SmartLangGuard directly to your AI assistant
-
-SmartLangGuard includes a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server. This allows AI tools like **Claude Desktop**, **Cursor**, **Cline**, and **Continue** to call SmartLangGuard directly from conversation.
+## For Claude Desktop, Cursor, Cline, Continue
 
 ```mermaid
 sequenceDiagram
     actor User as 👤 You
-    participant AI as 🤖 AI Assistant<br/>(Claude / Cursor / Cline)
-    participant MCP as 🛡️ SmartLangGuard<br/>MCP Server
+    participant AI as 🤖 AI Assistant
+    participant MCP as 🛡️ SmartLangGuard MCP
     
-    User->>AI: I typed "high hofhv;" by accident,<br/>please fix it using SmartLangGuard
+    User->>AI: Fix "high hofhv;" please
     AI->>MCP: fix_text("high hofhv;")
-    
-    rect rgb(232, 245, 233)
-        Note over MCP: Processing via stdio
-    end
-    
     MCP-->>AI: "اهلا اخبارك"
-    AI-->>User: Here's your corrected text: اهلا اخبارك 🎉
-    
-    Note over AI,MCP: JSON-RPC over stdin/stdout
+    AI-->>User: Here you go! اهلا اخبارك 🎉
 ```
 
-<br/>
-
-### 🔧 Setup Guide
-
-<details>
-<summary><b>Claude Desktop</b> — Click to expand</summary>
-
-Add to your `claude_desktop_config.json`:
-
+### Setup
 ```json
 {
   "mcpServers": {
@@ -575,61 +1129,13 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-Now Claude can fix text automatically. Just type:
-> *"I typed \`high hofhv;\` by accident. Can you fix it with SmartLangGuard?"*
-
-</details>
-
-<details>
-<summary><b>Cursor</b> — Click to expand</summary>
-
-Add to `~/.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "smartlangguard": {
-      "command": "smartlangguard",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-In Cursor, just ask: *"Fix the keyboard layout mistake in this text: \`high hofhv;\`"*
-
-</details>
-
-<details>
-<summary><b>Cline / Continue / Other MCP Tools</b> — Click to expand</summary>
-
-Same configuration pattern:
-
-```json
-{
-  "mcpServers": {
-    "smartlangguard": {
-      "command": "smartlangguard",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-Refer to your tool's MCP documentation for the exact config file location.
-
-</details>
-
-<br/>
-
-### 📋 Available MCP Tools
-
-| Tool | Description | Example |
-|------|-------------|---------|
-| `fix_text` | Fix a text string | `fix_text("high hofhv;")` → `اهلا اخبارك` |
-| `fix_clipboard` | Fix clipboard contents | `fix_clipboard()` → fixed text in clipboard |
-| `register_license` | Activate a license token | `register_license("slg_xxx")` |
-| `license_status` | Check current license tier | `license_status()` → `{ tier: "pro" }` |
+### MCP Tools
+| Tool | Description |
+|------|-------------|
+| `fix_text` | Fix any text string |
+| `fix_clipboard` | Fix clipboard contents |
+| `register_license` | Activate a license |
+| `license_status` | Check license tier |
 
 <br/>
 
@@ -641,54 +1147,29 @@ Refer to your tool's MCP documentation for the exact config file location.
 
 ## Clipboard monitor + Global hotkey + Local API
 
-The Daemon runs silently in your system tray and provides three powerful features:
-
-| Feature | Description |
-|---------|-------------|
-| 📋 **Clipboard Monitor** | Detects text on copy and auto-fixes on demand |
-| 🔑 **Global Hotkey** | Press **Ctrl+Shift+Space** to fix clipboard instantly |
-| 🌐 **Local HTTP API** | REST API on `http://localhost:41783` for custom integrations |
-
-<br/>
-
-### Start the Daemon
 ```bash
 smartlangguard daemon
 ```
 
-Output:
 ```
 SmartLangGuard Daemon v0.1.2
-
   [✓] Clipboard Monitor  : ACTIVE
-  [✓] Global Hotkey      : Ctrl+Shift+Space → Fix Clipboard
+  [✓] Global Hotkey      : Ctrl+Shift+Space
   [✓] Local HTTP API     : http://localhost:41783
-
-Press Ctrl+C to stop.
 ```
 
-### How to Use the Hotkey
-
-```mermaid
-flowchart LR
-    A[1️⃣ Copy text<br/>Ctrl+C] --> B[2️⃣ Press Hotkey<br/>Ctrl+Shift+Space]
-    B --> C[3️⃣ Paste fixed text<br/>Ctrl+V]
-    
-    style A fill:#1565c0,color:#fff
-    style B fill:#e65100,color:#fff
-    style C fill:#2e7d32,color:#fff
+### Hotkey Workflow
+```
+📋 Copy text (Ctrl+C) → 🔑 Press Ctrl+Shift+Space → 📋 Paste (Ctrl+V) → ✅ Done!
 ```
 
-Three keystrokes. Works in **any application**.
-
-### Daemon HTTP API Reference
-
-| Method | Endpoint | Description | Example |
-|--------|----------|-------------|---------|
-| `POST` | `/fix` | Fix a text string | `curl -X POST localhost:41783/fix -H "Content-Type: application/json" -d '{"text":"high"}'` |
-| `POST` | `/clipboard/fix` | Fix clipboard contents | `curl -X POST localhost:41783/clipboard/fix` |
-| `POST` | `/autofix/toggle` | Toggle auto-fix mode | `curl -X POST localhost:41783/autofix/toggle` |
-| `GET` | `/status` | Check daemon health | `curl localhost:41783/status` |
+### HTTP API
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/fix` | Fix a text string |
+| POST | `/clipboard/fix` | Fix clipboard |
+| POST | `/autofix/toggle` | Toggle auto-fix |
+| GET | `/status` | Daemon health |
 
 <br/>
 
@@ -698,22 +1179,15 @@ Three keystrokes. Works in **any application**.
 
 # 🖥️ VS Code Extension
 
-## Fix text directly in your editor
-
-### Installation
-1. Install the CLI: `npm install -g @smartlangguard/cli`
-2. Search **"SmartLangGuard"** in VS Code Extensions Marketplace (`Ctrl+Shift+X`)
-3. Or build locally: `cd packages/vscode-extension && npm run package`
+## Fix text in your editor
 
 ### Keyboard Shortcuts
+| Action | Windows/Linux | macOS |
+|--------|:-------------:|:-----:|
+| Fix Selection | `Ctrl+Shift+F1` | `Cmd+Shift+F1` |
+| Fix Clipboard | `Ctrl+Shift+F2` | `Cmd+Shift+F2` |
 
-| Action | Windows / Linux | macOS |
-|--------|:---------------:|:-----:|
-| **Fix Selected Text** | `Ctrl+Shift+F1` | `Cmd+Shift+F1` |
-| **Fix Clipboard** | `Ctrl+Shift+F2` | `Cmd+Shift+F2` |
-
-### Right-Click Context Menu
-Select any text → Right-click → **"SmartLangGuard: Fix Selection"** → Done.
+Or: **Right-click** → **"SmartLangGuard: Fix Selection"**
 
 <br/>
 
@@ -723,20 +1197,11 @@ Select any text → Right-click → **"SmartLangGuard: Fix Selection"** → Done
 
 # 🌐 Browser Extension (Pro+)
 
-## Auto-fix text in any web page
+## Fix text in any web page
 
-Auto-fill correction in form fields, right-click fix, and hotkey support — all with 100% local processing.
+Right-click any text field → **"Fix with SmartLangGuard"** — or use the hotkey.
 
-**Features:**
-- ✅ Auto-fill correction in form fields as you type
-- ✅ Right-click → "Fix with SmartLangGuard"
-- ✅ Works with Daemon hotkey (`Ctrl+Shift+Space`)
-- ✅ 100% local processing — no data sent anywhere
-
-**Installation:**
-1. Activate a **Pro** or higher license
-2. Install from Chrome Web Store (coming soon)
-3. Or load unpacked from `packages/browser-extension`
+**Requires:** Pro license or higher.
 
 <br/>
 
@@ -746,55 +1211,27 @@ Auto-fill correction in form fields, right-click fix, and hotkey support — all
 
 # ☁️ SaaS Backend
 
-## License management + AI scoring + Stripe billing + Admin dashboard
-
-### One-Command Deploy
+## Deploy in one command
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite/packages/backend
 cp .env.example .env
 npm install
 npm start
-# → http://localhost:4000
 ```
 
-### Environment Configuration
-```env
-JWT_SECRET=your_64_char_random_secret
-ADMIN_DEFAULT_PASSWORD=your_secure_password
-PORT=4000
-CORS_ORIGIN=http://localhost:3000
-SMARTLANGGUARD_DB_PATH=./saas.db
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-```
+### API Reference (16 endpoints)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/v1/license/validate` | Validate license |
+| POST | `/v1/license/activate` | Create license |
+| POST | `/v1/admin/login` | Admin login |
+| GET | `/v1/admin/dashboard` | Dashboard stats |
+| POST | `/v1/stripe/checkout` | Create checkout |
+| GET | `/v1/billing/plans` | Get plans |
+| GET | `/health` | Health check |
 
-### API Endpoints
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `POST` | `/v1/license/validate` | Validate a license token | Device headers |
-| `POST` | `/v1/license/activate` | Create a new license | Public |
-| `POST` | `/v1/license/revoke` | Revoke a license | Admin |
-| `GET` | `/v1/license/info/:token` | Get license information | - |
-| `POST` | `/v1/telemetry/batch` | Submit telemetry events | - |
-| `POST` | `/v1/ai/score` | AI scoring (Pro+ only) | License |
-| `POST` | `/v1/admin/login` | Admin login | Rate limited |
-| `GET` | `/v1/admin/dashboard` | Dashboard statistics | Admin |
-| `GET` | `/v1/admin/licenses` | List all licenses | Admin |
-| `POST` | `/v1/stripe/checkout` | Create checkout session | - |
-| `POST` | `/v1/stripe/portal` | Billing portal | - |
-| `GET` | `/v1/stripe/pricing` | Get pricing plans | - |
-| `POST` | `/v1/stripe/webhook` | Stripe webhook | Signature |
-| `GET` | `/v1/billing/plans` | Get billing plans | - |
-| `GET` | `/v1/billing/status` | Check subscription status | License |
-| `GET` | `/health` | Health check | - |
-
-### Admin Panel
-- **Login:** `POST /v1/admin/login` with username `admin`
-- **Auth:** JWT Bearer token
-- **Rate limited:** 5 attempts per 15 minutes
+Full list in the [API Reference](#api-endpoints).
 
 <br/>
 
@@ -804,53 +1241,39 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 # 🎯 Benefits
 
-## Why users choose SmartLangGuard
+## Why choose SmartLangGuard
 
 ### 👤 For Individual Users
-
-| Benefit | Description |
-|---------|-------------|
-| 🔒 **100% Private** | No data ever leaves your machine — all processing is local |
-| ⚡ **Blazing Fast** | ~1ms correction — faster than you can blink |
-| 💰 **Free Forever** | Rules-based engine costs $0, no credit card needed |
-| 📱 **Cross-Platform** | Windows, macOS, Linux — desktop and server |
-| 🔌 **Works Everywhere** | Terminal, browser, VS Code, AI tools, any app |
-| 🎮 **Hotkey Ready** | Ctrl+Shift+Space from any app, any context |
+| Benefit | Detail |
+|---------|--------|
+| 🔒 100% Private | No data ever leaves your machine |
+| ⚡ ~1ms Speed | Faster than you can blink |
+| 💰 Free Forever | $0 with no credit card needed |
+| 📱 Cross-Platform | Windows, macOS, Linux |
 
 ### 💻 For Developers
-
-| Benefit | Description |
-|---------|-------------|
-| 🤖 **MCP Integration** | Built-in server for Claude, Cursor, Cline, Continue |
-| 🔧 **CLI Pipe Support** | Integrate into shell scripts, CI/CD, build pipelines |
-| 📦 **Programmatic API** | Use `@smartlangguard/core` in your Node.js projects |
-| 🌐 **Daemon HTTP API** | Build custom browser bookmarklets and integrations |
-| ✅ **166 Tests** | Fully tested, CI/CD verified |
+| Benefit | Detail |
+|---------|--------|
+| 🤖 MCP Integration | Built-in for any AI tool |
+| 🔧 Pipe Support | Use in scripts & CI/CD |
+| 📦 Programmatic API | `@smartlangguard/core` for Node.js |
+| ✅ 166 Tests | Fully tested & verified |
 
 ```javascript
 const core = require('@smartlangguard/core');
 await core.init({ telemetryEnabled: false });
-const result = await core.fixText('high hofhv;', { useAI: false });
+const result = await core.fixText('high hofhv;');
 console.log(result.corrected);  // اهلا اخبارك
 ```
 
-### 👥 For Teams
-
-| Benefit | Description |
-|---------|-------------|
-| **Shared Workspace** | Team tier includes shared license management |
-| **Multi-Device** | Pro: 3 devices, Team: 10 devices |
-| **Cloud Sync** | Settings and custom dictionaries across devices |
-| **Priority Support** | Team+ tiers get priority response time |
-
-### 🏛️ For Enterprise
-
-| Benefit | Description |
-|---------|-------------|
-| **SSO & SAML** | Integrate with Okta, Azure AD, Google Workspace |
-| **On-Premise** | Deploy in your own infrastructure |
-| **Unlimited Devices** | No per-seat limitations |
-| **Analytics API** | Build custom dashboards and reports |
+### 👥 For Teams & 🏛️ Enterprise
+| Feature | Team | Enterprise |
+|---------|:----:|:----------:|
+| Shared Workspace | ✅ | ✅ |
+| SSO & SAML | ❌ | ✅ |
+| On-Premise | ❌ | ✅ |
+| Unlimited Devices | ❌ | ✅ |
+| Analytics API | ❌ | ✅ |
 
 <br/>
 
@@ -859,8 +1282,6 @@ console.log(result.corrected);  // اهلا اخبارك
 <br/>
 
 # 💰 Pricing
-
-## Start free. Upgrade when you need more power.
 
 | Tier | Price | Best For | Key Features |
 |------|:-----:|----------|--------------|
@@ -876,11 +1297,6 @@ curl -X POST http://localhost:4000/v1/license/activate \
   -d '{"email": "you@example.com", "tier": "pro"}'
 ```
 
-### Activate Your License
-```bash
-smartlangguard license activate slg_your_token_here
-```
-
 <br/>
 
 ---
@@ -889,35 +1305,29 @@ smartlangguard license activate slg_your_token_here
 
 # 🏗️ Architecture
 
-## System design overview
-
 ```mermaid
 flowchart TB
     subgraph APPS[📱 Applications]
-        CLI[🖥️ CLI<br/>Terminal / Pipe / File]
-        MCP[🤖 MCP Server<br/>AI Tools Integration]
-        DMN[⚙️ Daemon<br/>Clipboard / Hotkey]
-        VSC[✏️ VS Code Extension]
-        BRW[🌐 Browser Extension]
+        CLI[🖥️ CLI]
+        MCP[🤖 MCP Server]
+        DMN[⚙️ Daemon]
+        VSC[✏️ VS Code]
+        BRW[🌐 Browser]
     end
     
-    subgraph CORE[🛡️ SmartLangGuard Core]
-        TE[🔍 Translation Engine<br/>Rules-Based + AI]
-        AI[🧠 N-gram AI Model<br/>92% Accuracy, ~1ms]
-        LV[🔐 License Validation<br/>HMAC Offline Check]
-        TA[📊 Telemetry<br/>Privacy-First, Opt-Out]
-        AU[📦 Auto-Updater<br/>SHA256 Verified]
-        TD[🎯 Typing Detector<br/>Real-Time Debounced]
-        SP[🔔 Sound Player<br/>Cross-Platform]
+    subgraph CORE[🛡️ Core Engine]
+        TE[🔍 Translation Engine]
+        AI[🧠 AI Model]
+        LV[🔐 License Validation]
+        TA[📊 Telemetry]
+        AU[📦 Auto-Updater]
     end
     
     subgraph SAAS[☁️ SaaS Backend]
         LA[📋 License API]
-        TEA[📡 Telemetry API]
-        ASA[🧮 AI Scoring API]
+        ASA[🧮 AI Scoring]
         AD[📈 Admin Dashboard]
         SB[💳 Stripe Billing]
-        AUTH[🔑 JWT Auth]
     end
     
     CLI --> TE
@@ -925,69 +1335,23 @@ flowchart TB
     DMN --> TE
     VSC --> DMN
     BRW --> DMN
-    
     TE --> AI
     TE --> LV
-    TE --> TA
-    
     LV --> LA
-    TA --> TEA
     AI --> ASA
-    
-    SB --> AUTH
-    AD --> AUTH
     
     style CORE fill:#1a1a2e,color:#fff
     style APPS fill:#e3f2fd,color:#000
     style SAAS fill:#e8f5e9,color:#000
-    style AI fill:#ffd54f,color:#000
-    style TE fill:#00c851,color:#fff
 ```
-
-<br/>
 
 ### 📦 NPM Packages
-
-| Package | Description | Install Command |
-|---------|-------------|-----------------|
-| [`@smartlangguard/core`](https://www.npmjs.com/package/@smartlangguard/core) | Core engine: translation, AI, license, telemetry | `npm install @smartlangguard/core` |
-| [`@smartlangguard/cli`](https://www.npmjs.com/package/@smartlangguard/cli) | Cross-platform CLI binary | `npm install -g @smartlangguard/cli` |
-| [`@smartlangguard/mcp-server`](https://www.npmjs.com/package/@smartlangguard/mcp-server) | MCP server for AI tool integration | `npm install @smartlangguard/mcp-server` |
-| [`@smartlangguard/daemon`](https://www.npmjs.com/package/@smartlangguard/daemon) | Background daemon + hotkey | `npm install @smartlangguard/daemon` |
-
-<br/>
-
-### 📁 Monorepo Structure
-
-```
-rewrite/                              # Root
-├── packages/
-│   ├── core/                         # 🧠 Core engine
-│   │   ├── src/
-│   │   │   ├── index.js              # Unified API
-│   │   │   ├── translator.js         # Rules-based engine
-│   │   │   ├── custom-ai-model.js    # N-gram AI (92%)
-│   │   │   ├── ai-scoring.js         # Confidence scoring
-│   │   │   ├── license.js            # HMAC validation
-│   │   │   ├── telemetry.js          # Privacy-first
-│   │   │   ├── updater.js            # SHA256 updates
-│   │   │   ├── typing-detector.js    # Real-time detection
-│   │   │   └── sound-player.js       # Alert sounds
-│   │   └── tests/                    # 146 tests
-│   │
-│   ├── cli/                          # 🖥️ CLI
-│   ├── mcp-server/                   # 🤖 MCP server
-│   ├── daemon/                       # ⚙️ Daemon
-│   ├── vscode-extension/             # ✏️ VS Code
-│   ├── browser-extension/            # 🌐 Browser
-│   └── backend/                      # ☁️ Backend
-│
-├── scripts/                          # Build tools
-├── docs/                             # Documentation
-├── .github/workflows/ci.yml          # CI/CD
-├── jest.config.json                  # Test config
-└── package.json                      # Workspace root
-```
+| Package | Install |
+|---------|---------|
+| `@smartlangguard/core` | `npm install @smartlangguard/core` |
+| `@smartlangguard/cli` | `npm install -g @smartlangguard/cli` |
+| `@smartlangguard/mcp-server` | `npm install @smartlangguard/mcp-server` |
+| `@smartlangguard/daemon` | `npm install @smartlangguard/daemon` |
 
 <br/>
 
@@ -997,10 +1361,10 @@ rewrite/                              # Root
 
 # 🧪 Testing
 
-## 166 automated tests — 10 suites — All passing ✅
+## 166 tests — All passing ✅
 
 ```mermaid
-pie title Test Distribution (166 Total)
+pie title Test Distribution
     "Core: Translator" : 45
     "Core: License" : 30
     "Core: AI Model" : 25
@@ -1009,28 +1373,21 @@ pie title Test Distribution (166 Total)
     "MCP Server (6)" : 6
 ```
 
-| Suite | Package | Tests | Coverage |
-|:-----:|---------|:-----:|----------|
-| 01 | Core — Translator | 45 | Character mapping, direction detection, edge cases |
-| 02 | Core — License | 30 | HMAC validation, tier checking, revocation |
-| 03 | Core — AI Model | 25 | N-gram scoring, ambiguous word handling |
-| 04 | Core — Typing Detector | 15 | Real-time detection, debounce, events |
-| 05 | Core — Telemetry | 12 | Opt-in/out, batching, anonymization |
-| 06 | Core — Updater | 10 | SHA256 verification, download, rollback |
-| 07 | Core — Index | 20 | Unified API, initialization, error handling |
-| 08 | Core — Sound Player | 19 | Cross-platform audio, format handling |
-| 09 | Backend | 14 | Health, license, admin, billing, Stripe, 404 |
-| 10 | MCP Server | 6 | Protocol version, tool definitions, schemas |
-| | **Total** | **166** | **All passing** |
+| Suite | Tests |
+|:-----:|:-----:|
+| Core — Translator | 45 |
+| Core — License | 30 |
+| Core — AI Model | 25 |
+| Core — Other | 46 |
+| Backend | 14 |
+| MCP Server | 6 |
+| **Total** | **166** |
 
 ```bash
-# Run everything
-npm test
-
-# Run specific suites
-npm run test:core       # 146 core tests
-npm run test:backend    # 14 backend tests
-npm run test:mcp        # 6 MCP server tests
+npm test                 # Run all
+npm run test:core        # Core only
+npm run test:backend     # Backend only
+npm run test:mcp         # MCP only
 ```
 
 <br/>
@@ -1041,60 +1398,19 @@ npm run test:mcp        # 6 MCP server tests
 
 # 🔒 Security
 
-## Privacy-first by design. Security-tested by default.
+## Privacy-first by design
 
-```mermaid
-flowchart LR
-    subgraph LOCAL[🔒 Your Device]
-        U[👤 Input] --> E[🛡️ SmartLangGuard]
-        E --> C[✅ Corrected Text]
-        L[🔑 License] --> V[🔐 HMAC Verify]
-        V -->|Valid| F[🔓 Pro Features]
-        V -->|Invalid| G[🔒 Free Mode]
-    end
-    
-    subgraph CLOUD[☁️ Cloud (Optional)]
-        LS[📡 License Server]
-        SB[💳 Stripe]
-    end
-    
-    E -.->|📊 Telemetry Opt-In| LS
-    L -.->|🌐 Online Check| LS
-    F -.->|💵 Billing| SB
-    
-    style LOCAL fill:#e8f5e9,color:#000
-    style CLOUD fill:#e3f2fd,color:#000
-    style E fill:#1a1a2e,color:#fff
-```
-
-### 🔐 Security Measures
-
-| Category | Measure | Detail |
-|----------|---------|--------|
-| 🔑 **Authentication** | HMAC License Tokens | Offline-validatable, no server needed |
-| 📱 **Device Security** | Fingerprinting | Prevents license sharing across devices |
-| 🔏 **Code Integrity** | SHA256 Updates | Binary signature verification before install |
-| 🔇 **Privacy** | Telemetry Opt-Out | Disabled by default, anonymized when on |
-| 🔐 **API Security** | JWT Auth | Configurable secret, no hardcoded defaults |
-| 🚦 **Rate Limiting** | 100/15min Public, 5/15min Admin | Prevents brute force attacks |
-| 🌐 **CORS** | Origin Restriction | No wildcard in production |
-| 🧹 **Injection Safety** | Spawn-based Piping | No command injection via clipboard |
-| 🗄️ **Database** | better-sqlite3 | Synchronous, no event loop blocking |
-| 💳 **Payments** | Stripe Webhook | Timing-safe signature verification |
-
-### Required Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|:--------:|
-| `JWT_SECRET` | Secret for JWT token signing | ✅ Production |
-| `ADMIN_DEFAULT_PASSWORD` | Initial admin password | ✅ First run |
-| `SMARTLANGGUARD_OFFLINE_SECRET` | License HMAC signing key | ✅ Production |
-| `STRIPE_SECRET_KEY` | Stripe secret API key | ⚠️ For billing |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | ⚠️ For webhooks |
-| `CORS_ORIGIN` | Allowed CORS origins | Recommended |
+| Security Feature | Detail |
+|-----------------|--------|
+| 🔑 HMAC Licenses | Offline-validatable tokens |
+| 📱 Fingerprinting | Prevents license sharing |
+| 🔏 SHA256 Updates | Verified before install |
+| 🔇 Telemetry Opt-Out | Disabled by default |
+| 🚦 Rate Limiting | Prevents brute force |
+| 💳 Stripe Webhooks | Timing-safe verification |
 
 ### Reporting Vulnerabilities
-Email [security@smartlangguard.com](mailto:security@smartlangguard.com). Please do **not** file public GitHub issues.
+Email [security@smartlangguard.com](mailto:security@smartlangguard.com)
 
 <br/>
 
@@ -1104,38 +1420,22 @@ Email [security@smartlangguard.com](mailto:security@smartlangguard.com). Please 
 
 # 📊 CI/CD
 
-## Automated with GitHub Actions
+## GitHub Actions Pipeline
 
 ```mermaid
 flowchart LR
-    PUSH[📤 Push to main] --> TESTS{🧪 Run Tests}
-    
-    TESTS --> CORE[✅ Core Tests<br/>146 tests]
-    TESTS --> BACKEND[✅ Backend Tests<br/>14 tests]
-    TESTS --> MCP[✅ MCP Tests<br/>6 tests]
-    
-    CORE & BACKEND & MCP --> PASSED{All Passed?}
-    
+    PUSH[📤 Push to main] --> TESTS{🧪 Run 166 Tests}
+    TESTS --> PASSED{All Passed?}
     PASSED -->|Yes| BUILD[📦 Build Binaries]
-    PASSED -->|No| FAIL[❌ Pipeline Fails]
-    
-    BUILD --> WIN[🪟 Windows x64]
-    BUILD --> MAC[🍎 macOS x64 + arm64]
-    BUILD --> LIN[🐧 Linux x64 + arm64]
-    
+    PASSED -->|No| FAIL[❌ Fail]
+    BUILD --> WIN[🪟 Windows]
+    BUILD --> MAC[🍎 macOS]
+    BUILD --> LIN[🐧 Linux]
     style PUSH fill:#1565c0,color:#fff
     style FAIL fill:#ff4444,color:#fff
-    style WIN fill:#ffd54f,color:#000
-    style MAC fill:#e3f2fd,color:#000
-    style LIN fill:#e8f5e9,color:#000
 ```
 
-**Pipeline Details:**
-- **Trigger:** Every push or PR to `main`
-- **Environment:** Ubuntu latest, Node.js 20
-- **Parallel Tests:** Core, Backend, MCP run simultaneously
-- **Build:** CLI binaries for all platforms after tests pass
-- **Status:** [![CI/CD](https://img.shields.io/github/actions/workflow/status/ahmdelbaz28-ux/rewrite/ci.yml?style=flat-square&label=CI%2FCD)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/ahmdelbaz28-ux/rewrite/ci.yml?style=flat-square&label=CI%2FCD)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
 
 <br/>
 
@@ -1145,43 +1445,22 @@ flowchart LR
 
 # 👣 Roadmap
 
-## Past, present, and future development
-
 ```mermaid
 gantt
-    title SmartLangGuard Development Roadmap
+    title Development Roadmap
     dateFormat  YYYY-MM-DD
     axisFormat  %Y Q%q
-    
-    section ✅ Phase 1 — Foundation (Done)
-    Core Engine + CLI + MCP      :done, 2026-01-01, 2026-03-15
-    Backend + Tests + CI/CD      :done, 2026-03-01, 2026-04-01
-    npm publish v0.1.2           :done, 2026-04-01, 2026-04-15
-    
-    section 🚧 Phase 2 — Desktop (In Progress)
-    Daemon Hotkey (All OS)       :active, 2026-04-01, 2026-05-15
-    VS Code Marketplace          :active, 2026-04-15, 2026-05-01
-    
-    section 📋 Phase 3 — Web (Planned)
-    Browser Extension (Chrome)   :2026-05-01, 2026-06-15
-    Admin Dashboard UI           :2026-05-15, 2026-07-01
-    Stripe Live Mode             :2026-06-01, 2026-07-01
-    
-    section 🔬 Phase 4 — AI (Research)
-    AI Fine-Tuning (AR-EN)       :2026-07-01, 2026-09-01
-    
-    section 🏭 Phase 5 — Enterprise (Planned)
-    On-Premise Deployment        :2026-08-01, 2026-10-01
-    SSO + SAML Integration       :2026-09-01, 2026-11-01
+    section ✅ Phase 1 — Done
+    Core + CLI + MCP + Backend   :done, 2026-01-01, 2026-04-15
+    section 🚧 Phase 2 — In Progress
+    Daemon Hotkey + VS Code      :active, 2026-04-01, 2026-05-15
+    section 📋 Phase 3 — Planned
+    Browser Extension + Stripe   :2026-05-01, 2026-07-01
+    section 🔬 Phase 4 — Research
+    AI Fine-Tuning               :2026-07-01, 2026-09-01
+    section 🏭 Phase 5 — Planned
+    On-Premise + SSO             :2026-08-01, 2026-11-01
 ```
-
-| Phase | Status | Key Deliverables |
-|-------|:------:|------------------|
-| **Phase 1** — Foundation | ✅ **Done** | Core engine, CLI, MCP, Backend, 166 tests, CI/CD, npm publish |
-| **Phase 2** — Desktop | 🚧 **In Progress** | Daemon hotkey (all platforms), VS Code Marketplace publish |
-| **Phase 3** — Web | 📋 **Planned** | Browser extension, Admin dashboard UI, Stripe live mode |
-| **Phase 4** — AI | 🔬 **Research** | Custom Arabic-English mistake model fine-tuning |
-| **Phase 5** — Enterprise | 🏭 **Planned** | On-premise deployment, SSO/SAML, Analytics API |
 
 <br/>
 
@@ -1191,35 +1470,16 @@ gantt
 
 # 📜 Changelog
 
-## Version history
+### v0.1.2 (Latest)
+- Published all 4 packages to npm
+- 166 automated tests, CI/CD pipeline
+- Security fixes: JWT, CORS, rate limiting
+- better-sqlite3 database layer
 
-### v0.1.2 (Latest — April 2026)
-**🚀 New:**
-- Published all 4 packages to npm (`@smartlangguard/core`, `cli`, `mcp-server`, `daemon`)
-- Added 166 automated tests (146 core, 14 backend, 6 MCP)
-- Added CI/CD GitHub Actions workflow
-- Added logo, comprehensive README with usage guide
-
-**🔧 Fixed:**
-- Database layer: replaced sqlite3+deasync with better-sqlite3
-- MCP server: added missing clipboard module
-- Import paths: packages now use `@smartlangguard/core` (no relative paths)
-- Security: removed hardcoded JWT secret, added rate limiting on admin login
-- Security: fixed CORS wildcard, clipboard command injection
-- License field: all packages now consistently "PROPRIETARY"
-- Code quality: duplicate object keys, Stripe route indentation
-
-**📝 Updated:**
-- .env.example with required `JWT_SECRET` and `ADMIN_DEFAULT_PASSWORD`
-
-### v0.1.0 — Initial Release
-- Rules-based translation engine (QWERTY ↔ Arabic 101)
-- CLI with fix, detect, interactive, pipe, and file modes
-- MCP server for AI tool integration
-- SaaS backend with license management, telemetry, admin, Stripe billing
-- Daemon with clipboard monitoring and global hotkey
-- License validation (HMAC-signed, offline-capable)
-- VS Code and browser extension stubs
+### v0.1.0 (Initial)
+- Rules-based translation engine
+- CLI, MCP, Daemon, Backend
+- License validation (HMAC)
 
 <br/>
 
@@ -1229,16 +1489,13 @@ gantt
 
 # 📞 Support & Community
 
-## Get help and stay connected
-
-| Channel | Link | Purpose |
-|---------|------|---------|
-| 📧 **Email** | [hello@smartlangguard.com](mailto:hello@smartlangguard.com) | General inquiries & support |
-| 🐛 **Issues** | [GitHub Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues) | Bug reports & feature requests |
-| 📖 **Documentation** | [docs/](docs/) | Full technical documentation |
-| 🌐 **Website** | [https://smartlangguard.com](https://smartlangguard.com) | Coming soon |
-| 💬 **Discord** | [Join Discord](https://discord.gg/smartlangguard) | Coming soon |
-| 🐦 **Twitter / X** | [@SmartLangGuard](https://twitter.com/SmartLangGuard) | Coming soon |
+| Channel | Link |
+|---------|------|
+| 📧 Email | [hello@smartlangguard.com](mailto:hello@smartlangguard.com) |
+| 🐛 Issues | [GitHub Issues](https://github.com/ahmdelbaz28-ux/rewrite/issues) |
+| 📖 Docs | [docs/](docs/) |
+| 🌐 Website | [smartlangguard.com](https://smartlangguard.com) (Soon) |
+| 💬 Discord | [Join Discord](https://discord.gg/smartlangguard) (Soon) |
 
 <br/>
 
@@ -1248,16 +1505,12 @@ gantt
 
 # 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
-
-1. **Fork** the repository on GitHub
-2. **Create a feature branch** (`git checkout -b feature/your-feature`)
-3. **Run tests** to ensure nothing is broken (`npm test`)
-4. **Commit your changes** with a clear message (`git commit -m "Add your feature"`)
-5. **Push to your branch** (`git push origin feature/your-feature`)
-6. **Open a Pull Request** against the `main` branch
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting.
+1. **Fork** the repo
+2. **Create a branch** (`git checkout -b feature/your-feature`)
+3. **Run tests** (`npm test`)
+4. **Commit** (`git commit -m "Add your feature"`)
+5. **Push** (`git push origin feature/your-feature`)
+6. **Open a Pull Request**
 
 <br/>
 
@@ -1268,8 +1521,6 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting.
 # License
 
 **Proprietary License** — © 2026 SmartLangGuard. All rights reserved.
-
-See [LICENSE](LICENSE) for full details.
 
 <br/>
 
