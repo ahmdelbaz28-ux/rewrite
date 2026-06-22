@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="40" fill="#1a1a2e"/>
+  <text x="100" y="80" text-anchor="middle" fill="#e94560" font-family="Arial, sans-serif" font-size="48" font-weight="bold">SLG</text>
+  <text x="100" y="130" text-anchor="middle" fill="#0f3460" font-family="Arial, sans-serif" font-size="14">Keyboard Layout</text>
+  <text x="100" y="150" text-anchor="middle" fill="#0f3460" font-family="Arial, sans-serif" font-size="14">Correction Engine</text>
+  <rect x="40" y="165" width="120" height="3" rx="1.5" fill="#e94560"/>
+</svg>
