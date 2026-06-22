@@ -1,6 +1,6 @@
 {
   "name": "smartlangguard",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "SmartLangGuard - Cross-platform keyboard layout mistake fixer (CLI, MCP, Daemon, VS Code, SaaS)",
   "workspaces": [

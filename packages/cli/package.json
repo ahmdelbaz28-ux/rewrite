@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SmartLangGuard CLI - Fix Arabic/English keyboard layout mistakes from terminal",
   "main": "bin/smartlangguard.js",
   "bin": {
