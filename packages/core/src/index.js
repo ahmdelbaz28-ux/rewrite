@@ -78,6 +78,7 @@ async function init(config = {}) {
  * @returns {Promise<{original: string, corrected: string, direction: string, score: number, source: string}>}
  */
 async function fixText(text, options = {}) {
+  if (text == null) text = '';
   const direction = options.direction || currentConfig.defaultDirection;
   const useAI = options.useAI !== false && currentConfig.useRemoteScoring;
 
