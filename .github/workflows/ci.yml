@@ -60,6 +60,23 @@ jobs:
         env:
           NODE_ENV: test
 
+  test-daemon:
+    name: Test Daemon Package
+    runs-on: ubuntu-latest
+    needs: test-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Test Daemon (cross-platform tests)
+        run: npx jest packages/daemon/tests/ --ci --reporters=default
+        env:
+          NODE_ENV: test
+
   build-cli:
     name: Build CLI Binaries
     runs-on: ${{ matrix.os }}
