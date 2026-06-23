@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-<img src="docs/assets/smartlangguard-logo.svg" alt="SmartLangGuard Logo" width="100" />
+<img src="docs/assets/smartlangguard-logo.svg" alt="SmartLangGuard Logo" width="120" />
 
 # SmartLangGuard
 
@@ -10,18 +10,33 @@
 
 [![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue)](https://www.npmjs.com/package/@smartlangguard/cli)
 [![Tests](https://img.shields.io/badge/Tests-240%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
-[![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](#-whats-new-in-v020)
+[![Version](https://img.shields.io/badge/Version-0.1.3-blue.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.3)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
+
+**[📦 تنزيل الإصدار 0.1.3](https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.3)** · **[npm](https://www.npmjs.com/package/@smartlangguard/cli)** · **[السجل](CHANGELOG.md)**
 
 </div>
 
 ---
 
-## ✨ إيه الجديد في النسخة 0.2.0؟
+## ✨ آخر التحديثات (النسخة 0.1.3)
 
-| الميزة الجديدة | الوصف |
-|----------------|--------|
+| التحديث | الوصف |
+|---------|--------|
+| 🧪 **240 اختبار ناجح** | كل الباكدجات تم اختبارها على Node 18/20/22 على GitHub Actions |
+| 🐛 **إصلاح hang في MCP Server** | الـ readline بقي يتهيّا جوّه `startMcpServer()` بدل ما يعلّق الجست |
+| 🔧 **إصلاح بناء CLI** | شيلنا conflict بين `--out-path` و`--output` في @yao-pkg/pkg |
+| 🧩 **سكربتات VS Code محمولة** | استبدلنا المسار الثابت `/home/z/...` بسكربت جوّه الباكدج نفسه |
+| 🌐 **سكربتات Browser Extension** | أنشأنا `scripts/build.js` و`scripts/package.js` اللي كانت ناقصة |
+| 📦 **Artifacts جاهزة للتحميل** | CLI binary (Linux x64) + VSIX + ZIP في [صفحة الإصدارات](https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.3) |
+
+---
+
+## ✨ مميزات النسخة 0.2.0
+
+| الميزة | الوصف |
+|--------|--------|
 | 🔍 **كشف النصوص المشروعة** | URLs, إيميلات, أكواد, مسارات ملفات، ألوان Hex، أرقام IP — كلها متتغيرش |
 | 🌍 **دعم 3 أنواع كيبورد** | QWERTY (أمريكي), AZERTY (فرنسي), QWERTZ (ألماني) |
 | 📖 **قاموس مستخدم ذكي** | الأداة بتتعلم من رفضك للتنبيهات — بعد 3 مرات بتضيف الكلمة تلقائي |
@@ -79,22 +94,40 @@ node --version
 3. شغّل الملف اللي نزل واضغط **Next → Next → Install → Finish**
 4. افتح PowerShell تاني واكتب `node --version` — المفروض يظهر الرقم
 
-### 2. تحميل المشروع
+### 2. تنزيل الأداة
 
-محتاج تنزّل نسخة من المشروع على جهازك. عندك طريقتين:
+عندك 3 طرق، اختار اللي يناسبك:
 
-**الطريقة الأولى: Git (لو عندك)**
+**الطريقة الأولى: npm (الأسهل والأسرع) ⭐**
+```bash
+npm install -g @smartlangguard/cli
+```
+بعد كده تقدر تستخدمها من أي مكان بالأمر `smartlangguard` أو `slg`.
+
+**الطريقة الثانية: تحميل Binary جاهز (من غير Node.js)**
+1. روح لـ [صفحة الإصدارات](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest)
+2. نزّل الملف المناسب لجهازك:
+   - **Linux:** `smartlangguard-cli-0.1.3-linux-x64`
+   - **Windows:** لما الإصدار يطلع رسمياً نزّل من Release
+3. **Linux/Mac:** افتح Terminal ونفّذ:
+   ```bash
+   chmod +x smartlangguard-cli-0.1.3-linux-x64
+   sudo mv smartlangguard-cli-0.1.3-linux-x64 /usr/local/bin/smartlangguard
+   ```
+4. جرّب: `smartlangguard --version`
+
+**الطريقة الثالثة: من الكود المصدري (للمطورين)**
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite
 npm install
 ```
 
-**الطريقة الثانية: تحميل يدوي**
+أو حمّل ZIP:
 1. روح لـ [https://github.com/ahmdelbaz28-ux/rewrite](https://github.com/ahmdelbaz28-ux/rewrite)
 2. اضغط **Code** (الزر الأخضر) → **Download ZIP**
 3. فك الضغط عن الملف
-4. افتح PowerShell داخل المجلد واكتب:
+4. افتح PowerShell/Terminal داخل المجلد واكتب:
 ```bash
 npm install
 ```
@@ -536,13 +569,15 @@ npx jest --verbose      # تفاصيل أكتر
 ### إيه اللي بيتختبر؟
 | الوحدة | عدد الاختبارات | بتختبر إيه |
 |--------|:-:|--------|
-| Translator | 28 | تحويل الحروف، كشف الأخطاء، كشف النصوص المشروعة |
-| Custom AI Model | 25 | تسجيل الكلمات، Bigrams، قاموس 500+ كلمة |
-| Typing Detector | 17 | تتبع الكتابة، Backspace، السياق |
-| User Dictionary | 20 | Whitelist، التعلم التلقائي، التخزين |
-| Index (Core) | 20 | fixText, False Positives, Keyboard Layouts |
-| Daemon | 12 | API, Auth Token, CORS |
-| باقى الوحدات | 58 | CLI, Backend, License, Sound, Telemetry |
+| Core (Translator, AI, License, …) | 146 | تحويل الحروف، كشف الأخطاء، النصوص المشروعة، قاموس 500+ كلمة، التحليل الصرفي |
+| Backend API | 35 | License, Telemetry, Billing, Admin JWT, Stripe, 404 |
+| Daemon | 14 | API, Auth Token, CORS, تشغيل بدون crash |
+| CLI | 14 | --version, --help, fix (stdin/arg/file), detect, كل صيغ الإخراج |
+| Browser Extension | 11 | MV3 manifest, الصلاحيات الآمنة, build + zip |
+| Admin Dashboard | 9 | vite build + الحزم الـ hashed |
+| MCP Server | 6 | Protocol version, 4 tools (fix_text, fix_clipboard, register_license, license_status) |
+| VS Code Extension | 5 | tsc compilation, exports activate/deactivate, portable paths |
+| **الإجمالي** | **240** | **كل الباكدجات خضراء على Node 18/20/22** |
 
 ---
 
@@ -559,9 +594,22 @@ Proprietary — © 2026 SmartLangGuard.
 
 ---
 
-## ✨ What's New in v0.2.0?
+## ✨ Latest Updates (v0.1.3)
 
-| New Feature | Description |
+| Update | Description |
+|--------|-------------|
+| 🧪 **240 passing tests** | All packages verified on Node 18/20/22 via GitHub Actions |
+| 🐛 **Fixed MCP Server hang** | `readline` is now created inside `startMcpServer()` instead of at module-load time (was keeping the event loop alive) |
+| 🔧 **Fixed CLI build** | Removed `--out-path` + `--output` conflict in @yao-pkg/pkg |
+| 🧩 **Portable VS Code scripts** | Replaced the hardcoded `/home/z/...` path with a portable script inside the package |
+| 🌐 **Browser Extension scripts** | Created the missing `scripts/build.js` and `scripts/package.js` |
+| 📦 **Downloadable artifacts** | CLI binary (Linux x64) + VSIX + ZIP available on the [releases page](https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.3) |
+
+---
+
+## ✨ v0.2.0 Features
+
+| Feature | Description |
 |-------------|-------------|
 | 🔍 **False Positive Detection** | URLs, emails, code, file paths, hex colors, IP addresses are never touched |
 | 🌍 **3 Keyboard Layouts** | QWERTY (US), AZERTY (French), QWERTZ (German) |
@@ -620,18 +668,36 @@ node --version
 3. Run the downloaded file and click **Next → Next → Install → Finish**
 4. Open PowerShell again and type `node --version` — you should now see the version number
 
-### 2. Download the Project
+### 2. Download the Tool
 
-You need a copy of the project on your computer. There are two ways:
+You have 3 options, pick whichever suits you:
 
-**Option A: Git (if you have it installed)**
+**Option 1: npm (easiest and fastest) ⭐**
+```bash
+npm install -g @smartlangguard/cli
+```
+After that you can use it from anywhere via the `smartlangguard` or `slg` command.
+
+**Option 2: Download a prebuilt binary (no Node.js required)**
+1. Go to the [releases page](https://github.com/ahmdelbaz28-ux/rewrite/releases/latest)
+2. Download the file that matches your machine:
+   - **Linux:** `smartlangguard-cli-0.1.3-linux-x64`
+   - **Windows:** once the official release is out, grab it from Releases
+3. **Linux/Mac:** open Terminal and run:
+   ```bash
+   chmod +x smartlangguard-cli-0.1.3-linux-x64
+   sudo mv smartlangguard-cli-0.1.3-linux-x64 /usr/local/bin/smartlangguard
+   ```
+4. Verify: `smartlangguard --version`
+
+**Option 3: From source (for developers)**
 ```bash
 git clone https://github.com/ahmdelbaz28-ux/rewrite.git
 cd rewrite
 npm install
 ```
 
-**Option B: Manual Download**
+Or download a ZIP:
 1. Go to [https://github.com/ahmdelbaz28-ux/rewrite](https://github.com/ahmdelbaz28-ux/rewrite)
 2. Click **Code** (green button) → **Download ZIP**
 3. Extract the ZIP file
@@ -1077,13 +1143,15 @@ npx jest --verbose      # more details
 ### What's tested?
 | Module | Tests | What's tested |
 |--------|:-:|--------|
-| Translator | 28 | Char mapping, mistake detection, false positive detection |
-| Custom AI Model | 25 | Word scoring, bigrams, 500+ word dictionary |
-| Typing Detector | 17 | Word tracking, backspace handling, context awareness |
-| User Dictionary | 20 | Whitelist, auto-learning, persistence |
-| Index (Core) | 20 | fixText, false positives, keyboard layouts |
-| Daemon | 12 | API endpoints, auth token, CORS |
-| Other modules | 58 | CLI, Backend, License, Sound, Telemetry |
+| Core (Translator, AI, License, …) | 146 | char mapping, mistake detection, false positives, 500+ word dictionary, morphology |
+| Backend API | 35 | License, Telemetry, Billing, Admin JWT, Stripe, 404 |
+| Daemon | 14 | API, auth token, CORS, clean startup/shutdown |
+| CLI | 14 | --version, --help, fix (stdin/arg/file), detect, all output formats |
+| Browser Extension | 11 | MV3 manifest, safe permissions, build + zip packaging |
+| Admin Dashboard | 9 | vite build + hashed bundles |
+| MCP Server | 6 | protocol version, 4 tools (fix_text, fix_clipboard, register_license, license_status) |
+| VS Code Extension | 5 | tsc compilation, exports activate/deactivate, portable paths |
+| **Total** | **240** | **all green on Node 18/20/22** |
 
 ---
 
