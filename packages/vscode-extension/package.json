@@ -50,9 +50,9 @@
       "description": "Cross-platform"
     },
     {
-      "url": "https://img.shields.io/badge/tests-306%20passing-brightgreen.svg",
+      "url": "https://img.shields.io/badge/tests-180%20passing-brightgreen.svg",
       "href": "https://github.com/ahmdelbaz28-ux/rewrite/actions",
-      "description": "306 tests passing"
+      "description": "180 tests passing"
     }
   ],
   "activationEvents": [
@@ -241,8 +241,8 @@
     "vscode:prepublish": "echo 'Skipping prepublish - using pre-built out/'",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "node /home/z/my-project/scripts/build-vscode-extension.js",
-    "publish": "node /home/z/my-project/scripts/build-vscode-extension.js && echo 'Run: vsce publish' ",
+    "package": "node scripts/build-vscode-extension.js --vsix",
+    "publish": "node scripts/build-vscode-extension.js --vsix && echo 'Run: vsce publish'",
     "lint": "tsc --noEmit"
   },
   "devDependencies": {

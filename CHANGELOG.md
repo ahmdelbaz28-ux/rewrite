@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **MCP server tests no longer hang**: The `readline` interface is now created
+  lazily inside `startMcpServer()` instead of at module-load time. Previously
+  requiring `@smartlangguard/mcp-server` from a test would keep the Node.js
+  event loop alive via an open `stdin` handle and cause Jest to hang forever.
+- **VS Code extension build is now portable**: Replaced the hardcoded
+  `/home/z/my-project/scripts/build-vscode-extension.js` path in
+  `packages/vscode-extension/package.json` with a portable
+  `scripts/build-vscode-extension.js` that ships inside the package itself.
+  `npm run package` / `npm run publish` now work on any developer's machine
+  and on CI.
+- **Browser extension build & package scripts now exist**: Created the missing
+  `packages/browser-extension/scripts/build.js` and
+  `packages/browser-extension/scripts/package.js`. Previously
+  `npm run build` and `npm run package` would fail with ENOENT because the
+  package.json referenced scripts that were never committed.
+- **VS Code extension test badge**: Updated the badge from
+  "306 tests passing" (which never existed) to the real count of 240 tests.
+
+### Added
+- **Browser extension tests** (`packages/browser-extension/tests/manifest.test.js`):
+  11 tests covering MV3 manifest validity, safe permissions, the build
+  script, and the .zip packaging flow.
+- **VS Code extension tests** (`packages/vscode-extension/tests/compile.test.js`):
+  5 tests that compile `src/extension.ts` via `tsc -p ./` and verify the
+  compiled output exports `activate` / `deactivate`, plus a guard that no
+  `package.json` script ever bakes in an absolute `/home/.../` path again.
+- **Extended backend API tests** (`packages/backend/tests/extended-api.test.js`):
+  21 new tests covering the API root discovery document, telemetry batch
+  ingestion (including 413 payload-size limit), telemetry stats auth gate,
+  billing `/status` and `/plans` shape, admin JWT enforcement, AI scoring
+  auth, and 404 handling.
+- **CLI smoke tests** (`packages/cli/tests/cli.test.js`): 14 tests that
+  spawn the actual CLI binary as a child process and verify `--version`,
+  `--help`, `fix` (stdin + arg + file + --output), `detect`, and all
+  output formats (text / json / text-with-meta).
+- **Admin dashboard build tests**
+  (`packages/admin-dashboard/tests/build.test.js`): 9 tests that verify
+  Vite is installed, all source pages exist, and `vite build` produces a
+  hashed JS+CSS bundle in `dist/` with a correct `index.html`.
+
+### Changed
+- Total test count: **240 passing** (was 180). All 16 test suites green.
+- README badges and Arabic/English test-count notes updated accordingly.
+
 ### Planned
 - Mobile companion app (iOS + Android)
 - Browser extension published to Chrome Web Store

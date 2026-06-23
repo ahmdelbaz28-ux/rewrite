@@ -25,11 +25,12 @@ const PROTOCOL_VERSION = '2024-11-05';
 // ─── JSON-RPC over stdio ──────────────────────────────────────────────────────
 
 const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
-});
+
+// NOTE: readline interface is created lazily inside startMcpServer() so that
+// simply requiring this module (e.g. from tests) does NOT keep the Node.js
+// event loop alive via an open stdin handle. Previously this was created at
+// module-load time which caused jest to hang indefinitely on this test file.
+let rl = null;
 
 let initialized = false;
 
@@ -280,6 +281,14 @@ async function startMcpServer(options = {}) {
   });
 
   process.stderr.write(`SmartLangGuard MCP Server v${core.VERSION} starting...\n`);
+
+  // Create the readline interface lazily here so that requiring the module
+  // (e.g. from tests) does not keep the event loop alive.
+  rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+  });
 
   rl.on('line', (line) => {
     if (!line.trim()) return;

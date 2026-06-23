@@ -9,7 +9,7 @@
 `high hofhv;` → `اهلا اخبارك` ⚡
 
 [![npm version](https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue)](https://www.npmjs.com/package/@smartlangguard/cli)
-[![Tests](https://img.shields.io/badge/Tests-180%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
+[![Tests](https://img.shields.io/badge/Tests-240%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
 [![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](#-whats-new-in-v020)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
@@ -529,7 +529,7 @@ node packages/cli/bin/smartlangguard.js fix "high"
 ## الاختبارات (Tests)
 
 ```bash
-npm test                # 180 اختبار
+npm test                # 240 اختبار
 npx jest --verbose      # تفاصيل أكتر
 ```
 
@@ -1070,7 +1070,7 @@ If the output is `اهلا` → the tool is working perfectly ✓
 ## Tests
 
 ```bash
-npm test                # 180 tests
+npm test                # 240 tests
 npx jest --verbose      # more details
 ```
 
