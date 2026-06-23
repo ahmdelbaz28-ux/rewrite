@@ -1,56 +1,46 @@
-/* Reset and base styles */
-* {margin: 0; padding: 0; box-sizing: border-box;}
-body {font-family: Arial, Helvetica, sans-serif; line-height: 1.5; background: #f9fafb; color: #111;}
-a {color: #2563eb; text-decoration: none;}
-a:hover {text-decoration: underline;}
-
-/* Hero section */
-.hero {
-  background: linear-gradient(135deg, #1e293b, #4b5563);
-  color: #fff;
-  text-align: center;
-  padding: 4rem 1rem;
-  animation: fadeIn 1.5s ease-out;
-}
-.logo {width: 120px; animation: spin 8s linear infinite;}
-@keyframes spin {from {transform: rotate(0deg);} to {transform: rotate(360deg);}}
-.tagline {font-size: 1.2rem; margin-top: 0.5rem;}
-.cta-buttons {margin-top: 1.5rem;}
-.button {
-  display: inline-block;
-  margin: 0.5rem;
-  padding: 0.8rem 1.2rem;
-  background: #2563eb;
-  color: #fff;
-  border-radius: 4px;
-  transition: background .3s;
-}
-.button:hover {background: #1d4ed8;}
-
-/* Demo section */
-.demo {
-  padding: 2rem;
-  text-align: center;
-  background: #fff;
-  margin: 2rem auto;
-  max-width: 900px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
-}
-.video-wrapper video {width: 100%; max-width: 800px; border-radius: 8px;}
-.demo-caption {margin-top: 0.5rem; color: #555;}
-
-/* Features */
-.features {background: #fff; padding: 2rem; margin: 2rem auto; max-width: 900px; box-shadow: 0 2px 8px rgba(0,0,0,.1);}
-.feature-list {list-style: none; padding: 0;}
-.feature-list li {margin: 0.5rem 0; font-size: 1.1rem;}
-
-/* Install, Docs, Source sections */
-.install, .docs, .source {max-width: 800px; margin: 2rem auto; padding: 1rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.1);}
-.download-list {display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;}
-pre {background: #f4f4f4; padding: 0.5rem; overflow-x: auto;}
-
+/* Reset and base */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;}
+body{font-family:"Inter",Arial,sans-serif;background:#f9fafb;color:#111;}
+/* Links */
+a{color:#2563eb;transition:color .2s;text-decoration:none;}
+a:hover{color:#1d4ed8;}
+/* Utility */
+.container{max-width:1200px;margin:auto;padding:0 1rem;}
+/* Hero */
+.hero{background:linear-gradient(135deg,#1e293b,#4b5563);color:#fff;text-align:center;padding:5rem 1rem 4rem;position:relative;}
+.hero .logo{width:120px;margin-bottom:1rem;animation:spin 12s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.hero h1{font-size:2.75rem;margin:0.5rem 0;}
+.hero .subtitle{font-size:1.25rem;margin-bottom:2rem;}
+.hero .cta{display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem;margin-bottom:2rem;}
+.btn{display:inline-block;padding:0.75rem 1.5rem;border-radius:0.375rem;font-weight:600;transition:background .3s,transform .2s;cursor:pointer;}
+.btn.primary{background:#ff9800;color:#fff;border:none;}
+.btn.primary:hover{background:#fb8c00;transform:translateY(-2px);}
+.btn.secondary{background:transparent;color:#fff;border:2px solid #fff;}
+.btn.secondary:hover{background:#fff;color:#1e293b;}
+.hero .scroll-down{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);font-size:2rem;animation:bounce 2s infinite;}
+@keyframes bounce{0%,20%,50%,80%,100%{transform:translate(-50%,0);}40%{transform:translate(-50%,-8px);}60%{transform:translate(-50%,-4px);}}
+/* Sections */
+.section{padding:4rem 1rem;}
+.section h2{text-align:center;font-size:2rem;margin-bottom:2rem;color:#0f172a;}
+/* Features grid */
+.features .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;}
+.features .card{background:#fff;padding:1.5rem;border-radius:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;transition:transform .2s,box-shadow .2s;}
+.features .card:hover{transform:translateY(-4px);box-shadow:0 4px 12px rgba(0,0,0,0.12);}
+.features .card h3{margin-bottom:0.5rem;font-size:1.25rem;color:#1e293b;}
+/* Demo */
+.demo .video-container{max-width:960px;margin:auto;}
+.demo video{width:100%;border-radius:0.5rem;}
+.demo .caption{margin-top:0.75rem;text-align:center;color:#555;}
+/* Download */
+.download .download-list{display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem;margin-top:1.5rem;}
+/* Docs */
+.docs ul{list-style:none;max-width:600px;margin:auto;padding:0;}
+.docs li{margin:0.75rem 0;font-size:1.125rem;}
+.docs a{color:#2563eb;}
+.docs a:hover{text-decoration:underline;}
 /* Footer */
-footer {text-align: center; padding: 1rem; background: #1e293b; color: #fff;}
-
-/* Animations */
-@keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+footer{background:#1e293b;color:#fff;text-align:center;padding:1.5rem 1rem;}
+footer a{color:#fff;}
+footer a:hover{color:#ff9800;}

@@ -3,71 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SmartLangGuard instantly fixes Arabic/English keyboard layout mistakes across CLI, daemon, browser extension, and VS Code integration." />
   <title>SmartLangGuard – Keyboard Layout Fixer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="hero">
     <img src="assets/smartlangguard-logo.svg" alt="SmartLangGuard Logo" class="logo" />
     <h1>SmartLangGuard</h1>
-    <p class="tagline">Instantly correct Arabic/English keyboard‑layout mistakes.</p>
-    <div class="cta-buttons">
-      <a class="button" href="https://www.npmjs.com/package/@smartlangguard/cli" target="_blank">Install via npm</a>
-      <a class="button" href="https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.5" target="_blank">Download binaries</a>
+    <p class="subtitle">Instantly fix Arabic/English keyboard layout mistakes.</p>
+    <div class="cta">
+      <a href="https://www.npmjs.com/package/@smartlangguard/cli" class="btn primary" target="_blank">Install via npm</a>
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite/releases/tag/v0.1.5" class="btn secondary" target="_blank">Download binaries</a>
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite" class="btn secondary" target="_blank">View on GitHub</a>
     </div>
+    <a href="#features" class="scroll-down">&#x25BC;</a>
   </header>
 
-  <section class="demo">
+  <section id="features" class="section features">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="card"><h3>CLI Tool</h3><p>Cross‑platform command line utility.</p></div>
+      <div class="card"><h3>Background Daemon</h3><p>Continuously monitors clipboard and hotkey.</p></div>
+      <div class="card"><h3>Browser Extension</h3><p>Works on any website (Chrome/Edge/Brave).</p></div>
+      <div class="card"><h3>VS Code Extension</h3><p>Fix text directly in the editor.</p></div>
+      <div class="card"><h3>Real‑time Detection</h3><p>Instant feedback with sound alerts.</p></div>
+      <div class="card"><h3>Secure Licensing</h3><p>Online validation and telemetry.</p></div>
+    </div>
+  </section>
+
+  <section id="demo" class="section demo">
     <h2>Live Demo</h2>
-    <div class="video-wrapper">
-      <video controls autoplay muted loop poster="assets/smartlangguard-logo.svg">
+    <div class="video-container">
+      <video autoplay muted loop playsinline>
         <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
-    <p class="demo-caption">Watch SmartLangGuard fix a mistyped Arabic phrase in real time.</p>
+    <p class="caption">SmartLangGuard correcting a mistyped Arabic phrase in real‑time.</p>
   </section>
 
-  <section class="features">
-    <h2>Key Features</h2>
-    <ul class="feature-list">
-      <li>🔧 CLI tool – works on Windows, macOS and Linux.</li>
-      <li>🖥️ Background daemon with global hotkey.</li>
-      <li>🌐 Browser extension (Chrome MV3).</li>
-      <li>🧩 VS Code extension – fix on the fly.</li>
-      <li>⚡ Real‑time typing detection with sound alerts.</li>
-      <li>🔐 Secure license validation and telemetry.</li>
-    </ul>
-  </section>
-
-  <section class="install">
-    <h2>Installation</h2>
-    <p>Install globally via npm:</p>
+  <section id="download" class="section download">
+    <h2>Get Started</h2>
+    <p>Install globally via npm or download a pre‑built binary.</p>
     <pre><code>npm install -g @smartlangguard/cli</code></pre>
-    <p>Or download a pre‑built binary for your platform:</p>
-    <ul class="download-list">
-      <li><a class="button" href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-win-x64.exe" target="_blank">Windows x64</a></li>
-      <li><a class="button" href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-macos-x64" target="_blank">macOS Intel</a></li>
-      <li><a class="button" href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-linux-x64" target="_blank">Linux x64</a></li>
-    </ul>
-    <p>Verify the <code>checksums.sha256</code> file in the release assets for integrity.</p>
+    <div class="download-list">
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-win-x64.exe" class="btn primary" target="_blank">Windows x64</a>
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-macos-x64" class="btn primary" target="_blank">macOS Intel</a>
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite/releases/download/v0.1.5/smartlangguard-linux-x64" class="btn primary" target="_blank">Linux x64</a>
+    </div>
+    <p>Check the <code>checksums.sha256</code> file in the release assets to verify integrity.</p>
   </section>
 
-  <section class="docs">
+  <section id="docs" class="section docs">
     <h2>Documentation</h2>
     <ul>
-      <li><a href="README.md">Readme – overview &amp; quick start</a></li>
-      <li><a href="INSTALL.md">Installation guide</a></li>
-      <li><a href="API.md">API reference (MCP server)</a></li>
+      <li><a href="README.md">Readme – Overview &amp; Quick Start</a></li>
+      <li><a href="INSTALL.md">Installation Guide</a></li>
+      <li><a href="API.md">API Reference (MCP server)</a></li>
     </ul>
   </section>
 
-  <section class="source">
-    <h2>Source &amp; Issues</h2>
-    <p>Visit the project on <a href="https://github.com/ahmdelbaz28-ux/rewrite" target="_blank">GitHub</a>. Open <a href="https://github.com/ahmdelbaz28-ux/rewrite/issues" target="_blank">issues</a> for bugs or feature requests.</p>
-  </section>
-
-  <footer>
+  <footer class="footer">
     <p>© 2026 SmartLangGuard – <a href="https://github.com/ahmdelbaz28-ux/rewrite" target="_blank">GitHub</a></p>
   </footer>
 </body>
