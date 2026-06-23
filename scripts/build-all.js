@@ -49,7 +49,7 @@ const targets = [
 for (const { name, target, ext } of targets) {
   console.log(`🔨 Building ${name}...`);
   try {
-    execSync(`npx pkg . --targets ${target} --output dist/smartlangguard-${name}${ext}`, {
+    execSync(`npx @yao-pkg/pkg . --targets ${target} --output dist/smartlangguard-${name}${ext}`, {
       cwd: CLI_DIR,
       stdio: 'inherit'
     });
@@ -68,7 +68,8 @@ for (const file of files) {
   if (file === 'checksums.sha256') continue;
   const filePath = path.join(DIST_DIR, file);
   if (fs.statSync(filePath).isFile()) {
-    const hash = execSync(`sha256sum "${filePath}"`, { encoding: 'utf8' }).split(' ')[0];
+    const hashCmd = process.platform === 'darwin' ? `shasum -a 256 "${filePath}"` : `sha256sum "${filePath}"`;
+    const hash = execSync(hashCmd, { encoding: 'utf8' }).split(' ')[0];
     checksums[file] = hash;
   }
 }

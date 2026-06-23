@@ -92,8 +92,11 @@ async function init(config = {}) {
 async function fixText(text, options = {}) {
   if (text == null) text = '';
   
-  // Check false positive first
-  if (isFalsePositive(text)) {
+  const direction = options.direction || currentConfig.defaultDirection;
+  const isForcedDirection = direction !== 'auto';
+  
+  // Check false positive first - but skip if user explicitly forced a direction
+  if (!isForcedDirection && isFalsePositive(text)) {
     return {
       original: text,
       corrected: text,
@@ -103,8 +106,8 @@ async function fixText(text, options = {}) {
     };
   }
   
-  // Check user dictionary whitelist
-  if (userDictionary.isWhitelisted(text)) {
+  // Check user dictionary whitelist - but skip if user explicitly forced a direction
+  if (!isForcedDirection && userDictionary.isWhitelisted(text)) {
     return {
       original: text,
       corrected: text,
@@ -114,7 +117,6 @@ async function fixText(text, options = {}) {
     };
   }
   
-  const direction = options.direction || currentConfig.defaultDirection;
   const useAI = options.useAI !== false && currentConfig.useRemoteScoring;
 
   // 1. Apply rules-based translation

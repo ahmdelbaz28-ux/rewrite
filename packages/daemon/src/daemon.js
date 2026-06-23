@@ -237,11 +237,13 @@ function showNotification(message) {
       break;
     case 'win32': {
       // Use non-blocking toast notification instead of modal MessageBox
+      // Sanitize message to prevent PowerShell/XML injection
+      const safeMsg = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
       const psCode = [
         '[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null',
         '[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null',
         '$xml = "<toast><visual><binding template=\\"ToastGeneric\\"><text>SmartLangGuard</text>',
-        `<text>${message.replace(/"/g, '&quot;')}</text>`,
+        `<text>${safeMsg}</text>`,
         '</binding></visual></toast>"',
         '$doc = New-Object Windows.Data.Xml.Dom.XmlDocument',
         '$doc.LoadXml($xml)',
@@ -302,7 +304,17 @@ function startLocalServer() {
 
     // Parse body
     let body = '';
-    for await (const chunk of req) body += chunk;
+    const MAX_BODY_SIZE = 1024 * 1024; // 1MB limit
+    let bodySize = 0;
+    for await (const chunk of req) {
+      bodySize += chunk.length;
+      if (bodySize > MAX_BODY_SIZE) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Request body too large' }));
+        return;
+      }
+      body += chunk;
+    }
     let data = {};
     if (body) {
       try { data = JSON.parse(body); } catch {}
@@ -380,7 +392,13 @@ function startLocalServer() {
 
     // Token endpoint (for browser extension to get the auth token)
     if (req.url.startsWith('/token') && req.method === 'GET') {
-      // Only allow from localhost
+      // Only allow from localhost - verify remote address
+      const remoteAddr = req.socket.remoteAddress;
+      if (remoteAddr !== '127.0.0.1' && remoteAddr !== '::1' && remoteAddr !== '::ffff:127.0.0.1') {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Forbidden: token endpoint only accessible from localhost' }));
+        return;
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ token: authToken }));
       return;

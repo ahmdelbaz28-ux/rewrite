@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/browser-extension",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SmartLangGuard Chrome Extension (MV3) - Fix keyboard layout mistakes in any web page",
   "private": true,
   "scripts": {

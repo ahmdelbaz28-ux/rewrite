@@ -31,6 +31,11 @@ const UPDATE_CACHE_DIR = path.join(
  * @returns {number} -1 if a < b, 0 if equal, 1 if a > b
  */
 function compareVersions(a, b) {
+  // Validate version strings before comparison
+  const VERSION_REGEX = /^\d+(\.\d+)*$/;
+  if (!VERSION_REGEX.test(a) || !VERSION_REGEX.test(b)) {
+    return 0; // Invalid version strings are treated as equal (no update forced)
+  }
   const partsA = a.split('.').map(Number);
   const partsB = b.split('.').map(Number);
   for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {

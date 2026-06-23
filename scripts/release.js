@@ -46,7 +46,7 @@ execSync(`git tag v${version}`, { cwd: ROOT, stdio: 'inherit' });
 
 // 5. Push
 console.log('\n🚀 Pushing...');
-execSync('git push origin main', { cwd: ROOT, stdio: 'inherit' });
+execSync('git push origin ' + branch, { cwd: ROOT, stdio: 'inherit' });
 execSync(`git push origin v${version}`, { cwd: ROOT, stdio: 'inherit' });
 
 // 6. Create GitHub release (requires gh CLI)

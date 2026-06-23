@@ -78,7 +78,7 @@ describe('Core Index (Main Entry Point)', () => {
 
   describe('fixText', () => {
     test('fixes simple English-to-Arabic text', async () => {
-      const result = await core.fixText('high', { useAI: false });
+      const result = await core.fixText('high', { useAI: false, direction: 'en-to-ar' });
       expect(result.original).toBe('high');
       expect(result.corrected).toBe('اهلا');
       expect(result.direction).toBe('en-to-ar');
@@ -86,12 +86,12 @@ describe('Core Index (Main Entry Point)', () => {
     });
 
     test('fixes a phrase', async () => {
-      const result = await core.fixText('high hofhv;', { useAI: false });
+      const result = await core.fixText('high hofhv;', { useAI: false, direction: 'en-to-ar' });
       expect(result.corrected).toContain('اهلا');
     });
 
     test('returns result object with all fields', async () => {
-      const result = await core.fixText('high', { useAI: false });
+      const result = await core.fixText('high', { useAI: false, direction: 'en-to-ar' });
       expect(result).toHaveProperty('original');
       expect(result).toHaveProperty('corrected');
       expect(result).toHaveProperty('direction');
@@ -102,7 +102,7 @@ describe('Core Index (Main Entry Point)', () => {
 
   describe('fixTextBatch', () => {
     test('fixes multiple texts', async () => {
-      const results = await core.fixTextBatch(['high', 'hofhv;'], { useAI: false });
+      const results = await core.fixTextBatch(['high', 'hofhv;'], { useAI: false, direction: 'en-to-ar' });
       expect(results).toHaveLength(2);
       expect(results[0].corrected).toBe('اهلا');
     });

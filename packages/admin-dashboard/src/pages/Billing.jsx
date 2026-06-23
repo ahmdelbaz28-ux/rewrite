@@ -18,7 +18,10 @@ export default function Billing() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/v1/billing/plans');
+        const token = localStorage.getItem('slg_admin_token');
+    const res = await fetch('/v1/billing/plans', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
         const data = await res.json();
         setPlans(data.plans);
       } catch (err) {

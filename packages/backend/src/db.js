@@ -93,7 +93,14 @@ function init() {
         const randomPass = crypto.randomBytes(12).toString('hex');
         const defaultHash = bcrypt.hashSync(randomPass, 10);
         db.prepare('INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)').run('admin', defaultHash, Date.now());
-        console.log(` → Created default admin (username: admin, password: <set via ADMIN_DEFAULT_PASSWORD env>)`);
+        console.log(``);
+      console.log(`╔══════════════════════════════════════════════════════════════╗`);
+      console.log(`║  ⚠  DEFAULT ADMIN CREDENTIALS (save this - shown only once) ║`);
+      console.log(`║  Username: admin                                            ║`);
+      console.log(`║  Password: ${randomPass}` + ' '.repeat(Math.max(0, 46 - randomPass.length)) + `║`);
+      console.log(`╚══════════════════════════════════════════════════════════════╝`);
+      console.log(`  IMPORTANT: This password will NOT be shown again.`);
+      console.log(`  Set ADMIN_DEFAULT_PASSWORD env var for subsequent deployments.`);
       } else {
         const defaultHash = bcrypt.hashSync(defaultPassword, 10);
         db.prepare('INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)').run('admin', defaultHash, Date.now());

@@ -5,6 +5,7 @@
 'use strict';
 
 const express = require('express');
+const { requireAdmin } = require('../middleware');
 
 const router = express.Router();
 
@@ -120,7 +121,7 @@ router.post('/validate', asyncHandler(async (req, res) => {
 
 // ─── POST /v1/license/activate ────────────────────────────────────────────────
 
-router.post('/activate', asyncHandler(async (req, res) => {
+router.post('/activate', requireAdmin, asyncHandler(async (req, res) => {
   const { email, tier = 'free' } = req.body;
   
   if (!email) {
@@ -160,7 +161,7 @@ router.post('/activate', asyncHandler(async (req, res) => {
 
 // ─── POST /v1/license/revoke ──────────────────────────────────────────────────
 
-router.post('/revoke', asyncHandler(async (req, res) => {
+router.post('/revoke', requireAdmin, asyncHandler(async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ error: 'Token required' });
 

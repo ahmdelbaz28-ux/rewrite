@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/mcp-server",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "SmartLangGuard MCP Server - Integration with Claude Desktop, Cursor, Cline, and other AI tools via Model Context Protocol",
   "main": "src/mcp-server.js",
   "bin": {
@@ -48,6 +48,6 @@
   },
   "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
-    "@smartlangguard/core": "^0.1.0"
+    "@smartlangguard/core": "^0.2.0"
   }
 }

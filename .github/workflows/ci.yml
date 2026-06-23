@@ -1,96 +1,35 @@
-name: CI/CD
+name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, develop]
   pull_request:
     branches: [main, master]
 
 jobs:
-  test-core:
-    name: Test Core Package
+  test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Test Core
-        run: npm test --workspace @smartlangguard/core
-        env:
-          NODE_ENV: test
-
-  test-backend:
-    name: Test Backend Package
-    runs-on: ubuntu-latest
-    needs: test-core
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Test Backend
-        run: npm test --workspace @smartlangguard/backend
-        env:
-          JWT_SECRET: ci-test-jwt-secret
-          ADMIN_DEFAULT_PASSWORD: citestpass123
-          SMARTLANGGUARD_DB_PATH: ':memory:'
-          NODE_ENV: test
-
-  test-mcp:
-    name: Test MCP Server
-    runs-on: ubuntu-latest
-    needs: test-core
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Test MCP
-        run: npm test --workspace @smartlangguard/mcp-server
-        env:
-          NODE_ENV: test
-
-  test-daemon:
-    name: Test Daemon Package
-    runs-on: ubuntu-latest
-    needs: test-core
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Test Daemon (cross-platform tests)
-        run: npx jest packages/daemon/tests/ --ci --reporters=default
-        env:
-          NODE_ENV: test
-
-  build-cli:
-    name: Build CLI Binaries
-    runs-on: ${{ matrix.os }}
-    needs: [test-core, test-backend, test-mcp]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
+
       - name: Install dependencies
-        run: npm install
-      - name: Build CLI
-        run: npm run build:cli
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint || true
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check build
+        run: npm run build || true

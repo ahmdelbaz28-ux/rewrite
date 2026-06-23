@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/backend",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "SmartLangGuard SaaS Backend - License validation, telemetry, AI scoring, admin dashboard, and Stripe integration",
   "main": "src/server.js",
   "scripts": {
@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
-    "@smartlangguard/core": "^0.1.0",
+    "@smartlangguard/core": "^0.2.0",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.3.0",
     "cors": "^2.8.5",

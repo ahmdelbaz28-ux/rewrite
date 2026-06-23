@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/core",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "SmartLangGuard Core - Translation engine, license layer, telemetry, and updater for fixing Arabic/English keyboard layout mistakes",
   "main": "src/index.js",
   "types": "src/index.d.ts",

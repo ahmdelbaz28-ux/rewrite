@@ -7,15 +7,18 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRY = '24h';
-
+// JWT_SECRET is read lazily to ensure dotenv has been loaded first
+let _jwtSecret = null;
 function getJwtSecret() {
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required. Set it in your .env file.');
+  if (!_jwtSecret) {
+    _jwtSecret = process.env.JWT_SECRET;
   }
-  return JWT_SECRET;
+  if (!_jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is not set. Please configure it in .env');
+  }
+  return _jwtSecret;
 }
+const JWT_EXPIRY = '24h';
 
 function errorHandler(err, req, res, next) {
   console.error('Error:', err.message);

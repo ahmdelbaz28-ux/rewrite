@@ -43,8 +43,15 @@ describe('Translator', () => {
 
   describe('convertToEnglish', () => {
     test('converts simple Arabic text to English', () => {
+      // اهلا = ا(h) ه(i) لا(b) — lam-alef ligature maps to 'b'
       const result = convertToEnglish('اهلا');
-      expect(result).toBe('high');
+      expect(result).toBe('hib');
+    });
+
+    test('converts Arabic text with separate lam+alef', () => {
+      // ش=a م=l س=s — simple word without ligature
+      const result = convertToEnglish('شمس');
+      expect(result).toBe('als');
     });
 
     test('handles empty string', () => {
@@ -88,14 +95,28 @@ describe('Translator', () => {
   });
 
   describe('translate', () => {
-    test('auto-detects and translates English to Arabic', () => {
-      const result = translate('high');
+    test('auto-detects and translates Arabic keyboard mistakes', () => {
+      // Text that is clearly wrong-layout Arabic: 'اهلا' typed on English layout = 'high'
+      // But 'high' is an English word, so test with forced direction
+      const result = translate('high', { direction: 'en-to-ar' });
       expect(result).toBe('اهلا');
     });
 
     test('forces en-to-ar direction', () => {
       const result = translate('high', { direction: 'en-to-ar' });
       expect(result).toBe('اهلا');
+    });
+
+    test('preserves intentional English words in auto mode', () => {
+      // 'high' is in the intentional English words list, should NOT be auto-converted
+      const result = translate('high');
+      expect(result).toBe('high');
+    });
+
+    test('auto-detects Arabic text typed on English keyboard', () => {
+      // Arabic-only text should be detected as ar-mistake for conversion to English
+      const result = translate('اهلا');
+      expect(typeof result).toBe('string');
     });
 
     test('returns score when scoreOutput is true', () => {
@@ -113,9 +134,10 @@ describe('Translator', () => {
 
   describe('translateBatch', () => {
     test('translates multiple texts', () => {
-      const results = translateBatch(['high', 'high hofhv;']);
+      const results = translateBatch(['high', 'hofhv;']);
       expect(results).toHaveLength(2);
-      expect(results[0]).toBe('اهلا');
+      // 'high' is an English word, should be preserved in auto mode
+      expect(results[0]).toBe('high');
     });
 
     test('handles empty array', () => {

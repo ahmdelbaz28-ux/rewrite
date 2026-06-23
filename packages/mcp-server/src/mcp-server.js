@@ -157,6 +157,7 @@ async function handleRegisterLicense(args) {
   if (!args?.token) {
     return { content: [{ type: 'text', text: 'Error: token parameter is required' }], isError: true };
   }
+  try {
   const result = await core.activateLicense(args.token);
   if (result.success) {
     return {
@@ -167,8 +168,10 @@ async function handleRegisterLicense(args) {
     };
   }
   return { content: [{ type: 'text', text: `Failed: ${result.error}` }], isError: true };
+  } catch (err) {
+    return { content: [{ type: 'text', text: `License activation error: ${err.message}` }], isError: true };
+  }
 }
-
 async function handleLicenseStatus() {
   const status = core.getLicenseStatus();
   return {
@@ -191,8 +194,18 @@ const HANDLERS = {
 async function handleMessage(message) {
   const { jsonrpc, id, method, params } = message;
 
-  // Notification (no id) - ignore responses
+  // Handle notifications (no id) separately before discarding
   if (id === undefined || id === null) {
+    switch (method) {
+      case 'initialized':
+        // Handshake complete - client acknowledged our initialize response
+        initialized = true;
+        break;
+      case 'notifications/cancelled':
+        // Request cancellation - currently no-op, future implementation point
+        break;
+      // Other notifications are silently ignored per JSON-RPC spec
+    }
     return;
   }
 

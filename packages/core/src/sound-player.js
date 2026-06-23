@@ -351,7 +351,8 @@ class SoundPlayer {
       
       // Don't wait for playback to complete - fire and forget
       child.unref();
-      resolve();
+      // Note: we resolve once in the callback above; do NOT resolve again here
+      // as that would make the promise resolve before playback starts on some platforms
     });
   }
   

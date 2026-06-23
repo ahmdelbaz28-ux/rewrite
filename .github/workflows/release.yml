@@ -2,303 +2,60 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g. 0.1.0) - without v prefix'
-        required: true
-      draft:
-        description: 'Create as draft release'
-        required: false
-        type: boolean
-        default: false
-
-permissions:
-  contents: write
-
-env:
-  NODE_VERSION: 22
+    tags:
+      - 'v*'
 
 jobs:
-  # ─── Wait for build workflow to complete ────────────────────────────────────
-  wait-for-builds:
-    name: ⏳ Wait for Builds
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Wait for build workflow
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'Build Summary'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 30
-          verbose: true
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
 
-  # ─── Create GitHub Release with all artifacts ──────────────────────────────
-  create-release:
-    name: 🚀 Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: wait-for-builds
-    timeout-minutes: 15
-    
     steps:
-      - uses: actions/checkout@v5
-      
-      - name: Determine version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            TAG="v${VERSION}"
-          else
-            # Extract version from tag (v0.1.0 → 0.1.0)
-            VERSION="${GITHUB_REF_NAME#v}"
-            TAG="${GITHUB_REF_NAME}"
-          fi
-          
-          echo "Version: $VERSION"
-          echo "Tag: $TAG"
-          
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-      
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build CLI binary
+        run: npm run build:${{ matrix.target }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartlangguard-${{ matrix.target }}
+          path: packages/cli/dist/
+
+  create-release:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Download all artifacts
-        uses: actions/download-artifact@v5
-        with:
-          path: artifacts
-      
-      - name: List downloaded artifacts
-        run: |
-          echo "── Downloaded artifacts ───────────"
-          find artifacts -type f | sort
-          echo ""
-          echo "── Total size ───────────"
-          du -sh artifacts/
-      
-      - name: Prepare release directory
-        run: |
-          set -e
-          mkdir -p release
-          
-          # Move CLI binaries to release/
-          find artifacts/binary-* -type f -name 'smartlangguard-*' -exec cp {} release/ \;
-          
-          # Generate a SINGLE unified checksums file (not per-binary)
-          # This file will contain checksums for ALL binaries in one place
-          cd release
-          rm -f checksums.sha256  # remove any individual ones
-          for binary in smartlangguard-*; do
-            if [ -f "$binary" ]; then
-              if command -v shasum >/dev/null 2>&1; then
-                shasum -a 256 "$binary"
-              else
-                sha256sum "$binary"
-              fi
-            fi
-          done > checksums.sha256
-          cd ..
-          
-          echo "── Unified checksums ───────────"
-          cat release/checksums.sha256
-          echo ""
-          
-          # Move dashboard zip
-          if [ -f artifacts/admin-dashboard/dashboard.zip ]; then
-            cp artifacts/admin-dashboard/dashboard.zip release/
-          fi
-          
-          # Move VS Code extension .vsix
-          find artifacts/vscode-extension -name '*.vsix' -exec cp {} release/ \;
-          
-          # Move browser extension zip
-          find artifacts/browser-extension -name '*.zip' -exec cp {} release/ \;
-          
-          echo ""
-          echo "── Final release contents ───────────"
-          ls -lh release/
-      
-      - name: Generate latest.json manifest
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          REPO: ${{ github.repository }}
-        run: |
-          # Generate latest.json using a script that properly interpolates vars
-          RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          
-          cat > release/latest.json << EOF
-          {
-            "version": "${VERSION}",
-            "release_date": "${RELEASE_DATE}",
-            "repository": "https://github.com/${REPO}",
-            "files": [
-              {
-                "file": "smartlangguard-win-x64.exe",
-                "platform": "windows-x64",
-                "url": "https://github.com/${REPO}/releases/download/v${VERSION}/smartlangguard-win-x64.exe"
-              },
-              {
-                "file": "smartlangguard-macos-x64",
-                "platform": "macos-x64",
-                "url": "https://github.com/${REPO}/releases/download/v${VERSION}/smartlangguard-macos-x64"
-              },
-              {
-                "file": "smartlangguard-macos-arm64",
-                "platform": "macos-arm64",
-                "url": "https://github.com/${REPO}/releases/download/v${VERSION}/smartlangguard-macos-arm64"
-              },
-              {
-                "file": "smartlangguard-linux-x64",
-                "platform": "linux-x64",
-                "url": "https://github.com/${REPO}/releases/download/v${VERSION}/smartlangguard-linux-x64"
-              },
-              {
-                "file": "smartlangguard-linux-arm64",
-                "platform": "linux-arm64",
-                "url": "https://github.com/${REPO}/releases/download/v${VERSION}/smartlangguard-linux-arm64"
-              }
-            ]
-          }
-          EOF
-          
-          # Remove leading whitespace from heredoc (caused by YAML indentation)
-          # The heredoc lines start with 10 spaces, remove them
-          sed -i 's/^          //' release/latest.json
-          
-          echo "── latest.json ───────────"
-          cat release/latest.json
-      
-      - name: Validate latest.json
-        run: |
-          node -e "
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('release/latest.json', 'utf8'));
-          if (!data.version) throw new Error('Missing version');
-          if (!Array.isArray(data.files)) throw new Error('Missing files array');
-          if (data.files.length !== 5) throw new Error('Expected 5 files, got ' + data.files.length);
-          console.log('✓ latest.json is valid');
-          console.log('  Version:', data.version);
-          console.log('  Files:', data.files.map(f => f.platform).join(', '));
-          "
-      
-      - name: Generate release notes
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          REPO: ${{ github.repository }}
-        run: |
-          # Use unquoted heredoc so $VERSION and $REPO get expanded
-          cat > release/release-notes.md << EOF
-          # SmartLangGuard v${VERSION}
-          
-          🎉 New release of SmartLangGuard - cross-platform keyboard layout mistake fixer.
-          
-          ## 📦 Downloads
-          
-          | Platform | File | Install |
-          |----------|------|---------|
-          | 🪟 Windows x64 | \`smartlangguard-win-x64.exe\` | Add to PATH |
-          | 🍎 macOS Intel | \`smartlangguard-macos-x64\` | \`chmod +x && sudo mv to /usr/local/bin/\` |
-          | 🍎 macOS Apple Silicon | \`smartlangguard-macos-arm64\` | Same as above |
-          | 🐧 Linux x64 | \`smartlangguard-linux-x64\` | Same as above |
-          | 🐧 Linux arm64 | \`smartlangguard-linux-arm64\` | Same as above |
-          
-          ### VS Code Extension
-          
-          Install \`smartlangguard-${VERSION}.vsix\` via:
-          \`\`\`bash
-          code --install-extension smartlangguard-${VERSION}.vsix
-          \`\`\`
-          
-          ### Browser Extension (Chrome/Edge/Brave)
-          
-          1. Unzip \`smartlangguard-extension-v${VERSION}.zip\`
-          2. Go to \`chrome://extensions/\`
-          3. Enable Developer mode
-          4. Click "Load unpacked" → select the folder
-          
-          ## 📋 Installation (CLI)
-          
-          \`\`\`bash
-          # Verify checksum
-          shasum -a 256 -c checksums.sha256
-          
-          # Make executable (Unix)
-          chmod +x smartlangguard-*
-          
-          # Move to PATH (Unix)
-          sudo mv smartlangguard-* /usr/local/bin/smartlangguard
-          
-          # Verify
-          smartlangguard --version
-          # Output: ${VERSION}
-          
-          # Test
-          echo "high" | smartlangguard fix
-          # Output: اهلا
-          \`\`\`
-          
-          ## 🆕 What's New
-          
-          See [CHANGELOG.md](https://github.com/${REPO}/blob/main/CHANGELOG.md) for full details.
-          
-          ## 🔐 Checksums
-          
-          See \`checksums.sha256\` file for SHA256 checksums of all binaries.
-          
-          ## 📖 Documentation
-          
-          - [Installation Guide](https://github.com/${REPO}/blob/main/docs/INSTALL.md)
-          - [Architecture](https://github.com/${REPO}/blob/main/docs/ARCHITECTURE.md)
-          - [API Reference](https://github.com/${REPO}/blob/main/docs/API.md)
-          
-          ---
-          
-          **Made with ❤️ for the Arabic-speaking developer community.**
-          EOF
-          
-          # Remove leading whitespace from heredoc (YAML indentation)
-          sed -i 's/^          //' release/release-notes.md
-          
-          echo "── Release notes preview ───────────"
-          head -30 release/release-notes.md
-      
+        uses: actions/download-artifact@v4
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: SmartLangGuard v${{ steps.version.outputs.version }}
-          body_path: release/release-notes.md
-          # Upload all release artifacts:
-          # - smartlangguard-* matches: binaries, vsix, extension zip
-          # - checksums.sha256: unified checksums for all binaries
-          # - latest.json: update manifest for auto-updater
-          # - dashboard.zip: admin dashboard for self-hosting
-          files: |
-            release/smartlangguard-*
-            release/checksums.sha256
-            release/latest.json
-            release/dashboard.zip
-          draft: ${{ github.event.inputs.draft == 'true' }}
-          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
-          generate_release_notes: false
+          files: '**/smartlangguard-*'
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Release summary
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          TAG: ${{ steps.version.outputs.tag }}
-        run: |
-          echo "## 🚀 Release Created" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** v${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** ${TAG}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          ls -1 release/ | sed 's/^/- `/' | sed 's/$/`/' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Download URL" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "https://github.com/${{ github.repository }}/releases/tag/${TAG}" >> $GITHUB_STEP_SUMMARY

@@ -4,7 +4,7 @@ describe('TypingDetector', () => {
   describe('Stateless functions', () => {
     describe('detectWrongLayout', () => {
       test('detects English text that should be Arabic', () => {
-        const result = detectWrongLayout('high');
+        const result = detectWrongLayout('l,hk');
         expect(result).toBeTruthy();
         expect(result.detected).toBe(true);
         expect(result.direction).toBe('en-to-ar');
@@ -25,9 +25,9 @@ describe('TypingDetector', () => {
 
     describe('detectLastWord', () => {
       test('detects last word mistake', () => {
-        const result = detectLastWord('hello world high');
+        const result = detectLastWord('hello world l,hk');
         expect(result).toBeTruthy();
-        expect(result.word).toBe('high');
+        expect(result.word).toBe('l,hk');
         expect(result.range).toBeDefined();
       });
 
@@ -36,14 +36,14 @@ describe('TypingDetector', () => {
       });
 
       test('handles cursor position', () => {
-        const result = detectLastWord('high world', 4);
+        const result = detectLastWord('l,hk world', 4);
         expect(result).toBeTruthy();
       });
     });
 
     describe('findAllMistakes', () => {
       test('finds multiple mistakes', () => {
-        const mistakes = findAllMistakes('high hofhv');
+        const mistakes = findAllMistakes('l,hk fuhk');
         expect(mistakes.length).toBeGreaterThan(0);
       });
 

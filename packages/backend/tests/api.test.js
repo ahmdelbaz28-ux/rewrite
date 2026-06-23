@@ -8,8 +8,15 @@ const app = require('../src/server');
 const db = require('../src/db');
 
 describe('Backend API', () => {
-  beforeAll(() => {
+  let adminToken = '';
+
+  beforeAll(async () => {
     db.init();
+    // Get admin JWT token for protected endpoints
+    const adminRes = await request(app)
+      .post('/v1/admin/login')
+      .send({ username: 'admin', password: 'testpass123' });
+    adminToken = adminRes.body.token || '';
   });
 
   afterAll(() => {
@@ -30,6 +37,7 @@ describe('Backend API', () => {
     test('activates a free license', async () => {
       const res = await request(app)
         .post('/v1/license/activate')
+        .set('Authorization', 'Bearer ' + (adminToken))
         .send({ email: 'test@example.com', tier: 'free' });
       expect(res.status).toBe(201);
       expect(res.body.token).toMatch(/^slg_/);
@@ -39,6 +47,7 @@ describe('Backend API', () => {
     test('activates a pro license', async () => {
       const res = await request(app)
         .post('/v1/license/activate')
+        .set('Authorization', 'Bearer ' + (adminToken))
         .send({ email: 'pro@example.com', tier: 'pro' });
       expect(res.status).toBe(201);
       expect(res.body.tier).toBe('pro');
@@ -47,6 +56,7 @@ describe('Backend API', () => {
     test('returns 400 without email', async () => {
       const res = await request(app)
         .post('/v1/license/activate')
+        .set('Authorization', 'Bearer ' + (adminToken))
         .send({ tier: 'free' });
       expect(res.status).toBe(400);
     });
@@ -56,6 +66,7 @@ describe('Backend API', () => {
     test('validates an active license', async () => {
       const activateRes = await request(app)
         .post('/v1/license/activate')
+        .set('Authorization', 'Bearer ' + adminToken)
         .send({ email: 'validate@example.com', tier: 'pro' });
 
       const res = await request(app)

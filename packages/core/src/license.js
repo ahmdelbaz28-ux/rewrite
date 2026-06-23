@@ -35,11 +35,18 @@ const DEVICE_ID_FILE = path.join(
 );
 
 // Shared secret for offline token signing (rotated per release)
-const OFFLINE_SECRET = process.env.SMARTLANGGUARD_OFFLINE_SECRET ||
-  'smkt-2026-offline-signing-key-v1';
+const OFFLINE_SECRET = process.env.SMARTLANGGUARD_OFFLINE_SECRET;
 
-if (!process.env.SMARTLANGGUARD_OFFLINE_SECRET && process.env.NODE_ENV === 'production') {
-  console.warn('WARNING: SMARTLANGGUARD_OFFLINE_SECRET not set. Using default (insecure for production).');
+if (!OFFLINE_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL: SMARTLANGGUARD_OFFLINE_SECRET environment variable must be set in production. Refusing to use insecure default.');
+  }
+  // In development/test, use a deterministic key for convenience (NOT for production)
+  console.warn('WARNING: SMARTLANGGUARD_OFFLINE_SECRET not set. Using development-only key. DO NOT use in production.');
+}
+// Lazy getter that returns the secret, falling back to dev key only outside production
+function getOfflineSecret() {
+  return OFFLINE_SECRET || 'smkt-dev-only-key-NOT-FOR-PRODUCTION';
 }
 
 // ─── Device Fingerprint ───────────────────────────────────────────────────────
@@ -91,7 +98,7 @@ function getDeviceId() {
 function signLicenseToken(payload) {
   const data = Buffer.from(JSON.stringify(payload)).toString('base64');
   const signature = crypto
-    .createHmac('sha256', OFFLINE_SECRET)
+    .createHmac('sha256', getOfflineSecret())
     .update(data)
     .digest('base64url');
   return `${data}.${signature}`;
@@ -108,7 +115,7 @@ function verifyLicenseToken(token) {
 
   const [data, signature] = parts;
   const expected = crypto
-    .createHmac('sha256', OFFLINE_SECRET)
+    .createHmac('sha256', getOfflineSecret())
     .update(data)
     .digest('base64url');
 

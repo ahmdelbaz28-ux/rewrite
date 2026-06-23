@@ -22,7 +22,7 @@
 const EN_TO_AR_QWERTY = {
   q: 'ض', w: 'ص', e: 'ث', r: 'ق', t: 'ف', y: 'غ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
   a: 'ش', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
-  z: 'ئ', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
+  z: 'ئ', x: 'ء', c: 'ؤ', v: 'ر', b: 'لا', n: 'ى', m: 'ة',
   '`': 'ذ', 1: '١', 2: '٢', 3: '٣', 4: '٤', 5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩', 0: '٠',
   '-': '-', '=': '=', '[': 'ج', ']': 'د', '\\': '\\', ';': 'ك', "'": 'ط',
   ',': 'و', '.': 'ز', '/': 'ظ',
@@ -36,7 +36,7 @@ const EN_TO_AR_QWERTY = {
 const EN_TO_AR_AZERTY = {
   a: 'ش', z: 'ئ', e: 'ث', r: 'ق', t: 'ف', y: 'غ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
   q: 'ض', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
-  w: 'ص', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
+  w: 'ص', x: 'ء', c: 'ؤ', v: 'ر', b: 'لا', n: 'ى', m: 'ة',
   '`': 'ذ', '&': '١', 'é': '٢', '"': '٣', "'": '٤', '(': '٥', '-': '٦',
   'è': '٧', '_': '٨', 'ç': '٩', 'à': '٠',
   ')': '=', '^': 'ج', '$': 'د', '*': '\\', ';': 'ك', ':': 'ط',
@@ -50,7 +50,7 @@ const EN_TO_AR_AZERTY = {
 const EN_TO_AR_QWERTZ = {
   q: 'ض', w: 'ص', e: 'ث', r: 'ق', t: 'ف', z: 'ئ', u: 'ع', i: 'ه', o: 'خ', p: 'ح',
   a: 'ش', s: 'س', d: 'ي', f: 'ب', g: 'ل', h: 'ا', j: 'ت', k: 'ن', l: 'م',
-  y: 'غ', x: 'ء', c: 'ؤ', v: 'ر', b: 'ب', n: 'ى', m: 'ة',
+  y: 'غ', x: 'ء', c: 'ؤ', v: 'ر', b: 'لا', n: 'ى', m: 'ة',
   '`': 'ذ', 1: '١', 2: '٢', 3: '٣', 4: '٤', 5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩', 0: '٠',
   '-': '-', '=': '=', '[': 'ج', ']': 'د', '\\': '\\', ';': 'ك', "'": 'ط',
   ',': 'و', '.': 'ز', '/': 'ظ',
@@ -102,9 +102,16 @@ function detectKeyboardLayout(text) {
   // Check for AZERTY indicators: é, è, ç, à are common in French text
   if (/[éèçà]/.test(text)) return 'azerty';
   
-  // Check for QWERTZ indicators: z/y swap pattern
-  // If text has 'z' where 'y' would be expected in QWERTY→Arabic context
-  // This is a heuristic - not perfect but helps
+  // Check for QWERTZ indicators: German-specific characters
+  // ß, ü, ö, ä are strong indicators of German/QWERTZ layout
+  if (/[ßüöäÜÖÄ]/.test(text)) return 'qwertz';
+  
+  // Heuristic: if text has many 'z' chars where 'y' would be expected in QWERTY
+  // (QWERTZ swaps y↔z compared to QWERTY)
+  const zCount = (text.match(/z/gi) || []).length;
+  const yCount = (text.match(/y/gi) || []).length;
+  if (zCount > yCount * 2 && zCount >= 2) return 'qwertz';
+  
   return 'qwerty';
 }
 
@@ -115,27 +122,34 @@ function detectKeyboardLayout(text) {
  * Used when user typed Arabic text but intended English.
  * Properly handles hamza variants as distinct mappings.
  */
-const AR_TO_EN = (() => {
+// Build reverse maps for each layout to support Arabic→English conversion correctly
+const AR_TO_EN_MAPS = {};
+function buildReverseMap(enToAr) {
   const map = {};
-  for (const [en, ar] of Object.entries(EN_TO_AR)) {
-    if (!map[ar]) map[ar] = en;
+  for (const [en, ar] of Object.entries(enToAr)) {
+    if (!map[ar]) map[ar] = en;  // first mapping wins for each Arabic char
   }
-  // Proper manual overrides for ambiguous characters
-  // Note: ي (ya) and ى (alef maqsura) are distinct letters
-  map['ى'] = 'n';   // ى ← from key 'n' in Arabic layout
-  map['ي'] = 'd';   // ي ← from key 'd' in Arabic layout (but mapped to 'ي' same as d→ي)
-  map['ة'] = 'm';   // ة ← from key 'm'
-  map['ه'] = 'i';   // ه ← from key 'i'
-  map['ا'] = 'h';   // ا ← from key 'h'
-  // Hamza variants: each has a distinct mapping context
+  // Manual overrides for ambiguous/special characters
+  map['ى'] = 'n';   // alef maqsura
+  map['ي'] = 'd';   // ya
+  map['ة'] = 'm';   // ta marbuta
+  map['ه'] = 'i';   // ha
+  map['ا'] = 'h';   // alef
   map['أ'] = 'h';   // alef with hamza above
   map['إ'] = 'h';   // alef with hamza below
   map['آ'] = 'h';   // alef with madda
-  map['ؤ'] = 'c';   // waw with hamza ← from key 'c'
-  map['ئ'] = 'z';   // ya with hamza ← from key 'z'
-  map['ء'] = 'x';   // bare hamza ← from key 'x'
+  map['ؤ'] = 'c';   // waw with hamza
+  map['ئ'] = 'z';   // ya with hamza
+  map['ء'] = 'x';   // bare hamza
+  map['لا'] = 'b';  // lam-alef ligature
   return map;
-})();
+}
+AR_TO_EN_MAPS.qwerty = buildReverseMap(EN_TO_AR_QWERTY);
+AR_TO_EN_MAPS.azerty = buildReverseMap(EN_TO_AR_AZERTY);
+AR_TO_EN_MAPS.qwertz = buildReverseMap(EN_TO_AR_QWERTZ);
+
+// Backward-compatible AR_TO_EN reference (uses QWERTY layout)
+const AR_TO_EN = AR_TO_EN_MAPS.qwerty;
 
 // ─── False Positive Patterns ──────────────────────────────────────────────────
 
@@ -144,8 +158,9 @@ const AR_TO_EN = (() => {
  * These are legitimate text that happens to look like keyboard mistakes.
  */
 const FALSE_POSITIVE_PATTERNS = [
-  // URLs
+  // URLs (comprehensive - including inline URLs)
   /^https?:\/\/.+/i,
+  /https?:\/\/[^\s]+/i,         // URLs within text
   /^www\..+/i,
   /^ftp:\/\/.+/i,
   
@@ -158,7 +173,7 @@ const FALSE_POSITIVE_PATTERNS = [
   /^\.{0,2}[\/\\].+\.[a-zA-Z]{1,5}$/,
   
   // Code patterns (common programming keywords/syntax)
-  /^(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|new|this|typeof|null|undefined|true|false|console|require|module)\b/,
+  /^(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|new|this|typeof|null|undefined|true|false|console|require|module|def|print|self|try|catch|finally|throw|switch|case|break|continue|default|do|enum|extends|super|implements|interface|package|private|protected|public|static|void|yield)\b/,
   /^\/\/.*$/,        // line comments
   /^\/\*.+$/,        // block comments
   /^#include.+/,     // C preprocessor
@@ -170,13 +185,13 @@ const FALSE_POSITIVE_PATTERNS = [
   // IP addresses
   /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
   
-  // Version numbers
-  /^v?\d+\.\d+(\.\d+)?$/,
+  // Version numbers (semver with optional v prefix and prerelease)
+  /^v?\d+\.\d+(\.\d+)?(-[a-zA-Z0-9.]+)?$/,
   
   // Pure numbers / math expressions
   /^\d[\d+\-*/().\s,]*$/,
   
-  // Common abbreviations (2-3 letters, all uppercase)
+  // Common abbreviations (2-4 letters, all uppercase)
   /^[A-Z]{2,4}$/,
   
   // Git references
@@ -185,7 +200,35 @@ const FALSE_POSITIVE_PATTERNS = [
   
   // Package names (npm scoped packages, pip packages)
   /^@[a-z0-9\-]+\/[a-z0-9\-]+$/,
-  // Note: removed broad ^[a-z][a-z0-9\-]{0,30}$ pattern - too many false negatives
+  
+  // Password-like patterns (mixed case + digits + special chars)
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/,
+  
+  // Base64-encoded strings
+  /^[A-Za-z0-9+/]+=*$/,
+  
+  // UUIDs
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  
+  // Environment variables ($VAR or ${VAR})
+  /^\$[{]?[A-Z_]+[}]?$/,
+  
+  // JSON/XML fragments
+  /^\s*[{[]"/,
+  /^\s*<\/?[a-zA-Z]/,
+  
+  // Markdown syntax
+  /^#{1,6}\s/,
+  /^\[.+\]\(.+\)/,
+  
+  // Shell commands
+  /^(sudo|apt|yum|brew|pip|npm|yarn|cargo|go|docker|kubectl)\s/,
+  
+  // SSH/SCP patterns
+  /^(ssh|scp|rsync)\s/,
+  
+  // CSS property-like patterns
+  /^[a-z-]+\s*:/,
 ];
 
 /**
@@ -254,6 +297,31 @@ function isFalsePositive(text) {
   
   // Date formats
   if (/^\d{1,4}[\/\-.]\d{1,2}[\/\-.]\d{1,4}$/.test(trimmed)) return true;
+  
+  // Contains URL anywhere in the text
+  if (/https?:\/\/[^\s]+/i.test(trimmed)) return true;
+  
+  // Likely password: starts with uppercase, has numbers and special chars
+  if (/^[A-Z][a-zA-Z]*\d+[!@#$%^&*]/.test(trimmed) && trimmed.length >= 8) return true;
+  
+  // Mixed script in the same word (e.g., "الـAPI" where Arabic and Latin alternate)
+  // If more than 3 script transitions in a short span, it's likely mixed content
+  let scriptTransitions = 0;
+  let prevScript = null;
+  for (const ch of trimmed) {
+    const code = ch.charCodeAt(0);
+    let script = 'other';
+    if (code >= 0x0600 && code <= 0x06FF) script = 'arabic';
+    else if (/[a-zA-Z]/.test(ch)) script = 'latin';
+    if (prevScript && script !== prevScript && script !== 'other') {
+      scriptTransitions++;
+    }
+    if (script !== 'other') prevScript = script;
+  }
+  if (scriptTransitions >= 4) return true;
+  
+  // Programming operators and syntax
+  if (/^(=>|===|!==|>=|<=|!=|==|&&|\|\||\+\+|--|\+=|-=|\*=|\/=)$/.test(trimmed)) return true;
   
   return false;
 }
@@ -352,7 +420,20 @@ function convertToArabic(text) {
  */
 function convertToEnglish(text) {
   if (!text) return '';
-  return text.split('').map(ch => AR_TO_EN[ch] || ch).join('');
+  // Use layout-specific reverse map for correct Arabic→English conversion
+  const reverseMap = AR_TO_EN_MAPS[activeLayout] || AR_TO_EN_MAPS.qwerty;
+  // Handle multi-character sequences like 'لا' (lam-alef ligature)
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    // Check for lam-alef ligature (لا)
+    if (i + 1 < text.length && text[i] === 'ل' && text[i + 1] === 'ا') {
+      result += reverseMap['لا'] || 'b';
+      i++; // skip the next character (ا) since we consumed it as part of لا
+      continue;
+    }
+    result += reverseMap[text[i]] || text[i];
+  }
+  return result;
 }
 
 // ─── Word-Level Scoring ───────────────────────────────────────────────────────
@@ -469,6 +550,7 @@ module.exports = {
   detectKeyboardLayout,
   EN_TO_AR,
   AR_TO_EN,
+  AR_TO_EN_MAPS,
   ARABIC_WORD_SCORES,
   EN_TO_AR_QWERTY,
   EN_TO_AR_AZERTY,
