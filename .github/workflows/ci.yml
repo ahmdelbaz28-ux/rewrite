@@ -141,5 +141,9 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install --workspaces --include-workspace-root
-      - name: Build CLI
-        run: npm run build:cli
+      - name: Build CLI (platform-specific)
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then npm run build:linux --workspace @smartlangguard/cli; fi
+          if [ "$RUNNER_OS" = "Windows" ]; then npm run build:windows --workspace @smartlangguard/cli; fi
+          if [ "$RUNNER_OS" = "macOS" ]; then npm run build:macos --workspace @smartlangguard/cli; fi
+        shell: bash
