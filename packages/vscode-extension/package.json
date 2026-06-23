@@ -2,7 +2,7 @@
   "name": "smartlangguard",
   "displayName": "SmartLangGuard",
   "description": "Fix Arabic/English keyboard layout mistakes instantly. Works in any text editor, terminal, or AI tool.",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "publisher": "smartlangguard",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -168,7 +168,11 @@
         },
         "smartlangguard.direction": {
           "type": "string",
-          "enum": ["auto", "en-to-ar", "ar-to-en"],
+          "enum": [
+            "auto",
+            "en-to-ar",
+            "ar-to-en"
+          ],
           "default": "auto",
           "enumDescriptions": [
             "Auto-detect from text content",
@@ -200,7 +204,15 @@
         },
         "smartlangguard.sound": {
           "type": "string",
-          "enum": ["off", "beep", "ding", "chime", "soft-pop", "click", "double-beep"],
+          "enum": [
+            "off",
+            "beep",
+            "ding",
+            "chime",
+            "soft-pop",
+            "click",
+            "double-beep"
+          ],
           "default": "ding",
           "enumDescriptions": [
             "No sound (silent mode)",
@@ -224,7 +236,11 @@
         },
         "smartlangguard.sensitivity": {
           "type": "string",
-          "enum": ["low", "medium", "high"],
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
           "default": "medium",
           "enumDescriptions": [
             "Only alert after 5+ consecutive wrong-layout characters",

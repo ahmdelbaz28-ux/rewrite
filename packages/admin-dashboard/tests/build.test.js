@@ -72,7 +72,8 @@ describe('Admin Dashboard Build', () => {
     const result = spawnSync(vite, ['build', '--logLevel', 'error'], {
       cwd: PKG_DIR,
       encoding: 'utf-8',
-      timeout: 120000
+      timeout: 120000,
+      shell: true
     });
 
     if (result.status !== 0) {
