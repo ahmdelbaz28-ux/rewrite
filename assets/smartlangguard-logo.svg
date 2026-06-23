@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="SmartLangGuard logo">
+  <defs>
+    <!-- Main gradient: warm amber → cool indigo, signals "transform" -->
+    <linearGradient id="slg-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1333" />
+      <stop offset="100%" stop-color="#0f1b3d" />
+    </linearGradient>
+    <linearGradient id="slg-ar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    <linearGradient id="slg-en" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="slg-arrow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="slg-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="b" />
+      <feMerge>
+        <feMergeNode in="b" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <clipPath id="slg-clip">
+      <rect x="14" y="14" width="172" height="172" rx="36" ry="36" />
+    </clipPath>
+  </defs>
+
+  <!-- App-icon style rounded square background -->
+  <rect x="10" y="10" width="180" height="180" rx="40" ry="40" fill="url(#slg-bg)" />
+  <rect x="10" y="10" width="180" height="180" rx="40" ry="40" fill="none" stroke="#334155" stroke-width="1.2" />
+
+  <!-- Diagonal divider hinting the language swap -->
+  <line x1="20" y1="170" x2="180" y2="40" stroke="#334155" stroke-width="0.6" opacity="0.4" clip-path="url(#slg-clip)" />
+
+  <!-- English side: "Aa" (top-left, blue) -->
+  <g filter="url(#slg-glow)">
+    <text x="42" y="78" font-family="'Segoe UI', -apple-system, Helvetica, sans-serif"
+          font-size="46" font-weight="700" fill="url(#slg-en)" text-anchor="middle">Aa</text>
+  </g>
+
+  <!-- Arabic side: "أه" (bottom-right, amber) -->
+  <g filter="url(#slg-glow)">
+    <text x="158" y="160" font-family="'Segoe UI', 'Tahoma', sans-serif"
+          font-size="48" font-weight="700" fill="url(#slg-ar)" text-anchor="middle" direction="rtl">أه</text>
+  </g>
+
+  <!-- Bidirectional swap arrow (curved, between the two glyphs) -->
+  <g filter="url(#slg-glow)">
+    <path d="M 78 105 Q 100 95 122 105"
+          fill="none" stroke="url(#slg-arrow)" stroke-width="3.2" stroke-linecap="round" />
+    <!-- arrow head pointing right (en -> ar) -->
+    <path d="M 118 99 L 124 105 L 118 111"
+          fill="none" stroke="#f59e0b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- arrow head pointing left (ar -> en) -->
+    <path d="M 82 99 L 76 105 L 82 111"
+          fill="none" stroke="#3b82f6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
