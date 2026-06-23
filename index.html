@@ -20,6 +20,13 @@
     </div>
     <a href="#features" class="scroll-down">&#x25BC;</a>
   </header>
+    <div class="badges" style="text-align:center;margin:1rem 0;">
+      <a href="https://www.npmjs.com/package/@smartlangguard/cli"><img src="https://img.shields.io/npm/v/@smartlangguard/cli.svg?style=flat-square&label=CLI&color=blue" alt="npm version"/></a>
+      <a href="https://github.com/ahmdelbaz28-ux/rewrite/actions"><img src="https://img.shields.io/badge/Tests-180%20passing-brightgreen.svg?style=flat-square" alt="Tests"/></a>
+      <a href="#"><img src="https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square" alt="Version"/></a>
+      <a href="LICENSE"><img src="https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square" alt="License"/></a>
+      <a href="#"><img src="https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square" alt="Platform"/></a>
+    </div>
 
   <section id="features" class="section features">
     <h2>Features</h2>
@@ -31,6 +38,42 @@
       <div class="card"><h3>Real‑time Detection</h3><p>Instant feedback with sound alerts.</p></div>
       <div class="card"><h3>Secure Licensing</h3><p>Online validation and telemetry.</p></div>
     </div>
+  </section>
+
+  <section id="whats-new" class="section whats-new">
+    <h2>What’s New in v0.2.0</h2>
+    <table class="new-table">
+      <thead>
+        <tr><th>New Feature</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🔍 False Positive Detection</td><td>URLs, emails, code, file paths, Hex colors, IP addresses are never altered.</td></tr>
+        <tr><td>🌍 3 Keyboard Layouts</td><td>Supports QWERTY (US), AZERTY (French), QWERTZ (German).</td></tr>
+        <tr><td>📖 Smart User Dictionary</td><td>Auto‑learns from dismissed alerts – a word is whitelisted after 3 dismissals.</td></tr>
+        <tr><td>🔒 Daemon Security</td><td>Token‑based API authentication + restricted CORS.</td></tr>
+        <tr><td>🚀 Auto‑start on Login</td><td>Optionally start SmartLangGuard when the OS boots.</td></tr>
+        <tr><td>🔔 Toast Notifications</td><td>Non‑blocking background notifications instead of modal dialogs.</td></tr>
+        <tr><td>📚 500+ Arabic Words</td><td>Expanded dictionary with Egyptian, Gulf, and Levantine dialects.</td></tr>
+        <tr><td>🧠 Agglutinative Morphology</td><td>Strips prefixes/suffixes to find Arabic roots (وبالكتب → كتب).</td></tr>
+        <tr><td>⌨️ Context Awareness</td><td>Detects whether you’re typing Arabic or English from previous words.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-to-use" class="section how-to-use">
+    <h2>How to Use – 10 Ways</h2>
+    <ol class="usage-list">
+      <li><strong>CLI</strong> – run <code>smartlangguard fix "text"</code> directly in terminal.</li>
+      <li><strong>Interactive mode</strong> – <code>smartlangguard interactive</code> for a chat‑like session.</li>
+      <li><strong>Detect command</strong> – <code>smartlangguard detect "text"</code> to see mistakes without fixing.</li>
+      <li><strong>File fix</strong> – <code>smartlangguard fix -f input.txt -o output.txt</code> for batch processing.</li>
+      <li><strong>Pipe usage</strong> – <code>echo "text" | smartlangguard fix</code> for quick one‑liners.</li>
+      <li><strong>Daemon</strong> – run <code>smartlangguard daemon</code> to monitor clipboard and use the global hotkey.</li>
+      <li><strong>Browser extension</strong> – after the daemon is running, use the Chrome/Edge extension to fix selections.</li>
+      <li><strong>VS Code extension</strong> – install the extension to fix selections or the last typed word.</li>
+      <li><strong>MCP server</strong> – expose the tool to AI assistants (Claude, Cursor, etc.).</li>
+      <li><strong>Node.js API</strong> – programmatically call <code>core.fixText()</code> in your own applications.</li>
+    </ol>
   </section>
 
   <section id="demo" class="section demo">
