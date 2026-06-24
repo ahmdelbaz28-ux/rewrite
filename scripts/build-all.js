@@ -8,6 +8,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
 const CLI_DIR = path.join(ROOT, 'packages', 'cli');
@@ -68,8 +69,8 @@ for (const file of files) {
   if (file === 'checksums.sha256') continue;
   const filePath = path.join(DIST_DIR, file);
   if (fs.statSync(filePath).isFile()) {
-    const hashCmd = process.platform === 'darwin' ? `shasum -a 256 "${filePath}"` : `sha256sum "${filePath}"`;
-    const hash = execSync(hashCmd, { encoding: 'utf8' }).split(' ')[0];
+    const fileBuffer = fs.readFileSync(filePath);
+    const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
     checksums[file] = hash;
   }
 }

@@ -6,8 +6,10 @@
 
 `high hofhv;` → `اهلا اخبارك` ⚡
 
+[Demo Video 🎥](https://www.youtube.com/watch?v=YOUR_DEMO_VIDEO_ID)
+
 [![Tests](https://img.shields.io/badge/Tests-183%20passing-brightgreen.svg?style=flat-square)](https://github.com/ahmdelbaz28-ux/rewrite/actions)
-[![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](#-whats-new-in-v020)
+[![Version](https://img.shields.io/badge/Version-0.3.0-blue.svg?style=flat-square)](#-whats-new-in-v030)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Win%20|%20macOS%20|%20Linux-lightgrey.svg?style=flat-square)](#-installation)
 
@@ -15,7 +17,7 @@
 
 ---
 
-## ✨ إيه الجديد في النسخة 0.2.0؟
+## ✨ إيه الجديد في النسخة 0.3.0؟
 
 | الميزة الجديدة | الوصف |
 |----------------|--------|

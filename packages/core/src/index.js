@@ -19,7 +19,7 @@ const { TypingDetector, detectWrongLayout, detectLastWord, findAllMistakes } = r
 const customModel = require('./custom-ai-model');
 const userDictionary = require('./user-dictionary');
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -91,6 +91,11 @@ async function init(config = {}) {
  */
 async function fixText(text, options = {}) {
   if (text == null) text = '';
+  
+  // Set keyboard layout if specified in this call (affects translation mapping)
+  if (options.layout) {
+    setKeyboardLayout(options.layout);
+  }
   
   const direction = options.direction || currentConfig.defaultDirection;
   const isForcedDirection = direction !== 'auto';

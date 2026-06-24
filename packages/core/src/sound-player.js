@@ -310,51 +310,56 @@ class SoundPlayer {
   /**
    * Plays a WAV file using the OS-native player.
    */
-  _playFile(filepath) {
-    return new Promise((resolve) => {
-      const platform = os.platform();
-      let cmd, args;
-      
-      switch (platform) {
-        case 'darwin':
-          cmd = 'afplay';
-          args = [filepath];
-          break;
-          
-        case 'win32':
-          // PowerShell with SoundPlayer
-          cmd = 'powershell';
-          args = [
-            '-NoProfile',
-            '-Command',
-            `(New-Object Media.SoundPlayer '${filepath}').PlaySync()`
-          ];
-          break;
-          
-        case 'linux':
-          // Try multiple players
-          this._playLinux(filepath, resolve);
-          return;
-          
-        default:
-          // Unsupported - silently fail
+_playFile(filepath) {
+      return new Promise((resolve) => {
+        const platform = os.platform();
+        // Skip playback on CI or test environments for Windows to avoid hanging
+        if (platform === 'win32' && (process.env.NODE_ENV === 'test' || process.env.CI)) {
           resolve();
           return;
-      }
-      
-      const child = execFile(cmd, args, (err) => {
-        if (err) {
-          // Silently ignore playback errors
         }
-        resolve();
+        let cmd, args;
+        
+        switch (platform) {
+          case 'darwin':
+            cmd = 'afplay';
+            args = [filepath];
+            break;
+            
+          case 'win32':
+            // PowerShell with SoundPlayer (asynchronous playback)
+            cmd = 'powershell';
+            args = [
+              '-NoProfile',
+              '-Command',
+              `(New-Object Media.SoundPlayer '${filepath}').Play()`
+            ];
+            break;
+            
+          case 'linux':
+            // Try multiple players
+            this._playLinux(filepath, resolve);
+            return;
+            
+          default:
+            // Unsupported - silently fail
+            resolve();
+            return;
+        }
+        
+        const child = execFile(cmd, args, (err) => {
+          if (err) {
+            // Silently ignore playback errors
+          }
+          resolve();
+        });
+        
+        // Don't wait for playback to complete - fire and forget
+        child.unref();
+        // Note: we resolve once in the callback above; do NOT resolve again here
+        // as that would make the promise resolve before playback starts on some platforms
       });
-      
-      // Don't wait for playback to complete - fire and forget
-      child.unref();
-      // Note: we resolve once in the callback above; do NOT resolve again here
-      // as that would make the promise resolve before playback starts on some platforms
-    });
-  }
+    }
   
   /**
    * Linux: try multiple audio players.

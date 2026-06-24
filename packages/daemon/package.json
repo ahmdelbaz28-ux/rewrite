@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/daemon",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "SmartLangGuard Daemon - Background clipboard monitor + global hotkey for fixing keyboard layout mistakes",
   "main": "src/daemon.js",
   "bin": {
@@ -44,6 +44,10 @@
   },
   "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
-    "@smartlangguard/core": "^0.2.0"
+    "@smartlangguard/core": "^0.3.0",
+    "@smartlangguard/windows-hook": "^0.3.0"
+  },
+  "optionalDependencies": {
+    "@smartlangguard/windows-hook": "^0.3.0"
   }
 }

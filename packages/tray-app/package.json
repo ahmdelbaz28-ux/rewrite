@@ -1,22 +1,20 @@
 {
-  "name": "@smartlangguard/core",
+  "name": "@smartlangguard/tray-app",
   "version": "0.3.0",
-  "description": "SmartLangGuard Core - Translation engine, license layer, telemetry, and updater for fixing Arabic/English keyboard layout mistakes",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "description": "SmartLangGuard System Tray App - Monitor and control keyboard layout auto-correction from the system tray",
+  "main": "main.js",
   "scripts": {
-    "test": "jest --testPathPattern=tests/"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
+    "start": "electron .",
+    "build": "echo 'Use electron-builder or electron-packager for production builds'"
   },
   "keywords": [
-    "arabic",
+    "smartlangguard",
+    "tray",
+    "system-tray",
+    "electron",
     "keyboard",
-    "layout",
-    "auto-correct",
-    "translation",
-    "smartlangguard"
+    "arabic",
+    "auto-correct"
   ],
   "author": "SmartLangGuard <hello@smartlangguard.com>",
   "license": "PROPRIETARY",
@@ -26,17 +24,26 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "src/",
+    "main.js",
     "README.md",
     "LICENSE"
   ],
   "engines": {
     "node": ">=18.0.0"
   },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
-    "directory": "packages/core"
+    "directory": "packages/tray-app"
   },
   "bugs": {
     "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"

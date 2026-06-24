@@ -35,6 +35,9 @@ let httpServer = null;
 let shutdownRegistered = false;
 let authToken = null;
 
+// Windows keyboard hook process
+let keyboardHookProcess = null;
+
 // ─── Authentication ───────────────────────────────────────────────────────────
 
 /**
@@ -119,6 +122,11 @@ async function startDaemon(options = {}) {
   console.log('');
 
   // Register auto-start if requested
+  // Start OS-level keyboard hook (Windows only, real-time typing monitor)
+  if (options.enableTypingMonitor && os.platform() === 'win32') {
+    await startKeyboardHook();
+  }
+
   if (options.autoStart) {
     await setupAutoStart();
   }
@@ -145,6 +153,8 @@ function registerShutdown() {
       httpServer.close();
       httpServer = null;
     }
+    // Stop keyboard hook if running
+    stopKeyboardHook();
     try { core.shutdown(); } catch {}
     process.exit(0);
   }
@@ -378,12 +388,39 @@ function startLocalServer() {
       return;
     }
 
+    // Hook toggle endpoint (for tray app)
+    if (req.url.startsWith('/hook/toggle') && req.method === 'POST') {
+      if (os.platform() !== 'win32') {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Keyboard hook is only supported on Windows' }));
+        return;
+      }
+
+      const hookStatus = getKeyboardHookStatus();
+      if (hookStatus.running) {
+        stopKeyboardHook();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ running: false, message: 'Keyboard hook stopped' }));
+      } else {
+        if (!hookStatus.built) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Keyboard hook executable not found. Build with: cd packages/windows-hook && npm run build' }));
+          return;
+        }
+        await startKeyboardHook();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ running: true, message: 'Keyboard hook started' }));
+      }
+      return;
+    }
+
     if (req.url.startsWith('/status') && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         version: core.VERSION,
         monitoring,
         autofix: autoFixClipboard,
+        keyboardHook: getKeyboardHookStatus(),
         license: core.getLicenseStatus(),
         authRequired: true
       }));
@@ -509,7 +546,139 @@ function removeAutoStart() {
   } catch {}
 }
 
-module.exports = { startDaemon, removeAutoStart, getOrCreateToken };
+// ─── Windows Keyboard Hook Integration (Real-Time Typing Monitor) ────────────
+
+/**
+ * Paths to check for the keyboard hook executable.
+ */
+function getKeyboardHookPaths() {
+  const possiblePaths = [
+    // Development path (when running from source via npm workspaces)
+    path.join(__dirname, '..', '..', 'windows-hook', 'dist', 'SmartLangGuard.KeyHook.exe'),
+    // Development path (unbuilt source)
+    path.join(__dirname, '..', '..', 'windows-hook', 'KeyHook', 'bin', 'Release', 'net8.0', 'SmartLangGuard.KeyHook.exe'),
+    // Production path (when installed via npm in node_modules)
+    path.join(__dirname, '..', '..', '@smartlangguard', 'windows-hook', 'dist', 'SmartLangGuard.KeyHook.exe'),
+  ];
+  
+  // Try resolve from the windows-hook package directly (wrapped in try/catch for safety)
+  try {
+    const pkgJson = require.resolve('@smartlangguard/windows-hook/package.json');
+    possiblePaths.push(path.join(path.dirname(pkgJson), 'dist', 'SmartLangGuard.KeyHook.exe'));
+  } catch {
+    // Package not installed - that's ok, we'll try the other paths
+  }
+
+  return possiblePaths;
+}
+
+/**
+ * Finds the keyboard hook executable on the system.
+ */
+function findKeyboardHook() {
+  // Try named paths first
+  for (const p of getKeyboardHookPaths()) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  return null;
+}
+
+/**
+ * Starts the Windows keyboard hook process.
+ * This uses WH_KEYBOARD_LL to intercept keystrokes globally.
+ * Only works on Windows.
+ */
+function startKeyboardHook() {
+  return new Promise((resolve) => {
+    if (keyboardHookProcess) {
+      console.log('|  + Keyboard hook already running' + ' '.repeat(30) + '|');
+      resolve();
+      return;
+    }
+
+    const hookExe = findKeyboardHook();
+    if (!hookExe) {
+      console.log('|  - Keyboard hook: executable not found. Build with:' + ' '.repeat(7) + '|');
+      console.log('|    cd packages/windows-hook && npm run build' + ' '.repeat(17) + '|');
+      resolve();
+      return;
+    }
+
+    try {
+      const child = require('child_process').spawn(hookExe, [
+        '--daemon-url', `http://localhost:${DAEMON_PORT}`,
+        '--verbose'
+      ], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        detached: false,
+        windowsHide: false
+      });
+
+      child.stdout.on('data', (data) => {
+        const output = data.toString().trim();
+        if (output) process.stdout.write(`  [hook] ${output}\n`);
+      });
+
+      child.stderr.on('data', (data) => {
+        const output = data.toString().trim();
+        if (output) process.stderr.write(`  [hook:err] ${output}\n`);
+      });
+
+      child.on('error', (err) => {
+        console.log(`|  - Keyboard hook failed: ${err.message.padEnd(20)}|`);
+        keyboardHookProcess = null;
+        resolve();
+      });
+
+      child.on('close', (code) => {
+        if (keyboardHookProcess === child) {
+          keyboardHookProcess = null;
+          console.log('|  - Keyboard hook stopped' + ' '.repeat(32) + '|');
+        }
+      });
+
+      keyboardHookProcess = child;
+      console.log('|  + Keyboard hook: ACTIVE (real-time)' + ' '.repeat(17) + '|');
+      resolve();
+    } catch (err) {
+      console.log(`|  - Keyboard hook error: ${err.message.padEnd(18)}|`);
+      keyboardHookProcess = null;
+      resolve();
+    }
+  });
+}
+
+/**
+ * Stops the Windows keyboard hook process.
+ */
+function stopKeyboardHook() {
+  if (keyboardHookProcess) {
+    try {
+      keyboardHookProcess.kill();
+    } catch {}
+    keyboardHookProcess = null;
+    console.log('  Keyboard hook stopped.');
+  }
+}
+
+/**
+ * Returns the status of the keyboard hook.
+ */
+function getKeyboardHookStatus() {
+  if (os.platform() !== 'win32') return { supported: false, reason: 'Windows only' };
+  const exe = findKeyboardHook();
+  return {
+    supported: true,
+    built: exe !== null,
+    running: keyboardHookProcess !== null && !keyboardHookProcess.killed
+  };
+}
+
+// ─── Exports ──────────────────────────────────────────────────────────────────
+
+module.exports = { startDaemon, removeAutoStart, getOrCreateToken, startKeyboardHook, stopKeyboardHook, getKeyboardHookStatus };
 
 // ─── Auto-start when run directly ─────────────────────────────────────────────
 
@@ -517,6 +686,7 @@ if (require.main === module) {
   const args = process.argv.slice(2);
   const monitorClipboard = !args.includes('--no-clipboard');
   const enableHotkey = !args.includes('--no-hotkey');
+  const enableTypingMonitor = args.includes('--enable-typing-monitor');
   const autoStart = args.includes('--auto-start');
   const disableAutoStart = args.includes('--disable-auto-start');
   
@@ -529,6 +699,7 @@ if (require.main === module) {
   startDaemon({
     monitorClipboard,
     enableHotkey,
+    enableTypingMonitor,
     autoStart,
     endpoint: process.env.SMARTLANGGUARD_API || 'http://localhost:4000'
   }).catch(err => {

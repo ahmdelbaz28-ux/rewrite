@@ -37,6 +37,7 @@ yarn-error.log*
 
 # OS
 Thumbs.db
+nul
 .DS_Store
 
 # SmartLangGuard runtime
@@ -46,6 +47,14 @@ Thumbs.db
 # Test coverage
 coverage/
 .nyc_output/
+
+# Electron tray app
+packages/tray-app/node_modules/
+
+# C# build outputs (windows-hook)
+packages/windows-hook/KeyHook/bin/
+packages/windows-hook/KeyHook/obj/
+packages/windows-hook/dist-standalone/
 
 # pkg output
 packages/cli/dist/

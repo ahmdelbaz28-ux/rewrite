@@ -1,0 +1,50 @@
+{
+  "name": "@smartlangguard/windows-hook",
+  "version": "0.3.0",
+  "description": "SmartLangGuard Windows Keyboard Hook - OS-level low-level keystroke hook for auto-correcting keyboard layout mistakes in real time across all applications",
+  "main": "KeyHook/bin/Release/net8.0/SmartLangGuard.KeyHook.exe",
+  "bin": {
+    "smartlangguard-hook": "KeyHook/bin/Release/net8.0/SmartLangGuard.KeyHook.exe"
+  },
+  "scripts": {
+    "build": "cd KeyHook && dotnet publish -c Release --self-contained false -o ../dist",
+    "build:standalone": "cd KeyHook && dotnet publish -c Release --self-contained true -o ../dist-standalone -p:PublishSingleFile=true",
+    "clean": "rm -rf dist dist-standalone KeyHook/bin KeyHook/obj"
+  },
+  "keywords": [
+    "windows",
+    "keyboard",
+    "hook",
+    "wh_keyboard_ll",
+    "global",
+    "auto-correct",
+    "arabic",
+    "smartlangguard"
+  ],
+  "author": "SmartLangGuard <hello@smartlangguard.com>",
+  "license": "PROPRIETARY",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": ["win32"],
+  "cpu": ["x64"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",
+    "directory": "packages/windows-hook"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmdelbaz28-ux/rewrite/issues"
+  },
+  "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme"
+}
