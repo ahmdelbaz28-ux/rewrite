@@ -25,11 +25,25 @@ const PROTOCOL_VERSION = '2024-11-05';
 // ─── JSON-RPC over stdio ──────────────────────────────────────────────────────
 
 const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
-});
+let rl = null;
+
+function getReadline() {
+  if (!rl) {
+    rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      terminal: false
+    });
+  }
+  return rl;
+}
+
+function stopMcpServer() {
+  if (rl) {
+    rl.close();
+    rl = null;
+  }
+}
 
 let initialized = false;
 
@@ -294,7 +308,9 @@ async function startMcpServer(options = {}) {
 
   process.stderr.write(`SmartLangGuard MCP Server v${core.VERSION} starting...\n`);
 
-  rl.on('line', (line) => {
+  const rlInstance = getReadline();
+
+  rlInstance.on('line', (line) => {
     if (!line.trim()) return;
     try {
       const message = JSON.parse(line);
@@ -304,17 +320,20 @@ async function startMcpServer(options = {}) {
     }
   });
 
-  rl.on('close', () => {
+  rlInstance.on('close', () => {
+    stopMcpServer();
     core.shutdown();
     process.exit(0);
   });
 
   process.on('SIGINT', () => {
+    stopMcpServer();
     core.shutdown();
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
+    stopMcpServer();
     core.shutdown();
     process.exit(0);
   });
