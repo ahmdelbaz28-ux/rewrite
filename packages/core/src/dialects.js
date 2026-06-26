@@ -395,7 +395,7 @@ const DIALECT_SIGNATURES = {
     { pattern: /zain|zain|zên/gi, weight: 15 }
   ],
   [DIALECTS.SUDANESE]: [
-    { pattern: /kif|kifi|kifa|kide/gi, weight: 20 },
+    { pattern: /kide|kidi|kadi/gi, weight: 20 },
     { pattern: /shno|shunu|snu|shná/gi, weight: 20 },
     { pattern: /yazul|yazool|gazul/gi, weight: 20 },
     { pattern: /hsi|hsee|hsi|hisé/gi, weight: 15 },
