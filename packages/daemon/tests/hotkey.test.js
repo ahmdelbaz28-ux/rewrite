@@ -256,7 +256,7 @@ describe('Daemon Startup', () => {
     const daemon = require('../src/daemon');
     
     // Start daemon with hotkey disabled (to avoid platform issues in test)
-    const startPromise = daemon.startDaemon({
+    await daemon.startDaemon({
       monitorClipboard: false,
       enableHotkey: false,
       endpoint: 'http://localhost:4000'
@@ -268,8 +268,7 @@ describe('Daemon Startup', () => {
     // No error should have occurred
     expect(true).toBe(true);
 
-    // Clean shutdown
-    const { unregisterAll } = require('../src/hotkey');
-    await unregisterAll();
+    // Clean shutdown using stopDaemon
+    await daemon.stopDaemon();
   }, 10000);
 });

@@ -1,0 +1,82 @@
+# SmartLangGuard Docker Compose
+# For local development with PostgreSQL and Redis
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: smartlangguard-postgres
+    environment:
+      POSTGRES_DB: smartlangguard
+      POSTGRES_USER: smartlangguard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartlangguard_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlangguard -d smartlangguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: smartlangguard-redis
+    command: redis-server --appendonly yes
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SmartLangGuard Backend (optional - for full stack dev)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartlangguard-backend
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://smartlangguard:${POSTGRES_PASSWORD:-smartlangguard_dev_password}@postgres:5432/smartlangguard
+      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-}
+      SMARTLANGGUARD_OFFLINE_SECRET: ${SMARTLANGGUARD_OFFLINE_SECRET:-dev-offline-secret}
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./packages/backend:/app/packages/backend
+      - ./packages/core:/app/packages/core
+
+  # Admin Dashboard (optional)
+  admin:
+    build:
+      context: ./packages/admin-dashboard
+    container_name: smartlangguard-admin
+    environment:
+      VITE_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:

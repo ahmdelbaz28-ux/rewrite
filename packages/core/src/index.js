@@ -17,9 +17,10 @@ const updater = require('./updater');
 const { SoundPlayer } = require('./sound-player');
 const { TypingDetector, detectWrongLayout, detectLastWord, findAllMistakes } = require('./typing-detector');
 const customModel = require('./custom-ai-model');
+const dialects = require('./dialects');
 const userDictionary = require('./user-dictionary');
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -30,7 +31,9 @@ const DEFAULT_CONFIG = {
   defaultDirection: 'auto',
   useRemoteScoring: true,
   keyboardLayout: 'qwerty',
-  enableLearning: true
+  enableLearning: true,
+  dialect: dialects.DIALECTS.MSA,
+  autoDetectDialect: true
 };
 
 let currentConfig = { ...DEFAULT_CONFIG };
@@ -46,6 +49,14 @@ async function init(config = {}) {
   // Set keyboard layout
   if (config.keyboardLayout) {
     setKeyboardLayout(config.keyboardLayout);
+  }
+
+  // Set dialect if specified
+  if (config.dialect) {
+    customModel.setActiveDialect(config.dialect);
+  }
+  if (config.autoDetectDialect !== undefined) {
+    customModel.setAutoDetect(config.autoDetectDialect);
   }
 
   // Initialize user dictionary
@@ -269,5 +280,14 @@ module.exports = {
   detectWrongLayout,
   detectLastWord,
   findAllMistakes,
-  customModel
+  // Dialect support
+  dialects,
+  customModel,
+  // Dialect API
+  setDialect: customModel.setActiveDialect,
+  getDialect: customModel.getActiveDialect,
+  setAutoDetectDialect: customModel.setAutoDetect,
+  detectDialect: customModel.detectDialect,
+  getSupportedDialects: customModel.getSupportedDialects,
+  getDialectName: customModel.getDialectName
 };

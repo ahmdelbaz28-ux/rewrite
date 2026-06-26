@@ -16,6 +16,7 @@
 const core = require('@smartlangguard/core');
 const clipboard = require('./clipboard');
 const hotkey = require('./hotkey');
+const { XKBMonitor, detectLayoutMismatch } = require('./xkb-monitor');
 const http = require('http');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
@@ -37,6 +38,9 @@ let authToken = null;
 
 // Windows keyboard hook process
 let keyboardHookProcess = null;
+
+// Linux XKB monitor
+let xkbMonitor = null;
 
 // ─── Authentication ───────────────────────────────────────────────────────────
 
@@ -122,9 +126,13 @@ async function startDaemon(options = {}) {
   console.log('');
 
   // Register auto-start if requested
-  // Start OS-level keyboard hook (Windows only, real-time typing monitor)
-  if (options.enableTypingMonitor && os.platform() === 'win32') {
-    await startKeyboardHook();
+  // Start OS-level keyboard hook (Windows/Linux, real-time typing monitor)
+  if (options.enableTypingMonitor) {
+    if (os.platform() === 'win32') {
+      await startKeyboardHook();
+    } else if (os.platform() === 'linux') {
+      await startXkbMonitor();
+    }
   }
 
   if (options.autoStart) {
@@ -140,8 +148,8 @@ function registerShutdown() {
   if (shutdownRegistered) return;
   shutdownRegistered = true;
 
-  async function shutdown() {
-    console.log('\nShutting down...');
+  async function shutdown(signal) {
+    console.log(`\nShutting down from ${signal}...`);
     try {
       await hotkey.unregisterAll();
     } catch {}
@@ -155,12 +163,16 @@ function registerShutdown() {
     }
     // Stop keyboard hook if running
     stopKeyboardHook();
+    stopXkbMonitor();
     try { core.shutdown(); } catch {}
-    process.exit(0);
+    // Only exit if triggered by signal (not when called programmatically)
+    if (signal === 'SIGINT' || signal === 'SIGTERM') {
+      process.exit(0);
+    }
   }
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 // ─── Clipboard Monitor ────────────────────────────────────────────────────────
@@ -676,9 +688,117 @@ function getKeyboardHookStatus() {
   };
 }
 
+// ─── Linux XKB Monitor ─────────────────────────────────────────────────────────
+
+/**
+ * Starts the Linux XKB keyboard layout monitor.
+ */
+async function startXkbMonitor() {
+  if (xkbMonitor) {
+    console.log('|  + XKB monitor already running' + ' '.repeat(30) + '|');
+    return;
+  }
+
+  if (os.platform() !== 'linux') {
+    console.log('|  - XKB monitor: Linux only' + ' '.repeat(33) + '|');
+    return;
+  }
+
+  try {
+    xkbMonitor = new XKBMonitor({ pollInterval: 1000 });
+
+    xkbMonitor.on('layoutchange', (info) => {
+      console.log(`  [XKB] Layout changed: ${info.previous} -> ${info.current}`);
+      
+      // Emit event for other parts of the daemon to use
+      if (httpServer) {
+        broadcastEvent('layoutchange', info);
+      }
+    });
+
+    xkbMonitor.start();
+    console.log('|  + XKB monitor: ACTIVE (real-time)' + ' '.repeat(23) + '|');
+  } catch (err) {
+    console.log(`|  - XKB monitor error: ${err.message.padEnd(28)}|`);
+    xkbMonitor = null;
+  }
+}
+
+/**
+ * Stops the Linux XKB monitor.
+ */
+function stopXkbMonitor() {
+  if (xkbMonitor) {
+    xkbMonitor.stop();
+    xkbMonitor = null;
+    console.log('  XKB monitor stopped.');
+  }
+}
+
+/**
+ * Returns the status of the XKB monitor.
+ */
+function getXkbMonitorStatus() {
+  if (os.platform() !== 'linux') return { supported: false, reason: 'Linux only' };
+  return {
+    supported: true,
+    running: xkbMonitor !== null && xkbMonitor.isRunning,
+    currentLayout: xkbMonitor?.currentLayout || null
+  };
+}
+
+/**
+ * Broadcasts an event to all connected HTTP clients.
+ */
+const connectedClients = new Set();
+
+function broadcastEvent(event, data) {
+  const message = JSON.stringify({ event, data, timestamp: Date.now() });
+  for (const client of connectedClients) {
+    try {
+      client.write(`data: ${message}\n\n`);
+    } catch {
+      connectedClients.delete(client);
+    }
+  }
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
-module.exports = { startDaemon, removeAutoStart, getOrCreateToken, startKeyboardHook, stopKeyboardHook, getKeyboardHookStatus };
+/**
+ * Stops the daemon gracefully
+ */
+async function stopDaemon() {
+  if (clipboardCheckInterval) {
+    clearInterval(clipboardCheckInterval);
+    clipboardCheckInterval = null;
+  }
+  monitoring = false;
+  try {
+    await hotkey.unregisterAll();
+  } catch {}
+  if (httpServer) {
+    httpServer.close();
+    httpServer = null;
+  }
+  stopKeyboardHook();
+  stopXkbMonitor();
+  try { core.shutdown(); } catch {}
+}
+
+module.exports = { 
+  startDaemon, 
+  stopDaemon,
+  removeAutoStart, 
+  getOrCreateToken, 
+  startKeyboardHook, 
+  stopKeyboardHook, 
+  getKeyboardHookStatus,
+  startXkbMonitor,
+  stopXkbMonitor,
+  getXkbMonitorStatus,
+  connectedClients
+};
 
 // ─── Auto-start when run directly ─────────────────────────────────────────────
 
