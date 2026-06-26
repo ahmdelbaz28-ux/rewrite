@@ -20,7 +20,7 @@ const customModel = require('./custom-ai-model');
 const dialects = require('./dialects');
 const userDictionary = require('./user-dictionary');
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 

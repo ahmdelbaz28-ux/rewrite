@@ -363,7 +363,7 @@ const DIALECT_SIGNATURES = {
     { pattern: /balash|bela/gi, weight: 15 }
   ],
   [DIALECTS.GULF]: [
-    { pattern: /abi|abee|abgha/gi, weight: 20 },
+    { pattern: /abee|abgha/gi, weight: 20 },
     { pattern: /shlon|shton|shlonak/gi, weight: 20 },
     { pattern: /abgha|bgha/gi, weight: 20 },
     { pattern: /zayn|zain|zên/gi, weight: 15 },
@@ -372,7 +372,7 @@ const DIALECT_SIGNATURES = {
     { pattern: /y3tik|yatik/gi, weight: 10 }
   ],
   [DIALECTS.LEVANTINE]: [
-    { pattern: /biddi|biddu|badd/gi, weight: 20 },
+    { pattern: /biddi|biddu|badd|biddak|biddik/gi, weight: 20 },
     { pattern: /shoo|shu|shu/gi, weight: 20 },
     { pattern: /kteer|keteer|kita/gi, weight: 20 },
     { pattern: /heik|henné|hake/gi, weight: 20 },
@@ -380,25 +380,25 @@ const DIALECT_SIGNATURES = {
     { pattern: /takram|tkarm/gi, weight: 15 }
   ],
   [DIALECTS.MAGHREBI]: [
-    { pattern: /wash|shno|snu/gi, weight: 20 },
-    { pattern: /bzaf|besh|bizaf/gi, weight: 20 },
-    { pattern: /mzyan|zjen|zyen/gi, weight: 20 },
-    { pattern: /koun|kwun|kun/gi, weight: 15 },
-    { pattern: /gher|ghir|grir/gi, weight: 15 },
-    { pattern: /hada|hadha|daha/gi, weight: 10 }
+    { pattern: /wash|shno|snu|lab|labas|labes/gi, weight: 20 },
+    { pattern: /bzaf|besh|bizaf|ktil|bqal/gi, weight: 20 },
+    { pattern: /mzyan|zjen|zyen|mzyén/gi, weight: 20 },
+    { pattern: /koun|kwun|kun|kan/gi, weight: 15 },
+    { pattern: /gher|ghir|grir|bghit/gi, weight: 15 },
+    { pattern: /hada|hadha|daha|hada|hadak/gi, weight: 10 }
   ],
   [DIALECTS.IRAQI]: [
-    { pattern: /j|ch|jeem/gi, weight: 25 },
+    { pattern: /shno|shin|shen/gi, weight: 25 },
     { pattern: /maku|makoo|ma:ku/gi, weight: 25 },
     { pattern: /hsa|hesa|hissa/gi, weight: 20 },
-    { pattern: /shni|shene|suni/gi, weight: 20 },
+    { pattern: /wla|aw|ul|balla/gi, weight: 20 },
     { pattern: /zain|zain|zên/gi, weight: 15 }
   ],
   [DIALECTS.SUDANESE]: [
-    { pattern: /kdi|kide|kadi/gi, weight: 20 },
-    { pattern: /shno|shunu|snu/gi, weight: 20 },
+    { pattern: /kif|kifi|kifa|kide/gi, weight: 20 },
+    { pattern: /shno|shunu|snu|shná/gi, weight: 20 },
     { pattern: /yazul|yazool|gazul/gi, weight: 20 },
-    { pattern: /hsi|hsee|hsi/gi, weight: 15 },
+    { pattern: /hsi|hsee|hsi|hisé/gi, weight: 15 },
     { pattern: /jkr|jaJar|jgir/gi, weight: 15 }
   ]
 };
