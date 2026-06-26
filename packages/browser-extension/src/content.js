@@ -8,6 +8,7 @@
  *   - **Real-time typing detection** with sound alerts
  *   - **Quick-fix last word** via keyboard shortcut (Ctrl+Shift+Backspace)
  *   - monitor inputs (if auto-fix enabled) for paste events
+ *   - **Daemon integration** for full AI-powered correction
  */
 
 'use strict';
@@ -26,6 +27,10 @@
   let alertBadge = null;
   let audioContext = null;
   let cachedAudioBuffers = {};
+  let daemonUrl = 'http://localhost:41783';
+  let authToken = null;
+  let useDaemon = true;  // Try to use daemon for better correction
+  let daemonAvailable = false;
   
   const ALERT_COOLDOWN_MS = 2000;
   const DETECTION_DEBOUNCE_MS = 250;
@@ -37,6 +42,38 @@
     z:'ئ',x:'ء',c:'ؤ',v:'ر',b:'لا',n:'ى',m:'ة',
     ';':'ك','\'':'ط','.':'ز',',':'و','/':'ظ','[':'ج',']':'د'
   };
+  
+  // False positive patterns (browser-side quick check)
+  const FALSE_POSITIVE_PATTERNS = [
+    /^https?:\/\/.+/i,
+    /^www\..+/i,
+    /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
+    /^#[\da-f]{3,8}$/i,
+    /^(true|false|null|undefined)$/i,
+    /^\d+\.\d+\.\d+$/,  // semver
+    /^(const|let|var|function|return|if|else|for|while|class|import|export)$/,
+  ];
+  
+  // ─── Initialize daemon connection ──────────────────────────────────────────────
+  
+  async function initDaemon() {
+    // Get daemon URL and token from storage
+    const result = await chrome.storage.local.get(['daemonUrl', 'authToken']);
+    if (result.daemonUrl) daemonUrl = result.daemonUrl;
+    if (result.authToken) authToken = result.authToken;
+    
+    // Check if daemon is available
+    try {
+      const response = await fetch(`${daemonUrl}/status`, {
+        method: 'GET',
+        headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+      });
+      daemonAvailable = response.ok;
+    } catch {
+      daemonAvailable = false;
+      console.log('[SmartLangGuard] Daemon not available, using browser-side detection');
+    }
+  }
   
   // Load config
   chrome.storage.local.get('config', ({ config }) => {
@@ -55,6 +92,9 @@
       sensitivity = c.sensitivity || 'medium';
     }
   });
+  
+  // Initialize daemon connection
+  initDaemon();
   
   // ─── Real-time typing detection ────────────────────────────────────────────
   
@@ -101,32 +141,77 @@
       return;
     }
     
-    // Get the converted Arabic text (browser-side, fast)
-    const converted = convertToArabic(currentWord);
+    // Quick false positive check (browser-side)
+    if (isFalsePositive(currentWord)) {
+      hideAlertBadge();
+      return;
+    }
     
-    // Quick check: if the converted text contains Arabic chars AND the original is all Latin
-    const isAllLatin = /^[a-zA-Z;'\.,\[\]/]+$/.test(currentWord);
-    const hasArabic = /[\u0600-\u06FF]/.test(converted);
+    let suggestion = currentWord;
+    let score = 0;
     
-    if (!isAllLatin || !hasArabic) {
-      // Also check reverse: Arabic text that should be English
-      const isAllArabic = /^[\u0600-\u06FF\s]+$/.test(currentWord);
-      if (!isAllArabic) {
-        hideAlertBadge();
-        return;
+    // Try daemon for full AI-powered correction
+    if (useDaemon && daemonAvailable && authToken) {
+      try {
+        const response = await fetch(`${daemonUrl}/fix`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            text: currentWord,
+            options: { layout: 'qwerty' }
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.corrected && data.corrected !== currentWord && data.score >= 50) {
+            suggestion = data.corrected;
+            score = data.score;
+          }
+        }
+      } catch {
+        // Fallback to browser-side detection
+      }
+    }
+    
+    // Browser-side fallback detection
+    if (score === 0) {
+      const converted = convertToArabic(currentWord);
+      
+      // Quick check: if the converted text contains Arabic chars AND the original is all Latin
+      const isAllLatin = /^[a-zA-Z;'\.,\[\]/]+$/.test(currentWord);
+      const hasArabic = /[\u0600-\u06FF]/.test(converted);
+      
+      if (!isAllLatin || !hasArabic) {
+        // Also check reverse: Arabic text that should be English
+        const isAllArabic = /^[\u0600-\u06FF\s]+$/.test(currentWord);
+        if (!isAllArabic) {
+          hideAlertBadge();
+          return;
+        }
+      }
+      
+      // Only use suggestion if it differs
+      if (converted !== currentWord) {
+        suggestion = converted;
+        score = 70;  // Default score for browser-side detection
       }
     }
     
     // Confidence: if converted text differs from original, it's likely a mistake
-    if (converted !== currentWord) {
+    if (suggestion !== currentWord && score >= 50) {
       const now = Date.now();
       const shouldAlert = (now - lastAlertTime) > ALERT_COOLDOWN_MS;
       
       lastDetection = {
         word: currentWord,
-        suggestion: converted,
+        suggestion: suggestion,
         element,
-        timestamp: now
+        timestamp: now,
+        score
       };
       
       showAlertBadge(element);
@@ -138,6 +223,16 @@
     } else {
       hideAlertBadge();
     }
+  }
+  
+  function isFalsePositive(text) {
+    for (const pattern of FALSE_POSITIVE_PATTERNS) {
+      if (pattern.test(text)) return true;
+    }
+    // Short common English words
+    const shortWords = ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was', 'one'];
+    if (shortWords.includes(text.toLowerCase())) return true;
+    return false;
   }
   
   function convertToArabic(text) {

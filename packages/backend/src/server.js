@@ -7,6 +7,7 @@
  *   - AI scoring proxy (Pro+ feature)
  *   - Admin endpoints
  *   - Stripe webhook handler (subscription lifecycle)
+ *   - PostgreSQL + Redis support for production scaling
  * 
  * @module backend
  */
@@ -24,7 +25,8 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const db = require('./db');
+// Database abstraction layer (supports SQLite, PostgreSQL)
+const { initDatabase, initCache, closeAll, getDatabase, getCache } = require('./db-abstraction');
 const { errorHandler } = require('./middleware');
 const routes = require('./routes');
 
@@ -39,15 +41,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
-// Rate limiting
-const limiter = rateLimit({
+// Rate limiting with Redis support
+app.use('/v1/', rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' }
-});
-app.use('/v1/', limiter);
+}));
 
 // Body parsing
 // Stripe webhook needs raw body - mount BEFORE json parser
@@ -64,22 +65,42 @@ if (process.env.NODE_ENV !== 'test') {
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  let dbStatus = 'unknown';
+  let cacheStatus = 'disabled';
+  
+  try {
+    const db = getDatabase();
+    if (db) {
+      dbStatus = db.type || 'unknown';
+    }
+  } catch {
+    dbStatus = 'not initialized';
+  }
+  
+  try {
+    const cache = getCache();
+    if (cache && cache.isEnabled()) {
+      cacheStatus = 'connected';
+    }
+  } catch {
+    cacheStatus = 'not initialized';
+  }
+  
   res.json({
     status: 'ok',
     version: require('../package.json').version,
+    database: dbStatus,
+    cache: cacheStatus,
     timestamp: new Date().toISOString()
   });
 });
 
-// ─── API Routes ───────────────────────────────────────────────────────────────
+// ─── API Routes ─────────────────────────────────────────────────────────────
 
 app.use('/v1', routes);
 
-// ─── Stripe Webhook (raw body, registered before json middleware) ─────────────
-// Note: stripeRoutes already required and webhook mounted above before json parser
-
-// ─── Error Handler ────────────────────────────────────────────────────────────
+// ─── Error Handler ───────────────────────────────────────────────────────────
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
@@ -87,30 +108,42 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ─── Start ───────────────────────────────────────────────────────────────────
 
-function start() {
-  db.init();
-
-  app.listen(PORT, () => {
-    console.log(`╔════════════════════════════════════════════╗`);
-    console.log(`║  SmartLangGuard SaaS Backend v${require('../package.json').version}      ║`);
-    console.log(`║  Listening on http://localhost:${PORT}        ║`);
-    console.log(`║  Environment: ${process.env.NODE_ENV || 'development'.padEnd(22)}║`);
-    console.log(`╚════════════════════════════════════════════╝`);
-  });
+async function start() {
+  try {
+    // Initialize database (SQLite or PostgreSQL based on DATABASE_URL)
+    const db = await initDatabase();
+    
+    // Initialize Redis cache (optional, based on REDIS_URL)
+    await initCache();
+    
+    app.listen(PORT, () => {
+      console.log(`╔════════════════════════════════════════════════════════════════════╗`);
+      console.log(`║  SmartLangGuard SaaS Backend v${require('../package.json').version}                      ║`);
+      console.log(`║  Listening on http://localhost:${PORT}                           ║`);
+      console.log(`║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(38)}║`);
+      console.log(`║  Database:   ${(db.type || 'unknown').padEnd(38)}║`);
+      const cache = getCache();
+      console.log(`║  Cache:      ${(cache && cache.isEnabled() ? 'Redis' : 'Disabled').padEnd(38)}║`);
+      console.log(`╚════════════════════════════════════════════════════════════════════╝`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
 }
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM received, closing server...');
-  db.close();
+  await closeAll();
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('SIGINT received, closing server...');
-  db.close();
+  await closeAll();
   process.exit(0);
 });
 

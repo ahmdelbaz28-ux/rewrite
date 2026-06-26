@@ -16,7 +16,8 @@ const DEFAULT_CONFIG = {
   apiEndpoint: 'http://localhost:4000',
   autoFix: false,
   licenseToken: '',
-  telemetry: true
+  telemetry: true,
+  authToken: ''  // Daemon auth token
 };
 
 // ─── Install / Startup ────────────────────────────────────────────────────────
@@ -173,8 +174,14 @@ async function handleMessage(message, sender) {
 async function callDaemon(path, body, method = 'POST') {
   const { config } = await chrome.storage.local.get('config');
   const endpoint = config?.daemonEndpoint || DEFAULT_CONFIG.daemonEndpoint;
+  const authToken = config?.authToken;
 
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
+  const opts = { method, headers };
   if (body && method !== 'GET') opts.body = JSON.stringify(body);
 
   const res = await fetch(`${endpoint}${path}`, opts);

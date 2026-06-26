@@ -20,6 +20,29 @@
 
 'use strict';
 
+// ─── Dialect Support ─────────────────────────────────────────────────────────
+// Import dialect system for regional Arabic support
+const dialects = require('./dialects');
+
+// ─── Active Dialect State ─────────────────────────────────────────────────────
+// Default to MSA, users can switch based on their region
+let currentDialect = dialects.DIALECTS.MSA;
+let autoDetect = true;  // Automatically detect dialect from text
+
+function setActiveDialect(dialect) {
+  if (Object.values(dialects.DIALECTS).includes(dialect)) {
+    currentDialect = dialect;
+  }
+}
+
+function getActiveDialect() {
+  return currentDialect;
+}
+
+function setAutoDetect(enabled) {
+  autoDetect = enabled;
+}
+
 // ─── Arabic Letter Frequency Model ────────────────────────────────────────────
 // Based on Quranic Arabic Corpus + modern Arabic news text (~5M words).
 // Higher value = more common in natural Arabic.
@@ -566,10 +589,9 @@ function scoreDictionaryLookup(word) {
 // ─── Main Scoring Function ────────────────────────────────────────────────────
 
 /**
- * Scores a single Arabic word using all features.
- * Returns 0-100, higher = more likely correct.
+ * Internal scoring with explicit dialect (used by rankCandidates)
  */
-function scoreWord(word) {
+function scoreWordWithDialect(word, dialect) {
   if (!word) return 0;
   
   // Quick rejection: contains Latin letters
@@ -584,25 +606,107 @@ function scoreWord(word) {
   
   // Combine all features
   const letterScore = scoreLetterFrequency(word);
-  const bigramScore = scoreBigrams(word);
+  const bigramScore = scoreBigramsWithDialect(word, dialect);
   const shapeScore = scoreWordShape(word);
   
-  // Weighted combination
+  // Dialect boost - check if word is common in the specified dialect
+  const dialectScore = dialects.getDialectWordScore(word, dialect);
+  
+  // Weighted combination with dialect bonus
   const combined = (
     dictScore * 0.40 +
-    letterScore * 0.25 +
-    bigramScore * 0.20 +
-    shapeScore * 0.15
+    letterScore * 0.20 +
+    bigramScore * 0.15 +
+    shapeScore * 0.10 +
+    dialectScore * 0.15  // Dialect contribution
   );
   
   return Math.round(Math.max(0, Math.min(100, combined)));
 }
 
 /**
+ * Scores bigrams with dialect awareness
+ * Uses dialect-specific bigram frequencies when available
+ */
+function scoreBigramsWithDialect(word, dialect) {
+  if (word.length < 2) return 50;
+  
+  let score = 40; // start slightly below neutral
+  let bigramCount = 0;
+  let rareCount = 0;
+  let commonCount = 0;
+  
+  for (let i = 0; i < word.length - 1; i++) {
+    const pair = word.substring(i, i + 2);
+    if (RARE_BIGRAMS.has(pair)) {
+      score -= 15; // penalty for rare pairs
+      rareCount++;
+    } else if (BIGRAM_FREQ[pair] !== undefined) {
+      const freq = BIGRAM_FREQ[pair];
+      score += (freq / 100) * 10; // base reward
+      if (freq >= 50) commonCount++;
+    }
+    
+    // Check dialect-specific bigram bonus
+    const dialectBigramScore = dialects.getDialectBigramScore(pair, dialect);
+    if (dialectBigramScore > 0) {
+      score += (dialectBigramScore / 100) * 8; // dialect contribution
+    }
+    
+    bigramCount++;
+  }
+  
+  // Bonus for having multiple common bigrams
+  if (commonCount >= 2) score += 8;
+  if (commonCount >= 3) score += 5;
+  
+  // Heavy penalty for multiple rare bigrams
+  if (rareCount >= 2) score -= 10;
+  
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+/**
+ * Scores a single Arabic word using all features.
+ * Returns 0-100, higher = more likely correct.
+ * 
+ * @param {string} word - Arabic word to score
+ * @param {Object} options - Scoring options
+ * @param {string} options.dialect - Override dialect (default: auto-detect or current)
+ */
+function scoreWord(word, options = {}) {
+  if (!word) return 0;
+  
+  // Quick rejection: contains Latin letters
+  if (/[a-zA-Z]/.test(word)) return 0;
+  
+  // Determine which dialect to use
+  let dialect = currentDialect;
+  if (options && options.dialect) {
+    dialect = options.dialect;
+  }
+  
+  // If auto-detect is enabled and using default MSA, try to detect dialect
+  if (autoDetect && dialect === dialects.DIALECTS.MSA) {
+    const detected = dialects.detectDialect(word);
+    if (detected.confidence > 15) {
+      dialect = detected.dialect;
+    }
+  }
+  
+  return scoreWordWithDialect(word, dialect);
+}
+
+/**
  * Scores a full sentence (multiple words).
  * Returns 0-100.
+ * 
+ * @param {string} text - Arabic text to score
+ * @param {Object} options - Scoring options
+ * @param {string} options.dialect - Override dialect
+ * @param {boolean} options.detectDialect - Auto-detect dialect from text (default: true)
  */
-function scoreSentence(text) {
+function scoreSentence(text, options = {}) {
   if (!text || typeof text !== 'string') return 0;
   
   // Strip punctuation for word scoring
@@ -611,8 +715,22 @@ function scoreSentence(text) {
   const words = cleanText.split(/\s+/).filter(w => w.length > 0);
   if (words.length === 0) return 0;
   
-  // Score each word
-  const wordScores = words.map(scoreWord);
+  // Determine dialect to use
+  let dialect = currentDialect;
+  if (options && options.dialect) {
+    dialect = options.dialect;
+  }
+  
+  // Auto-detect dialect from sentence if enabled
+  if (options.detectDialect !== false && autoDetect) {
+    const detected = dialects.detectDialect(text);
+    if (detected.confidence > 20) {
+      dialect = detected.dialect;
+    }
+  }
+  
+  // Score each word with dialect awareness
+  const wordScores = words.map(w => scoreWordWithDialect(w, dialect));
   
   // Average word score
   const avgScore = wordScores.reduce((a, b) => a + b, 0) / words.length;
@@ -621,9 +739,13 @@ function scoreSentence(text) {
   const highScoringWords = wordScores.filter(s => s >= 70).length;
   const highRatio = highScoringWords / words.length;
   
+  // Dialect confidence bonus
+  const dialectBonus = dialects.detectDialect(text);
+  const dialectConfidenceBonus = dialectBonus.confidence > 30 ? 5 : 0;
+  
   const bonus = highRatio > 0.5 ? 10 : highRatio > 0.3 ? 5 : 0;
   
-  return Math.min(100, Math.round(avgScore + bonus));
+  return Math.min(100, Math.round(avgScore + bonus + dialectConfidenceBonus));
 }
 
 // ─── Candidate Ranking ────────────────────────────────────────────────────────
@@ -631,23 +753,41 @@ function scoreSentence(text) {
 /**
  * Given the original (mistyped) text and multiple correction candidates,
  * picks the best one using the custom model.
+ *
+ * @param {string} original - The original mistyped text
+ * @param {string[]} candidates - Array of correction candidates
+ * @param {Object} options - Ranking options
+ * @param {string} options.dialect - Force specific dialect for ranking
+ * @returns {{bestCandidate: string, confidence: number, allScores: Array, detectedDialect: string}}
  */
-function rankCandidates(original, candidates) {
+function rankCandidates(original, candidates, options = {}) {
   if (!candidates || candidates.length === 0) {
-    return { bestCandidate: original, confidence: 0, allScores: [] };
+    return { bestCandidate: original, confidence: 0, allScores: [], detectedDialect: currentDialect };
   }
-  
+
+  // Determine dialect to use for ranking
+  let dialect = currentDialect;
+  if (options && options.dialect) {
+    dialect = options.dialect;
+  } else if (autoDetect) {
+    const detected = dialects.detectDialect(original);
+    if (detected.confidence > 15) {
+      dialect = detected.dialect;
+    }
+  }
+
   const scored = candidates.map(c => ({
     candidate: c,
-    score: scoreSentence(c)
+    score: scoreWordWithDialect(c, dialect)
   }));
-  
+
   scored.sort((a, b) => b.score - a.score);
-  
+
   return {
     bestCandidate: scored[0].candidate,
     confidence: scored[0].score,
-    allScores: scored
+    allScores: scored,
+    detectedDialect: dialect
   };
 }
 
@@ -696,5 +836,17 @@ module.exports = {
   COMMON_WORDS,
   LETTER_FREQ,
   BIGRAM_FREQ,
-  RARE_BIGRAMS
+  RARE_BIGRAMS,
+  scoreBigramsWithDialect,
+  // Dialect control
+  setActiveDialect,
+  getActiveDialect,
+  setAutoDetect,
+  // Dialect utilities
+  detectDialect: dialects.detectDialect,
+  getSupportedDialects: dialects.getSupportedDialects,
+  getDialectName: dialects.getDialectName,
+  getDialectBigramScore: dialects.getDialectBigramScore,
+  // Re-export dialects constants
+  DIALECTS: dialects.DIALECTS
 }
