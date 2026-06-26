@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/windows-hook",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SmartLangGuard Windows Keyboard Hook - OS-level low-level keystroke hook for auto-correcting keyboard layout mistakes in real time across all applications",
   "main": "KeyHook/bin/Release/net8.0/SmartLangGuard.KeyHook.exe",
   "bin": {
@@ -36,8 +36,12 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "os": ["win32"],
-  "cpu": ["x64"],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ahmdelbaz28-ux/rewrite.git",

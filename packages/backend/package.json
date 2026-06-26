@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/backend",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "SmartLangGuard SaaS Backend - License validation, telemetry, AI scoring, admin dashboard, and Stripe integration",
   "main": "src/server.js",
   "scripts": {

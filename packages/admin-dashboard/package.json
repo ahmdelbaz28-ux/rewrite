@@ -1,7 +1,7 @@
 {
   "name": "@smartlangguard/admin-dashboard",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "SmartLangGuard Admin Dashboard - manage licenses, view telemetry, monitor system",
   "scripts": {

@@ -2,7 +2,7 @@
   "name": "smartlangguard",
   "displayName": "SmartLangGuard",
   "description": "Fix Arabic/English keyboard layout mistakes instantly. Works in any text editor, terminal, or AI tool.",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "publisher": "smartlangguard",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {

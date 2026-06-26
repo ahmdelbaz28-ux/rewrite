@@ -1,6 +1,6 @@
 {
   "name": "@smartlangguard/mcp-server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SmartLangGuard MCP Server - Integration with Claude Desktop, Cursor, Cline, and other AI tools via Model Context Protocol",
   "main": "src/mcp-server.js",
   "bin": {
