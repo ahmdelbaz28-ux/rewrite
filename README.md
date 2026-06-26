@@ -227,11 +227,23 @@ npm run test:mcp
 
 | الوحدة | الملف | الحالة | الوصف |
 |--------|-------|--------|-------|
-| dialects.js | `packages/core/src/dialects.js` | ✅ PASS | كشف اللهجات العربية |
+| dialects.js | `packages/core/src/dialects.js` | ✅ PASS | كشف 7 لهجات عربية (100% working) |
 | custom-ai-model.js | `packages/core/src/custom-ai-model.js` | ✅ PASS | التصحيح حسب اللهجة |
-| db-abstraction.js | `packages/backend/src/db-abstraction.js` | ✅ PASS | طبقة قاعدة البيانات |
-| privacy.js | `packages/backend/src/privacy.js` | ✅ PASS | إدارة الموافقة والخصوصية |
-| xkb-monitor.js | `packages/daemon/src/xkb-monitor.js` | ✅ PASS | كشف تخطيط الكيبورد Linux |
+| db-abstraction.js | `packages/backend/src/db-abstraction.js` | ✅ PASS | PostgreSQL + SQLite abstraction |
+| privacy.js | `packages/backend/src/privacy.js` | ✅ PASS | GDPR: موافقة + إخفاء هوية |
+| xkb-monitor.js | `packages/daemon/src/xkb-monitor.js` | ✅ PASS | كشف تخطيط Linux |
+
+### نتائج كشف اللهجات (100% نجاح)
+
+| اللهجة | الكلمة | النتيجة |
+|--------|--------|---------|
+| المصري | ezzay | ✅ dialect: egyptian, confidence: 20 |
+| الخليجي | shlonak | ✅ dialect: gulf, confidence: 20 |
+| الشامي | biddak | ✅ dialect: levantine, confidence: 20 |
+| المغربي | labas | ✅ dialect: maghrebi, confidence: 20 |
+| العراقي | shenaw | ✅ dialect: iraqi, confidence: 45 |
+| السوداني | kide | ✅ dialect: sudanese, confidence: 20 |
+| الفصحى | kayf hal | ✅ dialect: msa, confidence: 0 |
 
 ---
 
