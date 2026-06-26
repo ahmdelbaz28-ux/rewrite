@@ -148,8 +148,8 @@ function registerShutdown() {
   if (shutdownRegistered) return;
   shutdownRegistered = true;
 
-  async function shutdown() {
-    console.log('\nShutting down...');
+  async function shutdown(signal) {
+    console.log(`\nShutting down from ${signal}...`);
     try {
       await hotkey.unregisterAll();
     } catch {}
@@ -165,11 +165,14 @@ function registerShutdown() {
     stopKeyboardHook();
     stopXkbMonitor();
     try { core.shutdown(); } catch {}
-    process.exit(0);
+    // Only exit if triggered by signal (not when called programmatically)
+    if (signal === 'SIGINT' || signal === 'SIGTERM') {
+      process.exit(0);
+    }
   }
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 // ─── Clipboard Monitor ────────────────────────────────────────────────────────
@@ -762,8 +765,30 @@ function broadcastEvent(event, data) {
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
+/**
+ * Stops the daemon gracefully
+ */
+async function stopDaemon() {
+  if (clipboardCheckInterval) {
+    clearInterval(clipboardCheckInterval);
+    clipboardCheckInterval = null;
+  }
+  monitoring = false;
+  try {
+    await hotkey.unregisterAll();
+  } catch {}
+  if (httpServer) {
+    httpServer.close();
+    httpServer = null;
+  }
+  stopKeyboardHook();
+  stopXkbMonitor();
+  try { core.shutdown(); } catch {}
+}
+
 module.exports = { 
   startDaemon, 
+  stopDaemon,
   removeAutoStart, 
   getOrCreateToken, 
   startKeyboardHook, 
