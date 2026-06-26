@@ -63,9 +63,9 @@
   },
   "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
-    "@smartlangguard/core": "^0.3.0",
-    "@smartlangguard/mcp-server": "^0.3.0",
-    "@smartlangguard/daemon": "^0.3.0",
+    "@smartlangguard/core": "^0.4.0",
+    "@smartlangguard/mcp-server": "^0.4.0",
+    "@smartlangguard/daemon": "^0.4.0",
     "commander": "^11.1.0"
   }
 }

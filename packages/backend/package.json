@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/ahmdelbaz28-ux/rewrite#readme",
   "dependencies": {
-    "@smartlangguard/core": "^0.3.0",
+    "@smartlangguard/core": "^0.4.0",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.3.0",
     "cors": "^2.8.5",
